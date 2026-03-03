@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam Tracker</title>
+  <meta name="description" content="Personal dashboard for tracking competitive exams and government job notifications." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     LOADING SCREEN
+════════════════════════════════════════════════════════════════ -->
+<div id="loading-screen">
+  <div class="loading-logo">EXAM <span>TRACKER</span></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">EXAM <span>TRACKER</span></div>
+    <span class="auth-tagline">दीर्घसूत्री विनश्यति</span>
+
+    <!-- Auth Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth-tab="signin">Sign In</button>
+      <button class="auth-tab" data-auth-tab="signup">Create Account</button>
+    </div>
+
+    <!-- Sign In Form -->
+    <div id="signin-form" class="auth-form">
+      <div class="form-field">
+        <label class="form-label" for="signin-email">Email</label>
+        <input class="form-input" type="email" id="signin-email" placeholder="you@email.com" autocomplete="email" />
+        <span class="field-error" id="signin-email-err"></span>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="signin-password">Password</label>
+        <input class="form-input" type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password" />
+        <span class="field-error" id="signin-password-err"></span>
+      </div>
+      <span class="field-error" id="signin-general-err"></span>
+      <button class="btn-primary" data-action="do-signin">Sign In</button>
+      <div class="auth-divider">or</div>
+      <button class="btn-google" data-action="do-google">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="auth-forgot">
+        <a href="#" data-action="show-forgot">Forgot password?</a>
+      </div>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div id="signup-form" class="auth-form" style="display:none;">
+      <div class="form-field">
+        <label class="form-label" for="signup-name">Full Name</label>
+        <input class="form-input" type="text" id="signup-name" placeholder="Your name" autocomplete="name" />
+        <span class="field-error" id="signup-name-err"></span>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="signup-email">Email</label>
+        <input class="form-input" type="email" id="signup-email" placeholder="you@email.com" autocomplete="email" />
+        <span class="field-error" id="signup-email-err"></span>
+      </div>
+      <div class="form-field">
+        <label class="form-label" for="signup-password">Password</label>
+        <input class="form-input" type="password" id="signup-password" placeholder="Min. 6 characters" autocomplete="new-password" />
+        <span class="field-error" id="signup-password-err"></span>
+      </div>
+      <span class="field-error" id="signup-general-err"></span>
+      <button class="btn-primary" data-action="do-signup">Create Account</button>
+      <div class="auth-divider">or</div>
+      <button class="btn-google" data-action="do-google">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- Forgot Password Form -->
+    <div id="forgot-form" class="auth-form" style="display:none;">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:4px;">Enter your email and we'll send a password reset link.</p>
+      <div class="form-field">
+        <label class="form-label" for="forgot-email">Email</label>
+        <input class="form-input" type="email" id="forgot-email" placeholder="you@email.com" autocomplete="email" />
+        <span class="field-error" id="forgot-email-err"></span>
+      </div>
+      <span class="field-error" id="forgot-general-err"></span>
+      <button class="btn-primary" data-action="do-forgot">Send Reset Email</button>
+      <div class="auth-forgot">
+        <a href="#" data-action="show-signin">Back to Sign In</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     APP SCREEN
+════════════════════════════════════════════════════════════════ -->
+<div id="app-screen">
+
+  <!-- ── Topbar ──────────────────────────────────────────────── -->
+  <header id="topbar">
+    <div class="topbar-logo">EXAM <span>TRACKER</span></div>
+    <div class="topbar-actions">
+
+      <!-- Search -->
+      <button class="topbar-btn" id="search-btn" title="Search" data-action="open-search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+
+      <!-- Export / Import dropdown -->
+      <div class="dropdown-wrap">
+        <button class="topbar-btn" id="export-btn" title="Export / Import">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </button>
+        <div class="dropdown-menu" id="export-dropdown">
+          <button class="dropdown-item" data-action="export-json">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Export JSON
+          </button>
+          <button class="dropdown-item" data-action="export-csv">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Export CSV
+          </button>
+          <div class="dropdown-sep"></div>
+          <button class="dropdown-item" data-action="trigger-import">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Import JSON
+          </button>
+        </div>
+      </div>
+      <!-- Hidden file input for import -->
+      <input type="file" id="import-file-input" accept=".json" style="display:none;" />
+
+      <!-- Theme toggle -->
+      <button class="topbar-btn" id="theme-btn" title="Toggle theme" data-action="toggle-theme">
+        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+
+      <!-- User dropdown -->
+      <div class="dropdown-wrap">
+        <button class="topbar-btn" id="user-btn" title="Account">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span class="sync-dot" id="sync-dot"></span>
+        </button>
+        <div class="dropdown-menu" id="user-dropdown">
+          <div class="dropdown-header">
+            <span class="dropdown-name" id="dd-name">—</span>
+            <span class="dropdown-email" id="dd-email">—</span>
+          </div>
+          <div class="dropdown-edu-row" id="dd-edu-row"></div>
+          <div class="dropdown-sep"></div>
+          <button class="dropdown-item" data-action="open-profile">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Edit Profile
+          </button>
+          <button class="dropdown-item" data-action="change-password">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Change Password
+          </button>
+          <div class="dropdown-sep"></div>
+          <button class="dropdown-item" data-action="do-logout">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+          <div class="dropdown-sep"></div>
+          <button class="dropdown-item danger" data-action="delete-account">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Delete Account
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /topbar-actions -->
+  </header>
+
+  <!-- Search overlay -->
+  <div id="search-overlay">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--muted);flex-shrink:0;">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="search" id="search-input" placeholder="Search exams by name, agency, tag…" autocomplete="off" />
+    <button id="search-close" data-action="close-search">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ── Offline Banner ──────────────────────────────────────── -->
+  <div id="offline-banner">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="1" y1="1" x2="23" y2="23"/>
+      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
+      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
+      <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
+      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
+      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+      <line x1="12" y1="20" x2="12.01" y2="20"/>
+    </svg>
+    You're offline — showing cached data. Changes are disabled.
+  </div>
+
+  <!-- ── Countdown Strip ────────────────────────────────────── -->
+  <div id="countdown-strip">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- ── Filter Bar ─────────────────────────────────────────── -->
+  <div id="filter-bar">
+    <select class="filter-select" id="filter-status">
+      <option value="">All Status</option>
+      <option value="open">Open</option>
+      <option value="closed">Closed</option>
+      <option value="na">No Date</option>
+    </select>
+
+    <select class="filter-select" id="filter-tag">
+      <option value="">All Tags</option>
+      <!-- populated by JS -->
+    </select>
+
+    <select class="filter-select" id="filter-agency">
+      <option value="">All Agencies</option>
+      <!-- populated by JS -->
+    </select>
+
+    <label class="filter-applied-wrap">
+      <input type="checkbox" class="filter-checkbox" id="filter-applied" />
+      Applied only
+    </label>
+
+    <button id="filter-clear-btn" data-action="clear-filters">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      Clear
+    </button>
+
+    <span class="filter-count" id="filter-count"></span>
+  </div>
+
+  <!-- ── Main Content ───────────────────────────────────────── -->
+  <main id="main-content">
+
+    <!-- Desktop toolbar (Add button) -->
+    <div id="table-toolbar">
+      <button id="desktop-add-btn" data-action="add-exam">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Exam
+      </button>
+      <span></span><!-- spacer -->
+    </div>
+
+    <!-- Desktop Table -->
+    <div id="exam-table-wrap">
+      <table id="exam-table">
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="rank"># <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-sort="name">Exam Name <span class="sort-arrow">↕</span></th>
+            <th class="sortable" data-sort="agency">Agency <span class="sort-arrow">↕</span></th>
+            <th>Tag</th>
+            <th class="sortable" data-sort="deadlineDate">Deadline <span class="sort-arrow">↕</span></th>
+            <th>Status</th>
+            <th>Eligible</th>
+            <th>Apply</th>
+          </tr>
+        </thead>
+        <tbody id="exam-tbody">
+          <!-- populated by JS -->
+        </tbody>
+      </table>
+      <!-- Empty state inside table -->
+      <div id="table-empty" class="empty-state hidden">
+        <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <div class="empty-title" id="table-empty-title">No exams yet</div>
+        <div class="empty-sub" id="table-empty-sub">Add your first exam to get started.</div>
+        <button class="btn btn-accent" data-action="add-exam" id="table-empty-add-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Exam
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div id="exam-cards">
+      <!-- populated by JS -->
+    </div>
+    <div id="cards-empty" class="empty-state hidden">
+      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <div class="empty-title" id="cards-empty-title">No exams yet</div>
+      <div class="empty-sub" id="cards-empty-sub">Add your first exam to get started.</div>
+    </div>
+
+  </main>
+
+  <!-- ── Mobile FAB ─────────────────────────────────────────── -->
+  <button id="fab-add" data-action="add-exam" title="Add Exam">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ── Mobile Bottom Nav ──────────────────────────────────── -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" id="nav-exams" data-action="nav-exams">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      EXAMS
+    </button>
+    <button class="nav-btn" id="nav-add" data-action="add-exam">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      ADD
+    </button>
+    <button class="nav-btn" id="nav-profile" data-action="open-profile">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+      PROFILE
+    </button>
+  </nav>
+
+</div><!-- /#app-screen -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     SIDE PANEL
+════════════════════════════════════════════════════════════════ -->
+<div id="panel-overlay"></div>
+<aside id="side-panel" role="dialog" aria-modal="true" aria-label="Panel">
+  <!-- All panel content is built by JS -->
+  <div id="panel-inner" style="display:contents;"></div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════════════
+     DELETE ACCOUNT MODAL
+════════════════════════════════════════════════════════════════ -->
+<div id="modal-overlay">
+  <div class="modal-card" id="modal-card">
+    <div class="modal-title" id="modal-title">Delete your account?</div>
+    <div class="modal-body" id="modal-body">
+      All your exams and data will be permanently deleted. This cannot be undone.
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel-btn" data-action="close-modal">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm-btn" data-action="confirm-delete-account">Delete My Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     TOAST CONTAINER
+════════════════════════════════════════════════════════════════ -->
+<div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     DELETED ACCOUNT SCREEN
+════════════════════════════════════════════════════════════════ -->
+<div id="deleted-screen">
+  <div class="loading-logo">EXAM <span>TRACKER</span></div>
+  <h2>Account deleted.</h2>
+  <p>Your data has been permanently removed.</p>
+  <button class="btn btn-ghost" style="margin-top:8px;" onclick="location.reload()">Back to Sign In</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FIREBASE + APP SCRIPTS
+════════════════════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
