@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Govt Job Tracker</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500&display=swap');
+:root{--bg:#f8f8f8;--bg2:#f1f1f1;--surface:#fff;--border:#e2e2e2;--border2:#d0d0d0;--text:#111;--text2:#555;--muted:#999;--accent:#0052cc;--accent-bg:#e8f0ff;--open:#16a34a;--open-bg:#dcfce7;--closed:#dc2626;--closed-bg:#fee2e2;--upcoming:#d97706;--upcoming-bg:#fef3c7;--check:#2563eb;--check-bg:#dbeafe;--yes:#16a34a;--yes-bg:#dcfce7;--no:#dc2626;--no-bg:#fee2e2;--maybe:#d97706;--maybe-bg:#fef3c7;--r:4px;--font:'Geist',sans-serif;--mono:'Geist Mono',monospace}
+[data-theme=dark]{--bg:#0c0c0c;--bg2:#151515;--surface:#1c1c1c;--border:#262626;--border2:#343434;--text:#efefef;--text2:#aaa;--muted:#666;--accent:#4d9fff;--accent-bg:#0d1f3c;--open:#4ade80;--open-bg:#052e16;--closed:#f87171;--closed-bg:#450a0a;--upcoming:#fbbf24;--upcoming-bg:#431407;--check:#60a5fa;--check-bg:#0c1a3a;--yes:#4ade80;--yes-bg:#052e16;--no:#f87171;--no-bg:#450a0a;--maybe:#fbbf24;--maybe-bg:#431407}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;line-height:1.5;min-height:100vh}
+
+/* AUTH */
+#authScreen{display:none;position:fixed;inset:0;background:var(--bg);z-index:1000;align-items:center;justify-content:center;padding:20px}
+#authScreen.show{display:flex}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:36px 32px;width:100%;max-width:380px}
+.auth-logo{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.06em;margin-bottom:4px}
+.auth-logo span{color:var(--accent)}
+.auth-sub{font-size:12px;color:var(--muted);margin-bottom:24px}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:22px}
+.auth-tab{flex:1;height:34px;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;font-family:var(--mono);font-size:11px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .12s}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.auth-form{display:none;flex-direction:column;gap:14px}
+.auth-form.show{display:flex}
+.af{display:flex;flex-direction:column;gap:4px}
+.af label{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.af input{height:36px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:0 10px;border-radius:var(--r);outline:none;transition:border-color .12s}
+.af input:focus{border-color:var(--accent)}
+.auth-err{font-family:var(--mono);font-size:11px;color:var(--closed);background:var(--closed-bg);padding:8px 10px;border-radius:var(--r);display:none}
+.auth-err.show{display:block}
+.auth-ok{font-family:var(--mono);font-size:11px;color:var(--open);background:var(--open-bg);padding:8px 10px;border-radius:var(--r);display:none}
+.auth-ok.show{display:block}
+.auth-lnk{font-family:var(--mono);font-size:10px;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;text-align:left}
+.auth-lnk:hover{text-decoration:underline}
+
+/* APP */
+#app{display:none}
+#app.show{display:block}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:200;gap:12px}
+.logo{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;white-space:nowrap}
+.logo span{color:var(--accent)}
+.topbar-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ts{font-family:var(--mono);font-size:10px;color:var(--muted)}
+.user-chip{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--open);flex-shrink:0;transition:background .3s}
+.sdot.saving{background:var(--upcoming);animation:pulse 1s infinite}
+.sdot.err{background:var(--closed)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* CONTROLS */
+.controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:9px 20px;border-bottom:1px solid var(--border);background:var(--bg2)}
+input[type=text],select{height:29px;background:var(--surface);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:0 9px;outline:none;border-radius:var(--r);transition:border-color .12s;cursor:pointer}
+input[type=text]{min-width:160px}
+input[type=text]:focus,select:focus{border-color:var(--accent)}
+input[type=text]::placeholder{color:var(--muted)}
+.btn{height:29px;padding:0 11px;font-family:var(--mono);font-size:11px;font-weight:500;border:1px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;border-radius:var(--r);transition:all .12s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn.primary:hover{opacity:.88}
+.btn.ghost{border-color:transparent;color:var(--muted);background:transparent}
+.btn.ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn.danger{border-color:var(--closed);color:var(--closed);background:transparent}
+.btn.danger:hover{background:var(--closed-bg)}
+
+/* STATS */
+.stats{display:flex;border-bottom:1px solid var(--border);background:var(--surface)}
+.stat{flex:1;padding:11px 14px;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.sn{font-family:var(--mono);font-size:19px;font-weight:600;display:block}
+.sl{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{padding:8px 12px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;border-bottom:1px solid var(--border);background:var(--bg2);cursor:pointer;user-select:none}
+thead th:hover{color:var(--text)}
+thead th.asc::after{content:' ↑';color:var(--accent)}
+thead th.desc::after{content:' ↓';color:var(--accent)}
+tbody tr.main-row{border-bottom:1px solid var(--border);transition:background .07s;cursor:pointer}
+tbody tr.main-row:hover{background:var(--bg2)}
+tbody tr.main-row.app-row{background:var(--yes-bg)}
+tbody tr.main-row.expanded{background:var(--accent-bg);border-bottom:none}
+[data-theme=dark] tbody tr.main-row.expanded{background:var(--bg2)}
+td{padding:9px 12px;vertical-align:middle;font-size:12px}
+.xarr{width:28px;padding:9px 4px 9px 12px;text-align:center}
+.arr{display:inline-block;font-size:11px;color:var(--muted);transition:transform .18s}
+.expanded .arr{transform:rotate(90deg);color:var(--accent)}
+tr.exp-row{display:none}
+tr.exp-row.open{display:table-row}
+.exp-inner{padding:10px 12px 14px 52px;background:var(--accent-bg);border-bottom:1px solid var(--border)}
+[data-theme=dark] .exp-inner{background:var(--bg2)}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px 20px;margin-bottom:12px}
+.efl{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block}
+.efv{font-size:12px;color:var(--text);display:block}
+.exp-acts{display:flex;align-items:center;gap:7px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap}
+.enote{font-size:11px;color:var(--text2);padding:6px 10px;background:var(--bg);border-radius:var(--r);border-left:3px solid var(--upcoming);margin-bottom:10px;font-style:italic}
+
+/* PILLS TAGS */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-family:var(--mono);font-size:10px;font-weight:500;white-space:nowrap}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.po{background:var(--open-bg);color:var(--open)}.po .dot{box-shadow:0 0 5px currentColor}
+.pc{background:var(--closed-bg);color:var(--closed)}
+.pu{background:var(--upcoming-bg);color:var(--upcoming)}
+.pk{background:var(--check-bg);color:var(--check)}
+.elig{font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:var(--r);cursor:pointer;border:1px solid transparent;transition:filter .1s}
+.elig:hover{filter:brightness(.88)}
+.ey{background:var(--yes-bg);color:var(--yes)}.en{background:var(--no-bg);color:var(--no)}.em{background:var(--maybe-bg);color:var(--maybe)}
+.tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;white-space:nowrap}
+.ta{background:#e0e7ff;color:#3730a3}[data-theme=dark] .ta{background:#1e1b4b;color:#a5b4fc}
+.tb{background:#d1fae5;color:#065f46}[data-theme=dark] .tb{background:#022c22;color:#6ee7b7}
+.tr{background:#fce7f3;color:#9d174d}[data-theme=dark] .tr{background:#4a0030;color:#f9a8d4}
+.tp{background:#fee2e2;color:#991b1b}[data-theme=dark] .tp{background:#450a0a;color:#fca5a5}
+.td{background:#fef3c7;color:#92400e}[data-theme=dark] .td{background:#431407;color:#fcd34d}
+.tch{background:#ede9fe;color:#5b21b6}[data-theme=dark] .tch{background:#2e1065;color:#c4b5fd}
+.tps{background:#d1fae5;color:#064e3b}[data-theme=dark] .tps{background:#064e3b;color:#6ee7b7}
+.to{background:#f3f4f6;color:#374151}[data-theme=dark] .to{background:#1f2937;color:#9ca3af}
+.te{background:#fdf4ff;color:#7e22ce}[data-theme=dark] .te{background:#3b0764;color:#e9d5ff}
+.cb{width:15px;height:15px;cursor:pointer;accent-color:var(--yes)}
+.ib{height:24px;padding:0 9px;font-family:var(--mono);font-size:10px;border:1px solid var(--border);color:var(--muted);background:var(--surface);cursor:pointer;border-radius:var(--r);transition:all .1s;white-space:nowrap}
+.ib:hover{border-color:var(--accent);color:var(--accent)}
+.ib.dl:hover{border-color:var(--closed);color:var(--closed)}
+.ib.act{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+
+/* PANEL */
+.pb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;backdrop-filter:blur(2px)}
+.pb.open{display:block}
+.pn{position:fixed;top:0;right:-560px;height:100vh;width:530px;background:var(--surface);border-left:1px solid var(--border);z-index:400;transition:right .22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.pn.open{right:0}
+.pn-head{padding:20px 24px 0;flex-shrink:0;position:relative}
+.pt{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.pname{font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.35;padding-right:32px}
+.pcl{position:absolute;top:14px;right:18px;background:none;border:1px solid var(--border);color:var(--muted);font-size:15px;cursor:pointer;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:var(--r)}
+.pcl:hover{color:var(--text);border-color:var(--border2)}
+.tab-bar{display:flex;border-bottom:2px solid var(--border);margin:12px 24px 0;flex-shrink:0}
+.tab-btn{height:34px;padding:0 14px;font-family:var(--mono);font-size:11px;font-weight:500;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-body{flex:1;overflow-y:auto}
+.tab-content{display:none;padding:18px 24px}
+.tab-content.active{display:block}
+.pf{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px;flex-shrink:0;background:var(--surface)}
+
+/* PANEL CONTENT */
+.sh{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:16px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.sh:first-child{margin-top:0}
+.ptbl{width:100%;border-collapse:collapse;font-size:12px}
+.ptbl th{text-align:left;padding:5px 9px;background:var(--bg2);font-weight:600;font-size:11px;border:1px solid var(--border)}
+.ptbl td{padding:5px 9px;border:1px solid var(--border);vertical-align:top}
+.sb{margin-bottom:11px}
+.sb h4{font-size:12px;font-weight:600;margin-bottom:3px}
+.sb ul{padding-left:15px}
+.sb ul li{font-size:12px;color:var(--text2);margin-bottom:2px}
+.sl-link{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border:1px solid var(--accent);color:var(--accent);text-decoration:none;font-size:11px;font-family:var(--mono);border-radius:var(--r);margin-bottom:12px}
+.sl-link:hover{background:var(--accent);color:#fff}
+.ibox{padding:8px 10px;background:var(--upcoming-bg);color:var(--upcoming);font-size:11px;border-radius:var(--r);margin-bottom:10px}
+
+/* EDIT COMPONENTS */
+.fg{display:flex;flex-direction:column;gap:4px}.fg.full{grid-column:1/-1}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+label,.lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:3px}
+.fg input,.fg select,.fg textarea,.ei{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:7px 9px;border-radius:var(--r);outline:none;transition:border-color .12s;resize:vertical;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus,.ei:focus{border-color:var(--accent)}
+.row-edit{display:flex;gap:5px;align-items:center;margin-bottom:5px}
+.row-edit input{flex:1;height:28px;background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:0 7px;border-radius:var(--r);outline:none}
+.row-edit input:focus{border-color:var(--accent)}
+.xbtn{width:22px;height:22px;background:none;border:1px solid var(--border);color:var(--muted);cursor:pointer;border-radius:var(--r);font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.xbtn:hover{border-color:var(--closed);color:var(--closed)}
+.add-btn{width:100%;height:26px;background:none;border:1px dashed var(--border2);color:var(--muted);font-family:var(--mono);font-size:10px;cursor:pointer;border-radius:var(--r);margin-bottom:10px;transition:all .1s}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.sec-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:8px}
+.sec-head{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.sec-head input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 8px;border-radius:var(--r);outline:none;height:28px}
+.sec-head input:focus{border-color:var(--accent)}
+
+/* MOBILE */
+@media(max-width:767px){
+  .topbar{padding:9px 12px}
+  .topbar-r .ts,.topbar-r .user-chip{display:none}
+  .controls{padding:8px 12px}
+  input[type=text]{min-width:120px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr)}
+  .stat{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px}
+  .stat:nth-child(3),.stat:nth-child(6){border-right:none}
+  .sn{font-size:15px}
+  .tw{display:none}
+  .card-list{display:flex;flex-direction:column;gap:1px}
+  .card{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 14px;cursor:pointer}
+  .card.app-card{background:var(--yes-bg)}
+  .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+  .card-name{font-size:13px;font-weight:500;line-height:1.3;flex:1}
+  .card-meta{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .card-dl{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .card-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+  .card-detail.open{display:block}
+  .card-dg{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-bottom:10px}
+  .cdl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block}
+  .cdv{font-size:11px;color:var(--text);display:block}
+  .card-acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .pn{width:100%;right:-100%}
+}
+@media(min-width:768px){.card-list{display:none}}
+
+/* MISC */
+.empty{text-align:center;padding:60px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;font-family:var(--mono);font-size:12px;color:var(--muted);gap:10px}
+.spin{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="show">
+  <div class="auth-box">
+    <div class="auth-logo">GOVT JOB <span>TRACKER</span></div>
+    <div class="auth-sub">Sign in to access your personal tracker</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="showAuthTab('login',this)">Sign In</button>
+      <button class="auth-tab" onclick="showAuthTab('signup',this)">Sign Up</button>
+      <button class="auth-tab" onclick="showAuthTab('reset',this)">Reset Password</button>
+    </div>
+    <!-- Login -->
+    <div class="auth-form show" id="af-login">
+      <div class="af"><label>Email</label><input type="email" id="li-email" placeholder="you@example.com"></div>
+      <div class="af"><label>Password</label><input type="password" id="li-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-err" id="li-err"></div>
+      <button class="btn primary" onclick="doLogin()">Sign In</button>
+    </div>
+    <!-- Signup -->
+    <div class="auth-form" id="af-signup">
+      <div class="af"><label>Your Name</label><input type="text" id="su-name" placeholder="Full name"></div>
+      <div class="af"><label>Email</label><input type="email" id="su-email" placeholder="you@example.com"></div>
+      <div class="af"><label>Password (min 6 chars)</label><input type="password" id="su-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignup()"></div>
+      <div class="auth-err" id="su-err"></div>
+      <button class="btn primary" onclick="doSignup()">Create Account</button>
+    </div>
+    <!-- Reset -->
+    <div class="auth-form" id="af-reset">
+      <div class="af"><label>Email</label><input type="email" id="re-email" placeholder="you@example.com"></div>
+      <div class="auth-err" id="re-err"></div>
+      <div class="auth-ok" id="re-ok"></div>
+      <button class="btn primary" onclick="doReset()">Send Reset Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="logo">GOVT JOB <span>TRACKER</span></div>
+    <div class="topbar-r">
+      <span class="ts" id="ts"></span>
+      <div class="user-chip"><span class="sdot" id="sdot"></span><span id="userEmail"></span></div>
+      <button class="btn ghost" onclick="showProfile()">👤 Profile</button>
+      <button class="btn ghost" id="thbtn" onclick="toggleTheme()">☀</button>
+      <button class="btn" onclick="expCSV()">↓ CSV</button>
+      <button class="btn primary" onclick="openAdd()">+ Add</button>
+      <button class="btn ghost" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="controls">
+    <input type="text" id="q" placeholder="Search…" oninput="render()">
+    <select id="fS" onchange="render()"><option value="">All Status</option><option value="open">Open</option><option value="upcoming">Upcoming</option><option value="closed">Closed</option><option value="check">Check</option></select>
+    <select id="fT" onchange="render()"><option value="">All Tags</option></select>
+    <select id="fA" onchange="render()"><option value="">All Agencies</option></select>
+    <select id="fE" onchange="render()"><option value="">All Eligibility</option><option value="yes">Eligible ✓</option><option value="no">Not Eligible ✗</option><option value="maybe">Maybe ≈</option></select>
+    <label style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer"><input type="checkbox" id="fAp" onchange="render()" style="accent-color:var(--accent)"> Applied only</label>
+    <button class="btn ghost" onclick="clrF()">✕ Clear</button>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="sn" id="sT" style="color:var(--text)">0</span><span class="sl">Total</span></div>
+    <div class="stat"><span class="sn" id="sO" style="color:var(--open)">0</span><span class="sl">Open</span></div>
+    <div class="stat"><span class="sn" id="sU" style="color:var(--upcoming)">0</span><span class="sl">Upcoming</span></div>
+    <div class="stat"><span class="sn" id="sCl" style="color:var(--closed)">0</span><span class="sl">Closed</span></div>
+    <div class="stat"><span class="sn" id="sEl" style="color:var(--yes)">0</span><span class="sl">Eligible</span></div>
+    <div class="stat"><span class="sn" id="sAp" style="color:var(--accent)">0</span><span class="sl">Applied</span></div>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th style="width:28px"></th>
+        <th onclick="srt('rank')" style="width:34px">#</th>
+        <th onclick="srt('name')">Exam / Job</th>
+        <th onclick="srt('agency')">Agency</th>
+        <th>Tag</th>
+        <th onclick="srt('deadlineDate')">Deadline</th>
+        <th onclick="srt('status')">Status</th>
+        <th onclick="srt('eligible')">Eligible</th>
+        <th style="width:50px;text-align:center">✓ App</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">No jobs match your filters.</div>
+  </div>
+  <div class="card-list" id="cardList"></div>
+</div>
+
+<!-- PANEL -->
+<div class="pb" id="pb" onclick="if(event.target===this)closeP()"></div>
+<div class="pn" id="pn">
+  <button class="pcl" onclick="closeP()">✕</button>
+  <div id="pn-head" class="pn-head"></div>
+  <div class="tab-bar" id="tab-bar" style="display:none"></div>
+  <div class="tab-body" id="tab-body"></div>
+  <div class="pf" id="pf"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// FIREBASE CONFIG
+// ══════════════════════════════════════════════
+firebase.initializeApp({
+  apiKey:"AIzaSyDrwfDQfocEqCCEXXnjoE8PSphVpuDkxMg",
+  authDomain:"exam-tracker-a02ad.firebaseapp.com",
+  projectId:"exam-tracker-a02ad",
+  storageBucket:"exam-tracker-a02ad.firebasestorage.app",
+  messagingSenderId:"556305448977",
+  appId:"1:556305448977:web:35a93ea264b7e731c8f1b0"
+});
+const auth=firebase.auth();
+const db=firebase.firestore();
+
+// ══════════════════════════════════════════════
+// DEFAULT DATA — 38 JOBS
+// ══════════════════════════════════════════════
+function getDefaultJobs(){return [
+{id:1,rank:1,name:"UPSC Civil Services Exam (CSE)",agency:"UPSC",tag:"Administration",vacancies:"933",posts:"IAS, IPS, IFS, IRS, IAAS, IRTS & 20+ Group-A/B Services",deadline:"Closed – 27 Feb 2026",deadlineDate:"2026-02-27",status:"closed",website:"https://upsc.gov.in",eligible:"yes",age:"21–32 yrs",fee:"₹100",pay:"Pay L10–18; ₹56k–₹2.5L+",notes:"Next cycle expected ~Feb 2027.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 21–32 (UR Male); OBC +3 yrs","6 attempts for UR; 9 for OBC"],advantages:["Political Science optional is one of the most scoring","Pol Sci syllabus overlaps heavily with GS Paper-II","Bihar domicile: Bihar state cadre preference"],note:"Best long-term bet. Pol Sci + IR optional gives huge advantage."},pattern:{rows:[["Stage","Type","Papers","Marks","Notes"],["Prelims","Objective MCQ","2 Papers / 2 hrs each","400 (qualifying)","GS Paper-I + CSAT; min 33% in CSAT"],["Mains","Descriptive","9 Papers / 3 hrs each","1750","4 GS + Essay + 2 Optional + 2 qualifying"],["Interview","Personality Test","~30 min","275","Final merit = Mains + Interview"]]},syllabus:{link:"https://upsc.gov.in",curated:[{head:"Prelims – GS Paper I",items:["Current Events – National & International","History of India & Indian National Movement","Indian & World Geography","Indian Polity & Governance ← Pol Sci advantage","Economic & Social Development","Environment, Ecology, Biodiversity","General Science"]},{head:"Mains – Optional: Political Science & IR",items:["Political Theory (Liberty, Equality, Rights, Justice)","Comparative Politics & Political Analysis","Indian Government & Politics","India's Foreign Policy","International Relations & Institutions"]}]}},
+{id:2,rank:2,name:"UPSC CAPF AC (Assistant Commandant)",agency:"UPSC",tag:"Defence",vacancies:"349",posts:"Assistant Commandant – BSF, CRPF, CISF, ITBP, SSB",deadline:"12 March 2026",deadlineDate:"2026-03-12",status:"open",website:"https://upsconline.nic.in",eligible:"yes",age:"20–25 yrs (OBC 28)",fee:"₹200",pay:"Pay L10; ₹56,100/mo; Gross ~₹90k+",notes:"Check vision standards for CAPF — myopia rules vary by force.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 20–25 (UR Male); OBC +3 yrs","Physical fitness test mandatory"],advantages:["Pol Sci helps in Paper-I GK section","Paper-II is descriptive essay — Pol Sci background helps","Officer-rank entry into paramilitary"],note:"⚠️ Check eye-sight standards for each specific force before applying."},pattern:{rows:[["Paper","Type","Duration","Marks"],["Paper I – Gen Ability & Intelligence","Objective MCQ","2 hrs","250"],["Paper II – GS, Essay & Comprehension","Descriptive","3 hrs","200"],["PFT/PST/Medical","Physical + Medical","—","Qualifying"],["Interview","Personality Test","~25 min","150"]]},syllabus:{link:"https://upsc.gov.in",curated:[{head:"Paper I – Objective",items:["General Science & Technology","Current Affairs – National/International","Indian History & Freedom Struggle","Indian Polity & Constitution ← Pol Sci advantage","Mental Ability, Data Interpretation, Reasoning"]},{head:"Paper II – Descriptive",items:["Essay writing (~700–900 words)","Précis writing","Comprehension passage","Language: English OR Hindi"]}]}},
+{id:3,rank:3,name:"UPSC EPFO – Enforcement Officer / AO",agency:"UPSC",tag:"Administration",vacancies:"~230",posts:"Enforcement Officer (EO) / Accounts Officer (AO)",deadline:"Expected June–July 2026",deadlineDate:"2026-07-01",status:"upcoming",website:"https://upsc.gov.in",eligible:"yes",age:"21–30 yrs",fee:"~₹200",pay:"Pay L8; ₹47,600/mo; Gross ~₹75k",notes:"",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 21–30 (UR Male)","Labour law knowledge helpful"],advantages:["Polity section overlaps with GS prep","Non-technical post — arts graduates compete well"],note:"Good mid-tier central govt option."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Recruitment Test (RT)","Objective MCQ","2 hrs","—"],["Interview","Personality Test","~20 min","—"]]},syllabus:{link:"https://upsc.gov.in",curated:[{head:"Recruitment Test Syllabus",items:["Indian Freedom Struggle & Post-Independence History","Current Affairs & General Knowledge","Indian Polity & Constitution ← Pol Sci advantage","Industrial Relations & Labour Laws","Social Security in India","Computer & IT knowledge","English Comprehension"]}]}},
+{id:4,rank:4,name:"UPSC CDS (Combined Defence Services)",agency:"UPSC",tag:"Defence",vacancies:"~457",posts:"Lieutenant – IMA, INA, AFA; Gents Cadet – OTA (any grad)",deadline:"CDS-II expected Sept 2026",deadlineDate:"2026-09-01",status:"upcoming",website:"https://upsc.gov.in",eligible:"yes",age:"19–25 yrs",fee:"₹200",pay:"Pay L10; ₹56,100+ (Lieutenant)",notes:"OTA: no Maths required. Most accessible defence commission.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓ (OTA)",conditions:["Any male graduate for OTA","Age: 19–25 (UR)","Physical fitness + SSB interview mandatory"],advantages:["OTA requires only English + GK (no Maths)","Permanent commission after OTA training"],note:"Apply for OTA route — no Maths needed."},pattern:{rows:[["Paper","Type","Duration","Marks","For"],["English","Objective","2 hrs","100","All courses"],["General Knowledge","Objective","2 hrs","100","All courses"],["Elementary Maths","Objective","2 hrs","100","IMA/INA/AFA only – NOT OTA"],["SSB Interview","5-day process","—","900","All courses"]]},syllabus:{link:"https://upsc.gov.in",curated:[{head:"English",items:["Spotting Errors, Sentence Improvement","Comprehension, Fill in the Blanks","Vocabulary – Synonyms/Antonyms"]},{head:"General Knowledge",items:["Current Affairs (last 6 months)","History – India & World","Geography – India & World","Indian Polity & Economy"]}]}},
+{id:5,rank:5,name:"SSC CGL (Combined Graduate Level)",agency:"SSC",tag:"Administration",vacancies:"~17,000–20,000",posts:"IT Inspector, CBI SI, Auditor, UDC, Tax Asst, Statistical Investigator, AAO",deadline:"Expected April 2026",deadlineDate:"2026-04-30",status:"upcoming",website:"https://ssc.gov.in",eligible:"yes",age:"18–32 yrs",fee:"₹100",pay:"Pay L4–8; ₹25.5k–₹1.12L",notes:"Highest vacancy central govt exam. Tier-II is the real battle.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 18–32 (varies by post)"],advantages:["Largest graduate-level central govt exam","GS section benefits from Pol Sci prep"],note:"Most important exam alongside UPSC/BPSC."},pattern:{rows:[["Tier","Type","Marks/Duration","Notes"],["Tier-I","Objective CBT","200Q / 60 min","Qualifying for Tier-II"],["Tier-II","Objective CBT (3 sessions)","390Q / ~3 hrs","Main merit exam"],["DV","Document Verification","—","Final step"]]},syllabus:{link:"https://ssc.gov.in",curated:[{head:"General Intelligence & Reasoning",items:["Analogies, Classification, Series","Coding-Decoding, Blood Relations","Syllogism, Statement & Conclusions"]},{head:"Quantitative Aptitude",items:["Number System, Percentage, Profit & Loss","Algebra, Geometry, Mensuration, Trigonometry","Data Interpretation"]},{head:"General Awareness",items:["History, Polity, Geography (India + World) ← Pol Sci helps","Economy, Science & Technology","Current Affairs (last 3–6 months)"]}]}},
+{id:6,rank:6,name:"SSC CPO – SI Delhi Police / CAPF",agency:"SSC",tag:"Police",vacancies:"~4,000–5,000",posts:"Sub-Inspector – Delhi Police, BSF, CRPF, CISF, ITBP, SSB",deadline:"Expected April–May 2026",deadlineDate:"2026-05-15",status:"upcoming",website:"https://ssc.gov.in",eligible:"yes",age:"20–25 yrs",fee:"₹100",pay:"Pay L6; ₹35.4k–₹1.12L",notes:"Check vision standards — myopia cutoff may apply.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 20–25 (UR Male)","Physical test mandatory","⚠️ Vision standards apply"],advantages:["SI rank — officer level in police/paramilitary"],note:"Check eye standard for Delhi Police vs CRPF vs BSF — they differ."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Paper-I","Objective CBT (GK+Reasoning+Quant+English)","2 hrs","200"],["PET/PST","Physical + Height/Weight + Medical","—","Qualifying"],["Paper-II","English (Objective)","2 hrs","200"]]},syllabus:{link:"https://ssc.gov.in",curated:[{head:"Paper I",items:["General Intelligence & Reasoning","General Knowledge & Current Awareness","Quantitative Aptitude","English Comprehension"]},{head:"Physical Standards (Male)",items:["Height: 170 cm (UR); 165 cm (OBC)","Race: 1.6 km in 6.5 min"]}]}},
+{id:7,rank:7,name:"SSC CHSL (Combined Higher Secondary Level)",agency:"SSC",tag:"Administration",vacancies:"~3,000–5,000",posts:"LDC, Junior Secretariat Asst (JSA), Postal/Sorting Asst, DEO",deadline:"Expected June 2026",deadlineDate:"2026-06-30",status:"upcoming",website:"https://ssc.gov.in",eligible:"yes",age:"18–27 yrs",fee:"₹100",pay:"Pay L2–4; ₹19.9k–₹35.4k",notes:"",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["12th pass minimum (graduates also eligible)","Age: 18–27 (UR Male)"],note:"Lower pay than CGL — aim for CGL/BPSC but this is a solid fallback."},pattern:{rows:[["Tier","Type","Duration","Marks"],["Tier-I","Objective CBT","60 min","200"],["Tier-II Session-I","Objective (Maths+Reasoning+English+GK)","2 hrs 15 min","270"],["Tier-II Session-II","Skill/Typing Test","15 min","Qualifying"]]},syllabus:{link:"https://ssc.gov.in",curated:[{head:"Typing Test",items:["English: 35 WPM on computer","Hindi: 30 WPM on computer"]}]}},
+{id:8,rank:8,name:"SSC MTS + Havaldar",agency:"SSC",tag:"Other",vacancies:"~6,000–10,000",posts:"Multi-Tasking Staff (MTS), Havaldar (CBIC/CBN)",deadline:"Expected Q3 2026",deadlineDate:"2026-09-30",status:"upcoming",website:"https://ssc.gov.in",eligible:"yes",age:"18–25 yrs (MTS)",fee:"₹100",pay:"Pay L1; ₹18k–₹56.9k",notes:"10th-level exam. As a graduate, less competition.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["10th pass minimum (graduates also eligible)","Age: 18–25 (MTS); 18–27 (Havaldar)"],note:"Good early entry into central govt while preparing for better exams."},pattern:{rows:[["Paper","Type","Duration","Marks"],["Paper-I","Objective CBT","90 min","150"],["PET (Havaldar only)","Walk 1600m in 15 min","—","Qualifying"]]},syllabus:{link:"https://ssc.gov.in",curated:[{head:"Paper-I Syllabus (10th level)",items:["Numerical & Mathematical Ability","Reasoning Ability & Problem Solving","General Awareness","English Language & Comprehension"]}]}},
+{id:9,rank:9,name:"BPSC CCE (Combined Competitive Exam)",agency:"BPSC",tag:"Administration",vacancies:"~500+",posts:"SDM, DSP, BDO, CDPO, Supply Inspector, Rural Dev Officer",deadline:"Expected May–June 2026",deadlineDate:"2026-06-01",status:"upcoming",website:"https://bpsc.bih.nic.in",eligible:"yes",age:"20–37 yrs (OBC 40)",fee:"~₹600",pay:"Pay L7–11; ₹44.9k–₹1.12L",notes:"Most important Bihar state exam. SDM/DSP are top posts.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate from recognised university","Age: 20–37 (UR Male); OBC +3 yrs → max 40","Bihar domicile needed for state cadre posts"],advantages:["Political Science optional is available and high-scoring","GS Paper overlaps 60%+ with UPSC Prelims prep","Bihar domicile gives state-cadre benefit"],note:"Second most important exam after UPSC for your profile."},pattern:{rows:[["Stage","Type","Papers","Marks"],["Prelims (PT)","Objective","1 Paper","150"],["Mains","Descriptive","4 Papers","900+"],["Interview","Personality Test","—","120"]]},syllabus:{link:"https://bpsc.bih.nic.in",curated:[{head:"Prelims – General Studies",items:["Bihar History, Culture, Geography, Economy","Indian Polity ← Pol Sci core strength","Economy (Indian + Bihar)","General Science, Current Events"]},{head:"Mains – Optional: Political Science & IR",items:["Political Theory","Comparative Politics","Indian Government & Politics","International Relations & India's Foreign Policy"]}]}},
+{id:10,rank:10,name:"BPSC TRE (Teacher Recruitment Exam)",agency:"BPSC",tag:"Teaching",vacancies:"46,595",posts:"Teacher Cl 1–5, 6–8, 9–10; Cl 11–12 Political Science",deadline:"Notification March 2026; Exam Sept 2026",deadlineDate:"2026-09-01",status:"check",website:"https://bpsc.bih.nic.in",eligible:"maybe",age:"21–40 yrs",fee:"₹750",pay:"Primary ₹25–35k; Secondary ₹44.9k+",notes:"TRE 4.0 — read March 2026 notification for Cl 11-12 Pol Sci eligibility without B.Ed.",eligibilityInfo:{profile:"BA Political Science (Hons) – CONDITIONALLY ELIGIBLE ≈",conditions:["For Cl 11–12 Political Science post: BA Pol Sci (Hons) may qualify WITHOUT B.Ed","For Cl 6–10: B.Ed generally required"],note:"⚠️ Read TRE 4.0 official notification IMMEDIATELY."},pattern:{rows:[["Level","Type","Duration","Marks"],["All Levels","Objective + Descriptive","2–3 hrs","150"]]},syllabus:{link:"https://bpsc.bih.nic.in",curated:[{head:"Cl 11–12 Political Science Syllabus",items:["Political Theory","Comparative Politics","Indian Government & Politics","Constitution of India (in detail)","International Relations & India's Foreign Policy"]}]}},
+{id:11,rank:11,name:"BPSC APO (Asst Prosecution Officer)",agency:"BPSC",tag:"Administration",vacancies:"300",posts:"Assistant Prosecution Officer",deadline:"Closed – 20 March 2026",deadlineDate:"2026-03-20",status:"closed",website:"https://bpsc.bih.nic.in",eligible:"no",age:"21–37 yrs",fee:"₹100",pay:"Pay L9; ₹53.1k–₹1.67L",notes:"NOT eligible without LLB.",eligibilityInfo:{profile:"BA Political Science (Hons) – NOT ELIGIBLE ✗",conditions:["Requires LLB degree","BA alone is NOT sufficient"],note:"❌ Not eligible now. Complete 3-yr LLB then apply."},pattern:{rows:[["Stage","Type","Marks"],["Prelims","Objective","150"],["Mains","Descriptive Law Papers","—"],["Interview","—","—"]]},syllabus:{link:"https://bpsc.bih.nic.in",curated:[{head:"❌ Not Eligible",items:["Requires LLB degree. BA alone insufficient."]}]}},
+{id:12,rank:12,name:"BSSC CGL (Combined Graduate Level) 4th",agency:"BSSC",tag:"Administration",vacancies:"1,883",posts:"ASO, Planning Asst, Jr Statistical Asst, DEO, Malaria Inspector, Auditor",deadline:"Application closed; Prelims: July–Aug 2026",deadlineDate:"2026-08-01",status:"closed",website:"https://bssc.bihar.gov.in",eligible:"yes",age:"21–37 yrs",fee:"₹100",pay:"Pay L5–7; ₹29.2k–₹69.1k",notes:"Application phase closed. Prelims in July-Aug 2026 — prep now.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate from recognised university","Age: 21–37 (UR Male)"],advantages:["Bihar state exam — Bihar domicile gives advantage","Lower competition than SSC CGL"],note:"Good Bihar state alternative to SSC."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Prelims","Objective CBT","2 hrs","150"],["Mains","Objective + Descriptive","3 hrs","—"],["DV","Document Verification","—","—"]]},syllabus:{link:"https://bssc.bihar.gov.in",curated:[{head:"General Studies / GK",items:["Bihar GK (History, Culture, Geography, Economy)","Indian Polity & Constitution ← Pol Sci advantage","Current Affairs – National & Bihar state","General Science, Environment"]}]}},
+{id:13,rank:13,name:"BSSC Inter Level Exam",agency:"BSSC",tag:"Administration",vacancies:"26,426",posts:"LDC, Clerk-cum-Typist, Jr Regional Investigator, Bench Clerk",deadline:"Application closed; Prelims: June–July 2026",deadlineDate:"2026-07-01",status:"closed",website:"https://bssc.bihar.gov.in",eligible:"yes",age:"18–37 yrs",fee:"₹100",pay:"Pay L2–4; ₹19.9k–₹35.4k",notes:"Application closed. Prelims upcoming.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["12th pass minimum (graduates eligible)","Age: 18–37 (UR Male)"],note:"Large vacancy pool. Good entry-level Bihar state govt option."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Prelims","Objective CBT","2 hrs","120"],["Mains","Objective + Hindi","3 hrs","—"]]},syllabus:{link:"https://bssc.bihar.gov.in",curated:[{head:"Syllabus (12th level standard)",items:["General Studies & GK (Bihar + India focus)","Hindi Grammar & Comprehension","Maths: Arithmetic up to Class 12 level"]}]}},
+{id:14,rank:14,name:"BPSSC SI Prohibition",agency:"BPSSC",tag:"Police",vacancies:"78",posts:"Sub-Inspector (SI) – Prohibition / Excise",deadline:"Closed – 27 Feb 2026",deadlineDate:"2026-02-27",status:"closed",website:"https://bpssc.bih.nic.in",eligible:"yes",age:"20–37 yrs",fee:"₹100",pay:"Pay L6; ₹35.4k–₹1.12L",notes:"Watch for next cycle.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 20–37 (UR Male)","Physical test mandatory"],note:"Keep watching for next cycle notification."},pattern:{rows:[["Stage","Type","Marks"],["Written Prelims","Objective","100"],["Written Mains","Objective + Descriptive","200"],["PET/Medical","Physical + Medical","Qualifying"]]},syllabus:{link:"https://bpssc.bih.nic.in",curated:[{head:"General Studies",items:["Indian Polity & Governance ← Pol Sci advantage","History, Geography, Economy","Current Affairs, Bihar GK"]}]}},
+{id:15,rank:15,name:"BPSSC ASI Operation / Wireless",agency:"BPSSC",tag:"Police",vacancies:"462",posts:"Assistant Sub-Inspector (ASI) – Operation / Wireless",deadline:"Closed – 4 March 2026",deadlineDate:"2026-03-04",status:"closed",website:"https://bpssc.bih.nic.in",eligible:"no",age:"18–25 yrs",fee:"₹100",pay:"Pay L5; ₹29.2k–₹92.3k",notes:"NOT eligible — requires BSc Physics.",eligibilityInfo:{profile:"BA Political Science (Hons) – NOT ELIGIBLE ✗",conditions:["Requires BSc Physics (50%+)"],note:"❌ Not eligible. This post requires Physics graduate."},pattern:{rows:[["Stage","Type","Marks"],["Prelims","Objective GS","—"],["Mains","Physics Paper (BSc level)","—"]]},syllabus:{link:"https://bpssc.bih.nic.in",curated:[{head:"❌ Not Eligible",items:["Requires BSc Physics (50%+)."]}]}},
+{id:16,rank:16,name:"CSBC Bihar Police Constable Operator",agency:"CSBC",tag:"Police",vacancies:"993",posts:"Constable (Sipahi Prachalak – Operator / Wireless)",deadline:"31 March 2026",deadlineDate:"2026-03-31",status:"open",website:"https://csbc.bihar.gov.in",eligible:"no",age:"18–25 yrs",fee:"₹100",pay:"Pay L3; ₹21.7k–₹69.1k",notes:"NOT eligible — requires 12th PCM.",eligibilityInfo:{profile:"BA Political Science (Hons) – NOT ELIGIBLE ✗",conditions:["Requires 12th with PCM (Physics, Chemistry, Mathematics)","You have PCB (Biology instead of Maths)"],note:"❌ Do NOT apply. PCM mandatory, you have PCB."},pattern:{rows:[["Stage","Type","Marks"],["Written Test","Objective","100"],["PET","Physical Efficiency","Qualifying"]]},syllabus:{link:"https://csbc.bihar.gov.in",curated:[{head:"❌ Not Eligible",items:["Requires 12th with PCM. You have PCB."]}]}},
+{id:17,rank:17,name:"CSBC Bihar Police Constable (General)",agency:"CSBC",tag:"Police",vacancies:"~20,000+",posts:"Constable (General)",deadline:"Expected mid-2026",deadlineDate:"2026-07-01",status:"upcoming",website:"https://csbc.bihar.gov.in",eligible:"yes",age:"18–25 yrs",fee:"₹100",pay:"Pay L3; ₹21.7k–₹69.1k",notes:"Largest Bihar police recruitment. Start physical training NOW.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["12th pass minimum","Age: 18–25 (UR Male)","Physical test + medical mandatory"],note:"⚠️ Start physical training NOW — 1-mile run in 6 min is the real filter."},pattern:{rows:[["Stage","Type","Marks"],["Written Test","Objective (GK, Hindi, Science, Maths)","100"],["PET","Running, High Jump, Long Jump","Qualifying"]]},syllabus:{link:"https://csbc.bihar.gov.in",curated:[{head:"Physical Efficiency Test (Male)",items:["1 mile run: within 6 minutes","High Jump: minimum 4 feet","Long Jump: minimum 12 feet"]}]}},
+{id:18,rank:18,name:"RBI Assistant",agency:"Reserve Bank of India",tag:"Banking",vacancies:"650",posts:"Assistant (Clerical / Customer Service)",deadline:"8 March 2026",deadlineDate:"2026-03-08",status:"open",website:"https://www.rbi.org.in",eligible:"yes",age:"20–28 yrs",fee:"₹450",pay:"Basic ₹29k; Gross ~₹58.5k/mo",notes:"Your 74% BA qualifies (50% required). Apply ASAP.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Graduation with 50% marks (you have 74% ✓)","Age: 20–28 (UR Male)"],note:"✓ You are eligible. Apply before 8 March 2026."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Prelims","Objective CBT","1 hr","100"],["Mains","Objective CBT","2 hr 15 min","200"],["LPT","Language Proficiency Test (Hindi)","Qualifying","—"]]},syllabus:{link:"https://www.rbi.org.in",curated:[{head:"Prelims (100 Qs / 60 min)",items:["English Language (30 Qs)","Numerical Ability (35 Qs)","Reasoning Ability (35 Qs)"]},{head:"Mains",items:["Reasoning (40 Qs)","English Language (40 Qs)","Numerical Ability (40 Qs)","General Awareness / Banking Awareness (40 Qs)","Computer Knowledge (40 Qs)"]}]}},
+{id:19,rank:19,name:"RBI Grade B Officer",agency:"Reserve Bank of India",tag:"Banking",vacancies:"~200–300",posts:"Grade B Officer – General, DEPR, DSIM",deadline:"Expected Aug–Sept 2026",deadlineDate:"2026-09-01",status:"upcoming",website:"https://opportunities.rbi.org.in",eligible:"yes",age:"21–30 yrs",fee:"~₹850",pay:"Basic ₹55.2k; Gross ~₹1.1–1.3L/mo",notes:"",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate with 60% marks","Age: 21–30 (UR Male)"],note:"Very competitive. Prepare Economics seriously for Phase-II."},pattern:{rows:[["Stage","Type","Marks"],["Phase-I","Objective CBT","200"],["Phase-II Paper-A","Economics/Social Issues","200"],["Phase-II Paper-B","English Descriptive","100"],["Interview","Personality Test","75"]]},syllabus:{link:"https://opportunities.rbi.org.in",curated:[{head:"Phase-II – Economics & Social Issues",items:["Growth, Development, Inflation, Monetary Policy","Fiscal Policy, Government Finance, Budget","Social Issues: Poverty, Inequality, Healthcare, Education"]}]}},
+{id:20,rank:20,name:"NABARD Grade A (Assistant Manager)",agency:"NABARD",tag:"Banking",vacancies:"~100",posts:"Assistant Manager – RDBS",deadline:"Expected mid-2026",deadlineDate:"2026-07-01",status:"upcoming",website:"https://www.nabard.org",eligible:"yes",age:"21–30 yrs",fee:"~₹800",pay:"Basic ₹44.5k+; Gross ~₹80–₹1L/mo",notes:"Agriculture & Rural Development section is unique.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate (60% preferred)","Age: 21–30 (UR Male)"],note:"Specialized bank — prepare agriculture/rural banking section extra."},pattern:{rows:[["Stage","Type","Marks"],["Phase-I Prelims","Objective CBT","200"],["Phase-II Mains","Objective + Descriptive","300"],["Interview","—","75"]]},syllabus:{link:"https://www.nabard.org",curated:[{head:"Phase-II – Agriculture & Rural Development",items:["Crop Production, Irrigation, Land use","Rural Banking, SHGs, Microfinance","NABARD schemes & functions"]}]}},
+{id:21,rank:21,name:"NABARD Development Assistant (DA)",agency:"NABARD",tag:"Banking",vacancies:"162",posts:"Development Assistant / DA (Hindi)",deadline:"Closed 3 Feb 2026; Mains: 12 Apr 2026",deadlineDate:"2026-02-03",status:"closed",website:"https://www.nabard.org",eligible:"yes",age:"21–35 yrs",fee:"~₹750",pay:"Basic ₹23.1k; Gross ~₹46.5k/mo",notes:"Application closed. Watch for next cycle.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 21–35 (UR Male)"],note:"Application closed. Watch for next cycle."},pattern:{rows:[["Stage","Type","Marks"],["Phase-I Prelims","Objective CBT","200"],["Phase-II Mains","Objective + Descriptive","200"]]},syllabus:{link:"https://www.nabard.org",curated:[{head:"Syllabus",items:["Reasoning, Quantitative Aptitude","English Language, Computer Knowledge","General Awareness / Banking / Rural Dev"]}]}},
+{id:22,rank:22,name:"SBI PO (Probationary Officer)",agency:"State Bank of India",tag:"Banking",vacancies:"~2,000–3,000",posts:"Probationary Officer / Management Trainee",deadline:"Expected March 2026",deadlineDate:"2026-03-31",status:"upcoming",website:"https://sbi.co.in",eligible:"yes",age:"21–30 yrs",fee:"~₹750",pay:"Gross ~₹78k/mo",notes:"Notification imminent — watch SBI website closely.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 21–30 (UR Male)"],note:"Watch for notification in March 2026. Apply immediately when out."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Prelims","Objective CBT","1 hr","100"],["Mains","Objective + Descriptive CBT","3 hr 30 min","250"],["GD + Interview","Group Discussion + Personal Interview","—","50"]]},syllabus:{link:"https://sbi.co.in",curated:[{head:"Prelims",items:["English Language (30Q)","Quantitative Aptitude (35Q)","Reasoning Ability (35Q)"]},{head:"Mains – Descriptive",items:["Letter Writing (250 words)","Essay Writing (250 words)"]}]}},
+{id:23,rank:23,name:"SBI Clerk (Junior Associate)",agency:"State Bank of India",tag:"Banking",vacancies:"~10,000–15,000",posts:"Junior Associate – Customer Support & Sales",deadline:"Expected July–Aug 2026",deadlineDate:"2026-08-01",status:"upcoming",website:"https://sbi.co.in",eligible:"yes",age:"20–28 yrs",fee:"~₹750",pay:"Starting ₹24.05k; Gross ~₹35–40k/mo",notes:"",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 20–28 (UR Male)"],note:"Apply alongside SBI PO — same preparation base."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Prelims","Objective CBT","1 hr","100"],["Mains","Objective CBT","2 hr 40 min","190"]]},syllabus:{link:"https://sbi.co.in",curated:[{head:"Mains Syllabus",items:["General/Financial Awareness (50Q)","General English (40Q)","Quantitative Aptitude & Data Interpretation (50Q)","Reasoning Ability & Computer Aptitude (50Q)"]}]}},
+{id:24,rank:24,name:"IBPS PO (Probationary Officer)",agency:"IBPS",tag:"Banking",vacancies:"~4,000–6,000",posts:"PO / Management Trainee at 11 PSU Banks",deadline:"Expected June–July 2026",deadlineDate:"2026-07-01",status:"upcoming",website:"https://ibps.in",eligible:"yes",age:"20–30 yrs",fee:"~₹850",pay:"Gross ~₹78k/mo",notes:"",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 20–30 (UR Male)"],note:"Prepare SBI PO + IBPS PO together — almost identical syllabus."},pattern:{rows:[["Stage","Type","Marks"],["Prelims","Objective CBT","100"],["Mains","Objective + Descriptive CBT","225"],["Interview","—","100"]]},syllabus:{link:"https://ibps.in",curated:[{head:"Same pattern as SBI PO",items:["Prelims: Reasoning + Quant + English","Mains: Data Analysis, Banking GK, English"]}]}},
+{id:25,rank:25,name:"IBPS Clerk (Customer Service Associate)",agency:"IBPS",tag:"Banking",vacancies:"~15,736",posts:"Customer Service Associate at 11 PSU Banks",deadline:"Expected July–Aug 2026",deadlineDate:"2026-08-01",status:"upcoming",website:"https://ibps.in",eligible:"yes",age:"20–28 yrs",fee:"~₹850",pay:"Starting ₹24.05k; Gross ~₹32–40k/mo",notes:"",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 20–28 (UR Male)"],note:"Same prep as SBI Clerk. Apply both together."},pattern:{rows:[["Stage","Type","Marks"],["Prelims","Objective CBT","100"],["Mains","Objective CBT","190"]]},syllabus:{link:"https://ibps.in",curated:[{head:"Mains",items:["General/Financial Awareness (50Q)","English Language (40Q)","Reasoning & Computer Aptitude (50Q)","Quantitative Aptitude (50Q)"]}]}},
+{id:26,rank:26,name:"IBPS RRB Officer Scale-I",agency:"IBPS",tag:"Banking",vacancies:"~5,000–7,000",posts:"Officer Scale-I – Bihar Rural Banks",deadline:"Expected May–June 2026",deadlineDate:"2026-06-01",status:"upcoming",website:"https://ibps.in",eligible:"yes",age:"18–30 yrs",fee:"~₹850",pay:"Starting ₹36k+/mo",notes:"Bihar RRBs: Madhya Bihar Gramin Bank, Uttar Bihar Gramin Bank.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 18–30 (UR Male)"],note:"Strong option for Bihar-based banking."},pattern:{rows:[["Stage","Type","Marks"],["Prelims","Reasoning (40) + Quantitative (40)","80"],["Mains","Reasoning, Quant, Hindi/English, GK, Computer","200"],["Interview","—","100"]]},syllabus:{link:"https://ibps.in",curated:[{head:"Bihar RRBs",items:["Hindi/Regional Language replaces English in Mains","Financial Awareness focused on rural/agri banking"]}]}},
+{id:27,rank:27,name:"IBPS RRB Office Assistant",agency:"IBPS",tag:"Banking",vacancies:"~5,000–7,000",posts:"Office Assistant (Multipurpose) – Bihar Rural Banks",deadline:"Expected May–June 2026",deadlineDate:"2026-06-01",status:"upcoming",website:"https://ibps.in",eligible:"yes",age:"18–28 yrs",fee:"~₹850",pay:"Starting ~₹20–30k/mo",notes:"Entry-level rural banking. No interview required.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: 18–28 (UR Male)"],note:"Good entry option with no interview."},pattern:{rows:[["Stage","Type","Marks"],["Prelims","Reasoning (40) + Numerical (40)","80"],["Mains","Reasoning, Computer, GK, Hindi/English, Numerical","200"]]},syllabus:{link:"https://ibps.in",curated:[{head:"Key Notes",items:["Hindi proficiency tested heavily for Bihar circle RRBs","No interview for Office Assistant rank"]}]}},
+{id:28,rank:28,name:"RRB NTPC Graduate Level",agency:"Railway Recruitment Board",tag:"Railway",vacancies:"5,810",posts:"Station Master, Goods Train Manager, Traffic Asst, Sr Clerk-cum-Typist",deadline:"Application closed; CBT-1: 16–27 March 2026",deadlineDate:"2026-03-27",status:"closed",website:"https://rrbapply.gov.in",eligible:"yes",age:"18–33 yrs",fee:"₹500 (₹400 refunded)",pay:"Pay L4–6; ₹25.5k–₹63.2k",notes:"Application closed. CBT-1 on 16–27 March 2026 — prep now.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Graduation required for graduate-level posts","Age: 18–33 (UR Male)"],note:"Application phase over. Prep for CBT-1 if already applied."},pattern:{rows:[["Stage","Type","Duration","Marks"],["CBT-1","Objective (Qualifying)","1.5 hrs","100"],["CBT-2","Objective (Merit)","2 hrs","120"]]},syllabus:{link:"https://rrbapply.gov.in",curated:[{head:"CBT-1 (100Q / 90 min)",items:["Mathematics (30Q)","Reasoning (30Q)","GK (40Q): Current Affairs, History, Polity, Geography, Science"]}]}},
+{id:29,rank:29,name:"RRB Group D",agency:"Railway Recruitment Board",tag:"Railway",vacancies:"22,195",posts:"Track Maintainer Gr-IV, Pointsman, Asst (Workshop / S&T / Engineering)",deadline:"9 March 2026",deadlineDate:"2026-03-09",status:"open",website:"https://rrbapply.gov.in",eligible:"yes",age:"18–33 yrs",fee:"₹500 (₹400 refunded)",pay:"Pay L1; ₹18k–₹56.9k",notes:"Deadline 9 March 2026. 22,000+ vacancies.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["10th pass + ITI OR 12th pass eligible","Age: 18–33 (UR Male)"],note:"Low-prestige but very stable central govt job with railway perks."},pattern:{rows:[["Stage","Type","Duration","Marks"],["CBT","Objective (4 sections)","1.5 hrs","100"],["PET/PME","Physical Efficiency + Medical","—","Qualifying"]]},syllabus:{link:"https://rrbapply.gov.in",curated:[{head:"CBT Syllabus (100Q / 90 min)",items:["Mathematics (25Q)","Reasoning (30Q)","General Science (25Q)","GK & Current Affairs (20Q)"]}]}},
+{id:30,rank:30,name:"FCI Assistant Grade-III (AG-3)",agency:"Food Corporation of India",tag:"PSU",vacancies:"27,345",posts:"AG-3 General, Depot, Accounts, Hindi",deadline:"Expected Sept 2026",deadlineDate:"2026-09-30",status:"upcoming",website:"https://fci.gov.in",eligible:"yes",age:"Max 27 yrs (UR Male) ⚠️",fee:"~₹800",pay:"Pay L5; ₹29.2k–₹92.3k",notes:"⚠️ Age cutoff is 27 yrs (UR Male). If 21 now, you have ~6 years.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate eligible","Age: Max 27 yrs (UR Male) — CHECK your age"],note:"⚠️ Age limit is ONLY 27 for UR Male. Verify and plan accordingly."},pattern:{rows:[["Phase","Type","Marks"],["Phase-I Prelims","Objective","100"],["Phase-II Mains","Post-specific Objective","100"]]},syllabus:{link:"https://fci.gov.in",curated:[{head:"Phase-I (All Posts)",items:["English Language","Reasoning Ability","Numerical Aptitude","General Awareness"]}]}},
+{id:31,rank:31,name:"India Post GDS (Gramin Dak Sevak)",agency:"Department of Posts",tag:"Other",vacancies:"~25,000–30,000",posts:"Branch Postmaster (BPM), Asst Branch Postmaster (ABPM), Dak Sevak",deadline:"Expected June–July 2026",deadlineDate:"2026-07-01",status:"upcoming",website:"https://indiapostgdsonline.gov.in",eligible:"yes",age:"18–40 yrs",fee:"~₹100",pay:"TRCA ₹12k–₹14.5k/mo",notes:"No exam — pure Class 10 merit. Contract-type role.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["10th pass minimum","Selection purely on Class 10 marks"],note:"⚠️ GDS pays TRCA (allowance), NOT a full govt salary."},pattern:{rows:[["Selection","Basis"],["Merit List","Class 10 marks ONLY"]]},syllabus:{link:"https://indiapostgdsonline.gov.in",curated:[{head:"No Exam – Merit Based Only",items:["Selection based purely on Class 10 (Matric) percentage"]}]}},
+{id:32,rank:32,name:"BTSC Dairy Field / Technical Officer",agency:"BTSC",tag:"Other",vacancies:"68",posts:"Dairy Field Officer / Dairy Technical Officer",deadline:"13 March 2026",deadlineDate:"2026-03-13",status:"open",website:"https://btsc.bihar.gov.in",eligible:"maybe",age:"21–37 yrs",fee:"~₹200",pay:"Pay L6; ₹35.4k+/mo",notes:"⚠️ VERIFY ELIGIBILITY — technical degree may be required.",eligibilityInfo:{profile:"BA Political Science (Hons) – LIKELY NOT ELIGIBLE ≈",conditions:["Technical degree (BSc Dairy/Vet/Zoology/Agri) may be required"],note:"⚠️ Check immediately before 13 March 2026 deadline."},pattern:{rows:[["Stage","Type","Marks"],["Written","Objective + Descriptive","—"],["Interview","Personal Interview","—"]]},syllabus:{link:"https://btsc.bihar.gov.in",curated:[{head:"⚠️ Verify Eligibility FIRST",items:["Read official notification TODAY","Technical degree may be required"]}]}},
+{id:101,rank:33,name:"CUET PG (Common University Entrance Test – PG)",agency:"NTA",tag:"Education",vacancies:"Seat-based",posts:"MA Political Science, MA Public Admin, MA Sociology – central & state universities",deadline:"Expected March–April 2026",deadlineDate:"2026-04-15",status:"upcoming",website:"https://cuet.nta.nic.in",eligible:"yes",age:"No age limit",fee:"~₹800",pay:"N/A (entrance for PG admission)",notes:"Not a govt job but opens MA path → UGC NET → Lecturer.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate in relevant subject","50% in graduation (general category)"],note:"CUET PG + MA = UGC NET eligibility."},pattern:{rows:[["Stage","Type","Duration","Marks"],["Domain Test","Objective MCQ (150Q)","1.5 hrs","600"]]},syllabus:{link:"https://cuet.nta.nic.in",curated:[{head:"Political Science Paper",items:["Political Theory: Liberty, Equality, Rights, Justice, Democracy","Comparative Politics and Political Analysis","Indian Government & Politics","Public Administration","International Relations & India's Foreign Policy"]}]}},
+{id:102,rank:34,name:"IGNOU MA Political Science (Open University)",agency:"IGNOU",tag:"Education",vacancies:"Open admission",posts:"MA Political Science (2-year, distance mode)",deadline:"July 2026 session open ~April–June 2026",deadlineDate:"2026-06-30",status:"upcoming",website:"https://ignou.ac.in",eligible:"yes",age:"No age bar",fee:"~₹4,800–₹6,200 total",pay:"N/A (self-funded PG degree)",notes:"STRONGLY RECOMMENDED to pursue alongside exam prep.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any bachelor's degree with 50% marks","No entrance exam required","Fully distance/online mode"],note:"Enables UGC NET after completion. Very low cost."},pattern:{rows:[["Assessment","Type","Notes"],["Assignments","Written (35% weightage)","Submitted each semester"],["Term End Exam","Objective + Descriptive","June & December exams"]]},syllabus:{link:"https://ignou.ac.in",curated:[{head:"Year 1 Courses",items:["MPS-001: Political Theory","MPS-002: International Relations","MPS-003: India: Democracy and Development","MPS-004: Comparative Politics"]}]}},
+{id:103,rank:35,name:"UGC NET – Political Science (Asst. Professor + JRF)",agency:"NTA / UGC",tag:"Teaching",vacancies:"No fixed vacancies",posts:"Eligibility for Assistant Professor in colleges, JRF (₹37,000/mo)",deadline:"Expected June 2026",deadlineDate:"2026-06-30",status:"upcoming",website:"https://ugcnet.nta.nic.in",eligible:"maybe",age:"No age bar for Asst. Prof; JRF: max 30 yrs",fee:"~₹1,100",pay:"Asst. Professor: ₹57,700+; JRF: ₹37,000/mo",notes:"CURRENTLY NOT ELIGIBLE — need MA/PG first.",eligibilityInfo:{profile:"BA Political Science (Hons) – CONDITIONALLY ELIGIBLE ⚠️",conditions:["Need PG (MA) degree with 55% marks to be eligible","IGNOU MA Pol Sci is accepted for NET eligibility"],note:"⚠️ Currently NOT eligible (need MA). Complete MA first."},pattern:{rows:[["Paper","Type","Duration","Marks"],["Paper-I (Teaching & Research)","Objective MCQ","1 hr","100"],["Paper-II (Political Science)","Objective MCQ","2 hrs","200"]]},syllabus:{link:"https://ugcnet.nta.nic.in",curated:[{head:"Paper-II – Political Science",items:["Political Theory: Plato to Rawls","Indian Political Thought","Western Political Thought","Comparative Politics","Indian Government & Politics","International Relations"]}]}},
+{id:104,rank:36,name:"Bihar SET (State Eligibility Test) – Political Science",agency:"BPSC / Bihar Higher Education",tag:"Teaching",vacancies:"No fixed vacancies",posts:"Eligibility for Asst. Professor in Bihar colleges",deadline:"Expected 2026 (irregular schedule)",deadlineDate:"2026-12-31",status:"upcoming",website:"https://bpsc.bih.nic.in",eligible:"maybe",age:"No age bar",fee:"~₹500–₹750",pay:"Asst. Professor: ₹57,700+ in Bihar colleges",notes:"Need MA first. Same barrier as UGC NET.",eligibilityInfo:{profile:"BA Political Science (Hons) – CONDITIONALLY ELIGIBLE ⚠️",conditions:["Requires MA/PG degree with 55% marks"],note:"Complete MA first, then clear Bihar SET."},pattern:{rows:[["Paper","Type","Marks"],["Paper-I","General Teaching/Research Aptitude","100"],["Paper-II","Political Science Subject","200"]]},syllabus:{link:"https://bpsc.bih.nic.in",curated:[{head:"Same as UGC NET Political Science syllabus",items:["Political Theory, Indian Polity, Comparative Politics","International Relations, Public Admin"]}]}},
+{id:105,rank:37,name:"B.Ed Entrance – Bihar (IGNOU / Bihar B.Ed CET)",agency:"Bihar B.Ed CET / IGNOU",tag:"Teaching",vacancies:"Seat-based",posts:"B.Ed Programme (2-year teacher training degree)",deadline:"Bihar B.Ed CET: Expected April–May 2026",deadlineDate:"2026-05-15",status:"upcoming",website:"https://bihar.b.ed.co.in",eligible:"yes",age:"No age bar",fee:"~₹1,000 (entrance); programme ~₹25,000–₹50,000 total",pay:"N/A (qualification for teaching jobs)",notes:"HIGHLY RECOMMENDED. Opens 46,000+ BPSC TRE teaching positions.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Any graduate with 50% marks (your 74% qualifies ✓)"],note:"HIGHLY RECOMMENDED. Do B.Ed simultaneously with other exam prep."},pattern:{rows:[["Paper","Type","Marks"],["General English","Objective","50"],["General Hindi","Objective","50"],["Logical & Analytical Reasoning","Objective","50"],["General Awareness","Objective","50"],["Teaching & Learning Aptitude","Objective","50"]]},syllabus:{link:"https://bihar.b.ed.co.in",curated:[{head:"Bihar B.Ed CET Syllabus",items:["General English: Grammar, Comprehension, Vocabulary","General Hindi: Vyakaran, Comprehension","Reasoning: Analogies, Series, Coding","General Awareness: Bihar GK, Current Affairs","Teaching Aptitude: Pedagogy, Child Psychology basics"]}]}},
+{id:106,rank:38,name:"LLB Entrance (3-year) – BHU / Patna University / CLAT",agency:"Various Law Schools / CLAT Consortium",tag:"Education",vacancies:"Seat-based",posts:"3-year LLB programme (after graduation)",deadline:"BHU LLB 2026: Expected April–May 2026",deadlineDate:"2026-05-15",status:"upcoming",website:"https://consortiumofnlus.ac.in",eligible:"yes",age:"No age bar for 3-yr LLB",fee:"~₹4,000 (entrance)",pay:"N/A (qualification for legal/govt law posts)",notes:"LLB opens BPSC APO (₹53k+) and Bihar Judicial Services.",eligibilityInfo:{profile:"BA Political Science (Hons) – ELIGIBLE ✓",conditions:["Graduate with 45% marks (for 3-yr LLB)"],note:"Strategic: Do LLB from Patna Law College or BHU. Opens entire legal cadre."},pattern:{rows:[["Paper","Type","Marks"],["Legal Aptitude","Objective MCQ","—"],["General Knowledge","Objective MCQ","—"],["Reasoning","Objective MCQ","—"],["English","Objective MCQ","—"]]},syllabus:{link:"https://consortiumofnlus.ac.in",curated:[{head:"Entrance Test Topics",items:["Legal Aptitude & Reasoning (no prior law knowledge needed)","General English: Grammar, Comprehension","General Knowledge & Current Affairs","Elementary Mathematics (basic arithmetic)"]}]}}
+];}
+
+const DEFAULT_PROFILE={tenth:"CBSE Board",twelfth:"CBSE Board – PCB (Physics, Chemistry, Biology)",graduation:"BA (Hons) Political Science",gradPercent:"",domicile:"",category:"",age:"",gender:"",health:"",notes:""};
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let jobs=[],applied={},profile={...DEFAULT_PROFILE},sc='rank',sd=1,expandedId=null,currentUser=null,saveTimer=null;
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function showAuthTab(tab,btn){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('show'));
+  btn.classList.add('active');
+  document.getElementById('af-'+tab).classList.add('show');
+}
+function authErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
+function authOk(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');}
+function clearAuthErr(){document.querySelectorAll('.auth-err,.auth-ok').forEach(e=>{e.classList.remove('show');e.textContent='';});}
+
+async function doLogin(){
+  clearAuthErr();
+  const email=document.getElementById('li-email').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  if(!email||!pass){authErr('li-err','Please enter email and password.');return;}
+  try{await auth.signInWithEmailAndPassword(email,pass);}
+  catch(e){authErr('li-err',friendlyErr(e.code));}
+}
+async function doSignup(){
+  clearAuthErr();
+  const name=document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pass=document.getElementById('su-pass').value;
+  if(!name||!email||!pass){authErr('su-err','Please fill all fields.');return;}
+  if(pass.length<6){authErr('su-err','Password must be at least 6 characters.');return;}
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:name});
+  }catch(e){authErr('su-err',friendlyErr(e.code));}
+}
+async function doReset(){
+  clearAuthErr();
+  const email=document.getElementById('re-email').value.trim();
+  if(!email){authErr('re-err','Please enter your email.');return;}
+  try{await auth.sendPasswordResetEmail(email);authOk('re-ok','Reset email sent! Check your inbox.');}
+  catch(e){authErr('re-err',friendlyErr(e.code));}
+}
+async function doLogout(){await auth.signOut();}
+function friendlyErr(code){
+  const m={
+    'auth/user-not-found':'No account found with this email.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/email-already-in-use':'An account with this email already exists.',
+    'auth/invalid-email':'Invalid email address.',
+    'auth/weak-password':'Password is too weak.',
+    'auth/too-many-requests':'Too many attempts. Please try again later.',
+    'auth/network-request-failed':'Network error. Check your connection.',
+    'auth/invalid-credential':'Invalid email or password.'
+  };
+  return m[code]||'Something went wrong. Please try again.';
+}
+
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    currentUser=user;
+    document.getElementById('authScreen').classList.remove('show');
+    document.getElementById('app').classList.add('show');
+    document.getElementById('userEmail').textContent=user.displayName||user.email;
+    await loadData();
+    render();
+  } else {
+    currentUser=null;
+    document.getElementById('authScreen').classList.add('show');
+    document.getElementById('app').classList.remove('show');
+  }
+});
+
+// ══════════════════════════════════════════════
+// FIRESTORE LOAD / SAVE
+// ══════════════════════════════════════════════
+function docRef(){return db.collection('users').doc(currentUser.uid);}
+
+async function loadData(){
+  setSyncState('saving');
+  try{
+    const snap=await docRef().get();
+    if(snap.exists){
+      const d=snap.data();
+      jobs=d.jobs||getDefaultJobs();
+      applied=d.applied||{};
+      profile=d.profile||{...DEFAULT_PROFILE};
+    } else {
+      jobs=getDefaultJobs();applied={};profile={...DEFAULT_PROFILE};
+      await saveNow();
+    }
+    jobs=jobs.map(j=>({...j,status:autoStatus(j)}));
+    setSyncState('ok');
+    setTs();
+  }catch(e){setSyncState('err');console.error(e);}
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  setSyncState('saving');
+  saveTimer=setTimeout(saveNow,1200);
+}
+
+async function saveNow(){
+  if(!currentUser)return;
+  try{
+    await docRef().set({jobs,applied,profile,savedAt:Date.now()});
+    setSyncState('ok');setTs();
+  }catch(e){setSyncState('err');console.error(e);}
+}
+
+function setSyncState(s){
+  const d=document.getElementById('sdot');
+  if(!d)return;
+  d.className='sdot'+(s==='saving'?' saving':s==='err'?' err':'');
+}
+function setTs(){
+  const d=new Date();
+  const el=document.getElementById('ts');
+  if(el)el.textContent='Saved '+d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ══════════════════════════════════════════════
+// AUTO STATUS
+// ══════════════════════════════════════════════
+function autoStatus(j){
+  if(!j.deadlineDate)return j.status;
+  const dl=new Date(j.deadlineDate);
+  const now=new Date();now.setHours(0,0,0,0);
+  const diff=(dl-now)/(1000*60*60*24);
+  if(diff<0)return'closed';
+  if(diff<=30)return'open';
+  return j.status==='closed'?'upcoming':j.status;
+}
+
+function fmtDl(j){
+  if(!j.deadlineDate&&!j.deadline)return'—';
+  if(j.deadlineDate){
+    const dl=new Date(j.deadlineDate);
+    const now=new Date();now.setHours(0,0,0,0);
+    const diff=Math.round((dl-now)/(1000*60*60*24));
+    const fmt=dl.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    if(diff<0)return`<span style="font-family:var(--mono);font-size:11px;color:var(--closed)">${fmt}</span>`;
+    if(diff===0)return`<span style="font-family:var(--mono);font-size:11px;color:var(--closed);font-weight:600">TODAY ⚡</span>`;
+    if(diff<=7)return`<span style="font-family:var(--mono);font-size:11px;color:var(--closed);font-weight:600">${fmt} 🚨</span>`;
+    if(diff<=30)return`<span style="font-family:var(--mono);font-size:11px;color:var(--upcoming)">${fmt}</span>`;
+    return`<span style="font-family:var(--mono);font-size:11px;color:var(--text2)">${fmt}</span>`;
+  }
+  return`<span style="font-family:var(--mono);font-size:11px;color:var(--muted)">${j.deadline}</span>`;
+}
+
+// ══════════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════════
+function pill(s){const m={open:['po','OPEN'],closed:['pc','CLOSED'],upcoming:['pu','UPCOMING'],check:['pk','CHECK']};const[c,l]=m[s]||m.check;return`<span class="pill ${c}"><span class="dot"></span>${l}</span>`;}
+function eligBadge(e,id,clickable=false){
+  const cls=e==='yes'?'ey':e==='no'?'en':'em';
+  const lbl=e==='yes'?'✓ YES':e==='no'?'✗ NO':'≈ MAYBE';
+  const oc=clickable?`onclick="event.stopPropagation();od(${id},'e')" title="View eligibility"`:'';
+  return`<span class="elig ${cls}" ${oc}>${lbl}</span>`;
+}
+function tg(t){const k=(t||'').toLowerCase().replace(/\s/g,'');const m={administration:'ta',banking:'tb',railway:'tr',police:'tp',defence:'td',teaching:'tch',psu:'tps',education:'te',other:'to'};return`<span class="tag ${m[k]||'to'}">${t||'Other'}</span>`;}
+
+function gf(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const sf=document.getElementById('fS').value;
+  const tf=document.getElementById('fT').value;
+  const af=document.getElementById('fA').value;
+  const ef=document.getElementById('fE').value;
+  const apf=document.getElementById('fAp').checked;
+  return jobs.filter(j=>{
+    if(q&&!`${j.name} ${j.agency} ${j.posts||''} ${j.tag||''}`.toLowerCase().includes(q))return false;
+    if(sf&&j.status!==sf)return false;
+    if(tf&&j.tag!==tf)return false;
+    if(af&&j.agency!==af)return false;
+    if(ef&&j.eligible!==ef)return false;
+    if(apf&&!applied[j.id])return false;
+    return true;
+  });
+}
+
+function render(){
+  const f=gf().slice().sort((a,b)=>{
+    let av=a[sc],bv=b[sc];
+    if(sc==='deadlineDate'){av=a.deadlineDate||'9999';bv=b.deadlineDate||'9999';}
+    else if(['rank'].includes(sc)){av=parseFloat(av)||9999;bv=parseFloat(bv)||9999;}
+    return av<bv?-sd:av>bv?sd:0;
+  });
+
+  // Update tag + agency dropdowns dynamically per user's jobs
+  const tSel=document.getElementById('fT');const tCurr=tSel.value;
+  const userTags=[...new Set(jobs.map(j=>j.tag).filter(Boolean))].sort();
+  tSel.innerHTML='<option value="">All Tags</option>'+userTags.map(t=>`<option${t===tCurr?' selected':''}>${t}</option>`).join('');
+
+  const aSel=document.getElementById('fA');const aCurr=aSel.value;
+  const userAgencies=[...new Set(jobs.map(j=>j.agency).filter(Boolean))].sort();
+  aSel.innerHTML='<option value="">All Agencies</option>'+userAgencies.map(a=>`<option${a===aCurr?' selected':''}>${a}</option>`).join('');
+
+  document.getElementById('sT').textContent=f.length;
+  document.getElementById('sO').textContent=f.filter(j=>j.status==='open').length;
+  document.getElementById('sU').textContent=f.filter(j=>j.status==='upcoming').length;
+  document.getElementById('sCl').textContent=f.filter(j=>j.status==='closed'||j.status==='check').length;
+  document.getElementById('sEl').textContent=f.filter(j=>j.eligible==='yes').length;
+  document.getElementById('sAp').textContent=Object.values(applied).filter(Boolean).length;
+
+  const tb=document.getElementById('tbody');
+  const em=document.getElementById('empty');
+  if(!f.length){tb.innerHTML='';em.style.display='block';renderCards([]);return;}
+  em.style.display='none';
+
+  tb.innerHTML=f.map(j=>{
+    const isExp=expandedId===j.id;
+    const isApp=applied[j.id];
+    const main=`<tr class="main-row${isApp?' app-row':''}${isExp?' expanded':''}" onclick="toggleRow(${j.id})">
+      <td class="xarr"><span class="arr">▶</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--muted);text-align:center">${j.rank}</td>
+      <td style="font-weight:500;font-size:12px">${j.name}</td>
+      <td style="color:var(--text2);font-size:11px">${j.agency}</td>
+      <td>${tg(j.tag)}</td>
+      <td>${fmtDl(j)}</td>
+      <td>${pill(j.status)}</td>
+      <td>${eligBadge(j.eligible,j.id,true)}</td>
+      <td style="text-align:center"><input type="checkbox" class="cb" ${isApp?'checked':''} onchange="tgA(${j.id},this)" onclick="event.stopPropagation()"></td>
+    </tr>`;
+    const exp=`<tr class="exp-row${isExp?' open':''}">
+      <td colspan="9" style="padding:0">
+        <div class="exp-inner">
+          ${j.notes?`<div class="enote">${j.notes}</div>`:''}
+          <div class="exp-grid">
+            <div><span class="efl">Vacancies</span><span class="efv">${j.vacancies||'—'}</span></div>
+            <div><span class="efl">Age Limit</span><span class="efv">${j.age||'—'}</span></div>
+            <div><span class="efl">Fee</span><span class="efv">${j.fee||'—'}</span></div>
+            <div><span class="efl">Pay / Salary</span><span class="efv">${j.pay||'—'}</span></div>
+            ${j.website?`<div><span class="efl">Website</span><span class="efv"><a href="${j.website}" target="_blank" onclick="event.stopPropagation()">${j.website.replace('https://','').split('/')[0]}</a></span></div>`:''}
+            <div style="grid-column:1/-1"><span class="efl">Posts</span><span class="efv">${j.posts||'—'}</span></div>
+          </div>
+          <div class="exp-acts">
+            <button class="ib act" onclick="event.stopPropagation();od(${j.id},'e')">Eligibility</button>
+            <button class="ib" onclick="event.stopPropagation();od(${j.id},'p')">Pattern</button>
+            <button class="ib" onclick="event.stopPropagation();od(${j.id},'s')">Syllabus</button>
+            <span style="flex:1"></span>
+            <button class="ib" onclick="event.stopPropagation();oe(${j.id})">Edit</button>
+            <button class="ib dl" onclick="event.stopPropagation();delJob(${j.id})">✕ Delete</button>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+    return main+exp;
+  }).join('');
+  renderCards(f);
+}
+
+function toggleRow(id){expandedId=(expandedId===id)?null:id;render();}
+
+function renderCards(f){
+  const cl=document.getElementById('cardList');
+  if(!cl)return;
+  if(!f.length){cl.innerHTML='<div class="empty">No jobs match filters.</div>';return;}
+  cl.innerHTML=f.map(j=>{
+    const isApp=applied[j.id];
+    return`<div class="card${isApp?' app-card':''}" onclick="toggleCard(${j.id})">
+      <div class="card-top"><div class="card-name">${j.name}</div><div>${pill(j.status)}</div></div>
+      <div class="card-meta">${tg(j.tag)} ${eligBadge(j.eligible,j.id,true)} <span class="card-dl">${j.deadlineDate?new Date(j.deadlineDate).toLocaleDateString('en-IN',{day:'numeric',month:'short'}):(j.deadline||'—')}</span></div>
+      <div class="card-detail" id="cdet-${j.id}">
+        <div class="card-dg">
+          <div><span class="cdl">Agency</span><span class="cdv">${j.agency}</span></div>
+          <div><span class="cdl">Vacancies</span><span class="cdv">${j.vacancies||'—'}</span></div>
+          <div><span class="cdl">Age</span><span class="cdv">${j.age||'—'}</span></div>
+          <div><span class="cdl">Fee</span><span class="cdv">${j.fee||'—'}</span></div>
+          <div><span class="cdl">Pay</span><span class="cdv">${j.pay||'—'}</span></div>
+          ${j.website?`<div><span class="cdl">Website</span><span class="cdv"><a href="${j.website}" target="_blank" onclick="event.stopPropagation()">${j.website.replace('https://','').split('/')[0]}</a></span></div>`:''}
+        </div>
+        ${j.notes?`<div class="enote">${j.notes}</div>`:''}
+        <div class="card-acts">
+          <button class="ib act" onclick="event.stopPropagation();od(${j.id},'e')">Eligibility</button>
+          <button class="ib" onclick="event.stopPropagation();od(${j.id},'p')">Pattern</button>
+          <button class="ib" onclick="event.stopPropagation();od(${j.id},'s')">Syllabus</button>
+          <label style="display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--text2);cursor:pointer" onclick="event.stopPropagation()">
+            <input type="checkbox" class="cb" ${isApp?'checked':''} onchange="tgA(${j.id},this)"> Applied
+          </label>
+          <button class="ib" onclick="event.stopPropagation();oe(${j.id})">Edit</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleCard(id){const d=document.getElementById('cdet-'+id);if(d)d.classList.toggle('open');}
+
+function tgA(id,el){
+  applied[id]=el.checked;
+  const r=el.closest('tr');if(r){r.classList.toggle('app-row',el.checked);}
+  const c=el.closest('.card');if(c){c.classList.toggle('app-card',el.checked);}
+  document.getElementById('sAp').textContent=Object.values(applied).filter(Boolean).length;
+  scheduleSave();
+}
+
+function srt(c){
+  if(sc===c)sd*=-1;else{sc=c;sd=1;}
+  document.querySelectorAll('thead th').forEach(t=>{t.classList.remove('asc','desc');});
+  const cols=['','rank','name','agency','','deadlineDate','status','eligible',''];
+  const i=cols.indexOf(c);
+  if(i>=0){const ths=document.querySelectorAll('thead th');if(ths[i])ths[i].classList.add(sd===1?'asc':'desc');}
+  render();
+}
+
+// ══════════════════════════════════════════════
+// PANEL
+// ══════════════════════════════════════════════
+function openPanel(head,tabs,contents,footer){
+  document.getElementById('pn-head').innerHTML=`<div class="pt">${head.label}</div><div class="pname">${head.name}</div>${head.badges||''}`;
+  const tb=document.getElementById('tab-bar');
+  const tby=document.getElementById('tab-body');
+  const pf=document.getElementById('pf');
+  if(tabs&&tabs.length>1){
+    tb.style.display='flex';
+    tb.innerHTML=tabs.map((t,i)=>`<button class="tab-btn${i===0?' active':''}" onclick="switchTab(${i})">${t}</button>`).join('');
+  } else {tb.style.display='none';}
+  tby.innerHTML=contents.map((c,i)=>`<div class="tab-content${i===0?' active':''}" id="tc${i}">${c}</div>`).join('');
+  pf.innerHTML=footer;
+  document.getElementById('pb').classList.add('open');
+  document.getElementById('pn').classList.add('open');
+}
+function switchTab(i){
+  document.querySelectorAll('.tab-btn').forEach((b,j)=>b.classList.toggle('active',i===j));
+  document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i===j));
+}
+function closeP(){document.getElementById('pb').classList.remove('open');document.getElementById('pn').classList.remove('open');}
+
+// ══════════════════════════════════════════════
+// DETAIL VIEW (read mode with edit buttons per section)
+// ══════════════════════════════════════════════
+function od(id,tab){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+
+  const eI=j.eligibilityInfo||{};
+  const eH=`
+    <div class="sh" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Your Eligibility</span>
+      <button class="ib" onclick="editEligibility(${j.id})">✏ Edit</button>
+    </div>
+    ${eI.profile?`<div style="padding:10px;background:var(--bg2);border-radius:4px;margin-bottom:10px;font-size:12px"><strong>${eI.profile}</strong></div>`:''}
+    ${eI.conditions&&eI.conditions.length?`<div class="sb"><h4>Conditions</h4><ul>${eI.conditions.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+    ${eI.advantages&&eI.advantages.length?`<div class="sb"><h4>Your Advantages</h4><ul>${eI.advantages.map(a=>`<li>${a}</li>`).join('')}</ul></div>`:''}
+    ${eI.note?`<div class="ibox">${eI.note}</div>`:''}`;
+
+  const pR=j.pattern&&j.pattern.rows?j.pattern.rows:[];
+  const pH=`
+    <div class="sh" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Exam Pattern</span>
+      <button class="ib" onclick="editPattern(${j.id})">✏ Edit</button>
+    </div>
+    ${pR.length?`<table class="ptbl"><thead><tr>${pR[0].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${pR.slice(1).map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`:'<p style="color:var(--muted);font-size:12px">No pattern data yet.</p>'}`;
+
+  const syl=j.syllabus||{};
+  const sH=`
+    <div class="sh" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Syllabus</span>
+      <button class="ib" onclick="editSyllabus(${j.id})">✏ Edit</button>
+    </div>
+    ${syl.link?`<a class="sl-link" href="${syl.link}" target="_blank">↗ Official Syllabus PDF</a><br>`:''}
+    ${(syl.curated||[]).map(b=>`<div class="sb"><h4>${b.head}</h4><ul>${(b.items||[]).map(i=>`<li>${i}</li>`).join('')}</ul></div>`).join('')}`;
+
+  openPanel(
+    {label:'Detail View',name:j.name,badges:`<div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px">${tg(j.tag)} ${pill(j.status)} ${eligBadge(j.eligible,j.id)}</div>`},
+    ['Eligibility','Exam Pattern','Syllabus'],
+    [eH,pH,sH],
+    `<button class="btn" onclick="oe(${j.id})">Edit Info</button><button class="btn primary" onclick="closeP()">Close</button>`
+  );
+  const idx=tab==='p'?1:tab==='s'?2:0;
+  if(idx>0)switchTab(idx);
+}
+
+// ══════════════════════════════════════════════
+// EDIT ELIGIBILITY
+// ══════════════════════════════════════════════
+function editEligibility(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const eI=j.eligibilityInfo||{conditions:[],advantages:[],profile:'',note:''};
+  const conds=eI.conditions||[];
+  const advs=eI.advantages||[];
+
+  const html=`
+    <div class="sh">Profile Summary</div>
+    <input class="ei" id="ep-profile" type="text" value="${eI.profile||''}" placeholder="e.g. BA Political Science (Hons) – ELIGIBLE ✓" style="width:100%;margin-bottom:12px">
+    <div class="sh">Conditions <span style="font-weight:400;font-size:10px;color:var(--muted)">(one per line)</span></div>
+    <div id="ep-conds">${conds.map((c,i)=>condRow(c,i)).join('')}</div>
+    <button class="add-btn" onclick="addCondRow()">+ Add Condition</button>
+    <div class="sh">Your Advantages</div>
+    <div id="ep-advs">${advs.map((a,i)=>advRow(a,i)).join('')}</div>
+    <button class="add-btn" onclick="addAdvRow()">+ Add Advantage</button>
+    <div class="sh">Note / Warning</div>
+    <textarea class="ei" id="ep-note" rows="3" style="width:100%">${eI.note||''}</textarea>`;
+
+  openPanel(
+    {label:'Edit Eligibility',name:j.name},
+    null,[html],
+    `<button class="btn" onclick="od(${id},'e')">Cancel</button><button class="btn primary" onclick="saveEligibility(${id})">Save</button>`
+  );
+}
+function condRow(val,i){return`<div class="row-edit" id="cond-row-${i}"><input value="${val.replace(/"/g,'&quot;')}" placeholder="Eligibility condition"><button class="xbtn" onclick="this.parentElement.remove()">✕</button></div>`;}
+function advRow(val,i){return`<div class="row-edit" id="adv-row-${i}"><input value="${val.replace(/"/g,'&quot;')}" placeholder="Your advantage"><button class="xbtn" onclick="this.parentElement.remove()">✕</button></div>`;}
+function addCondRow(){const c=document.getElementById('ep-conds');const i=c.children.length;c.insertAdjacentHTML('beforeend',condRow('',i));}
+function addAdvRow(){const c=document.getElementById('ep-advs');const i=c.children.length;c.insertAdjacentHTML('beforeend',advRow('',i));}
+function saveEligibility(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const profile=document.getElementById('ep-profile').value.trim();
+  const note=document.getElementById('ep-note').value.trim();
+  const conditions=[...document.getElementById('ep-conds').querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
+  const advantages=[...document.getElementById('ep-advs').querySelectorAll('input')].map(i=>i.value.trim()).filter(Boolean);
+  j.eligibilityInfo={profile,conditions,advantages,note};
+  scheduleSave();od(id,'e');
+}
+
+// ══════════════════════════════════════════════
+// EDIT PATTERN
+// ══════════════════════════════════════════════
+function editPattern(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const rows=(j.pattern&&j.pattern.rows)||[['Stage','Type','Marks']];
+
+  const html=`
+    <div class="sh">Pattern Table <span style="font-weight:400;font-size:10px;color:var(--muted)">(first row = headers)</span></div>
+    <div id="pt-rows">${rows.map((r,i)=>ptRow(r,i)).join('')}</div>
+    <button class="add-btn" onclick="addPtRow()">+ Add Row</button>`;
+
+  openPanel(
+    {label:'Edit Exam Pattern',name:j.name},
+    null,[html],
+    `<button class="btn" onclick="od(${id},'p')">Cancel</button><button class="btn primary" onclick="savePattern(${id})">Save</button>`
+  );
+}
+function ptRow(cells,i){
+  return`<div class="row-edit" style="margin-bottom:5px" id="pt-row-${i}">${cells.map(c=>`<input value="${c.replace(/"/g,'&quot;')}" placeholder="Cell">`).join('')}<button class="xbtn" onclick="this.parentElement.remove()">✕</button></div>`;
+}
+function addPtRow(){
+  const c=document.getElementById('pt-rows');
+  const cols=c.children.length?c.children[0].querySelectorAll('input').length:3;
+  const i=c.children.length;
+  c.insertAdjacentHTML('beforeend',`<div class="row-edit" style="margin-bottom:5px" id="pt-row-${i}">${Array(cols).fill(0).map(()=>`<input placeholder="Cell">`).join('')}<button class="xbtn" onclick="this.parentElement.remove()">✕</button></div>`);
+}
+function savePattern(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const rowEls=document.getElementById('pt-rows').children;
+  const rows=[...rowEls].map(row=>[...row.querySelectorAll('input')].map(i=>i.value.trim()));
+  j.pattern={rows};scheduleSave();od(id,'p');
+}
+
+// ══════════════════════════════════════════════
+// EDIT SYLLABUS
+// ══════════════════════════════════════════════
+function editSyllabus(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const syl=j.syllabus||{link:'',curated:[]};
+  const secs=syl.curated||[];
+
+  const html=`
+    <div class="sh">Official Syllabus Link</div>
+    <input class="ei" id="sl-link" type="text" value="${syl.link||''}" placeholder="https://..." style="width:100%;margin-bottom:12px">
+    <div class="sh">Syllabus Sections</div>
+    <div id="sl-secs">${secs.map((s,i)=>sylSection(s,i)).join('')}</div>
+    <button class="add-btn" onclick="addSylSection()">+ Add Section</button>`;
+
+  openPanel(
+    {label:'Edit Syllabus',name:j.name},
+    null,[html],
+    `<button class="btn" onclick="od(${id},'s')">Cancel</button><button class="btn primary" onclick="saveSyllabus(${id})">Save</button>`
+  );
+}
+function sylSection(sec,i){
+  const items=(sec.items||[]);
+  return`<div class="sec-block" id="sl-sec-${i}">
+    <div class="sec-head">
+      <input value="${(sec.head||'').replace(/"/g,'&quot;')}" placeholder="Section heading">
+      <button class="xbtn" onclick="this.closest('.sec-block').remove()">✕</button>
+    </div>
+    <div class="sl-items">${items.map((item,j)=>sylItem(item,i,j)).join('')}</div>
+    <button class="add-btn" onclick="addSylItem(this)" style="margin-bottom:0">+ Add Item</button>
+  </div>`;
+}
+function sylItem(val,si,ii){
+  return`<div class="row-edit" style="margin-bottom:4px"><input value="${val.replace(/"/g,'&quot;')}" placeholder="Syllabus item"><button class="xbtn" onclick="this.parentElement.remove()">✕</button></div>`;
+}
+function addSylSection(){
+  const c=document.getElementById('sl-secs');
+  const i=c.children.length;
+  c.insertAdjacentHTML('beforeend',sylSection({head:'',items:['']},i));
+}
+function addSylItem(btn){
+  const list=btn.previousElementSibling;
+  list.insertAdjacentHTML('beforeend',`<div class="row-edit" style="margin-bottom:4px"><input placeholder="Syllabus item"><button class="xbtn" onclick="this.parentElement.remove()">✕</button></div>`);
+}
+function saveSyllabus(id){
+  const j=jobs.find(x=>x.id===id);if(!j)return;
+  const link=document.getElementById('sl-link').value.trim();
+  const secEls=document.getElementById('sl-secs').children;
+  const curated=[...secEls].map(s=>{
+    const head=s.querySelector('.sec-head input').value.trim();
+    const items=[...s.querySelectorAll('.sl-items input')].map(i=>i.value.trim()).filter(Boolean);
+    return{head,items};
+  }).filter(s=>s.head);
+  j.syllabus={link,curated};scheduleSave();od(id,'s');
+}
+
+// ══════════════════════════════════════════════
+// ADD / EDIT JOB (basic info form)
+// ══════════════════════════════════════════════
+function fH(j){
+  const v=k=>j?(j[k]||''):'';
+  const sel=(k,opts)=>opts.map(x=>`<option value="${x}"${v(k)===x?' selected':''}>${x}</option>`).join('');
+  const html=`<div class="fgrid">
+    <div class="fg"><label>Rank</label><input id="fr" type="number" value="${v('rank')}"></div>
+    <div class="fg"><label>Status</label><select id="fst">${sel('status',['open','upcoming','closed','check'])}</select></div>
+    <div class="fg full"><label>Exam / Job Name *</label><input id="fn" type="text" value="${v('name')}"></div>
+    <div class="fg"><label>Conducting Agency *</label><input id="fa" type="text" value="${v('agency')}"></div>
+    <div class="fg"><label>Tag</label><select id="ftg">${sel('tag',['Administration','Banking','Railway','Police','Defence','Teaching','PSU','Education','Other'])}</select></div>
+    <div class="fg"><label>Vacancies</label><input id="fv" type="text" value="${v('vacancies')}"></div>
+    <div class="fg"><label>Eligible?</label><select id="fe">${sel('eligible',['yes','no','maybe'])}</select></div>
+    <div class="fg full"><label>Post Names</label><input id="fp" type="text" value="${v('posts')}"></div>
+    <div class="fg"><label>Deadline Label</label><input id="fd" type="text" value="${v('deadline')}" placeholder="e.g. 15 March 2026"></div>
+    <div class="fg"><label>Deadline Date (ISO)</label><input id="fdd" type="date" value="${v('deadlineDate')}"></div>
+    <div class="fg full"><label>Official Website</label><input id="fw" type="text" value="${v('website')}" placeholder="https://..."></div>
+    <div class="fg"><label>Age Limit</label><input id="fag" type="text" value="${v('age')}"></div>
+    <div class="fg"><label>Fee</label><input id="ff" type="text" value="${v('fee')}"></div>
+    <div class="fg full"><label>Pay / Salary</label><input id="fpy" type="text" value="${v('pay')}"></div>
+    <div class="fg full"><label>Notes / Warnings</label><textarea id="fno" rows="3">${v('notes')}</textarea></div>
+  </div>`;
+  return html;
+}
+
+let editId=null;
+function openAdd(){
+  editId=null;
+  openPanel({label:'New Job',name:'Add New Exam'},null,[fH(null)],
+    `<button class="btn" onclick="closeP()">Cancel</button><button class="btn primary" onclick="svJ()">Save</button>`);
+}
+function oe(id){
+  editId=id;
+  const j=jobs.find(x=>x.id===id);
+  openPanel({label:'Edit Job',name:j?j.name:''},null,[fH(j)],
+    `<button class="btn" onclick="closeP()">Cancel</button><button class="btn primary" onclick="svJ()">Save</button>`);
+}
+function svJ(){
+  const n=document.getElementById('fn').value.trim();if(!n){alert('Job name required.');return;}
+  const d={
+    rank:parseInt(document.getElementById('fr').value)||99,name:n,
+    agency:document.getElementById('fa').value.trim(),tag:document.getElementById('ftg').value,
+    vacancies:document.getElementById('fv').value.trim(),eligible:document.getElementById('fe').value,
+    posts:document.getElementById('fp').value.trim(),deadline:document.getElementById('fd').value.trim(),
+    deadlineDate:document.getElementById('fdd').value.trim()||null,
+    status:document.getElementById('fst').value,website:document.getElementById('fw').value.trim(),
+    age:document.getElementById('fag').value.trim(),fee:document.getElementById('ff').value.trim(),
+    pay:document.getElementById('fpy').value.trim(),notes:document.getElementById('fno').value.trim()
+  };
+  d.status=autoStatus(d);
+  if(editId!==null){
+    const i=jobs.findIndex(j=>j.id===editId);
+    if(i!==-1)jobs[i]={...jobs[i],...d};
+  } else {
+    d.id=Date.now();
+    d.pattern={rows:[["Stage","Type","Marks"],["—","—","—"]]};
+    d.syllabus={link:'',curated:[{head:'Add syllabus',items:['Edit this job to update syllabus']}]};
+    d.eligibilityInfo={profile:'',conditions:[],advantages:[],note:''};
+    jobs.push(d);
+  }
+  scheduleSave();closeP();render();
+}
+function delJob(id){
+  if(!confirm('Delete this job?'))return;
+  jobs=jobs.filter(j=>j.id!==id);
+  delete applied[id];
+  if(expandedId===id)expandedId=null;
+  scheduleSave();render();
+}
+function clrF(){
+  document.getElementById('q').value='';
+  ['fS','fT','fA','fE'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('fAp').checked=false;render();
+}
+
+// ══════════════════════════════════════════════
+// PROFILE
+// ══════════════════════════════════════════════
+function showProfile(){
+  const p=profile;
+  const viewHtml=`
+    <div class="sh" style="display:flex;justify-content:space-between;align-items:center">
+      <span>Education</span><button class="ib" onclick="editProfile()">✏ Edit Profile</button>
+    </div>
+    <table class="ptbl" style="margin-bottom:14px"><tbody>
+      <tr><td><strong>10th</strong></td><td>${p.tenth||'—'}</td></tr>
+      <tr><td><strong>12th</strong></td><td>${p.twelfth||'—'}</td></tr>
+      <tr><td><strong>Graduation</strong></td><td>${p.graduation||'—'}${p.gradPercent?` — ${p.gradPercent}%`:''}</td></tr>
+    </tbody></table>
+    <div class="sh">Personal Details</div>
+    <table class="ptbl" style="margin-bottom:14px"><tbody>
+      <tr><td><strong>Domicile</strong></td><td>${p.domicile||'—'}</td></tr>
+      <tr><td><strong>Category</strong></td><td>${p.category||'—'}</td></tr>
+      <tr><td><strong>Age</strong></td><td>${p.age||'—'}</td></tr>
+      <tr><td><strong>Gender</strong></td><td>${p.gender||'—'}</td></tr>
+      <tr><td><strong>Health Note</strong></td><td>${p.health||'—'}</td></tr>
+    </tbody></table>
+    ${p.notes?`<div class="sh">Key Notes</div><div style="font-size:12px;color:var(--text2)">${p.notes}</div>`:''}`;
+
+  openPanel({label:'My Profile',name:'Candidate Profile'},null,[viewHtml],
+    `<button class="btn primary" onclick="closeP()">Close</button>`);
+}
+
+function editProfile(){
+  const p=profile;
+  const html=`<div class="fgrid">
+    <div class="fg full"><label>Full Name</label><input id="pf-name" type="text" value="${p.name||''}"></div>
+    <div class="fg"><label>10th Board</label><input id="pf-tenth" type="text" value="${p.tenth||''}"></div>
+    <div class="fg"><label>12th Board & Stream</label><input id="pf-twelfth" type="text" value="${p.twelfth||''}"></div>
+    <div class="fg"><label>Graduation (Degree)</label><input id="pf-grad" type="text" value="${p.graduation||''}"></div>
+    <div class="fg"><label>Graduation % / CGPA</label><input id="pf-gradp" type="text" value="${p.gradPercent||''}"></div>
+    <div class="fg"><label>Domicile State</label><input id="pf-dom" type="text" value="${p.domicile||''}"></div>
+    <div class="fg"><label>Category</label><input id="pf-cat" type="text" value="${p.category||''}"></div>
+    <div class="fg"><label>Age</label><input id="pf-age" type="text" value="${p.age||''}"></div>
+    <div class="fg"><label>Gender</label><input id="pf-gen" type="text" value="${p.gender||''}"></div>
+    <div class="fg full"><label>Health / Medical Notes</label><input id="pf-health" type="text" value="${p.health||''}"></div>
+    <div class="fg full"><label>Key Eligibility Notes</label><textarea id="pf-notes" rows="4">${p.notes||''}</textarea></div>
+  </div>`;
+  openPanel({label:'Edit Profile',name:'Candidate Profile'},null,[html],
+    `<button class="btn" onclick="showProfile()">Cancel</button><button class="btn primary" onclick="saveProfile()">Save</button>`);
+}
+function saveProfile(){
+  profile={
+    name:document.getElementById('pf-name').value.trim(),
+    tenth:document.getElementById('pf-tenth').value.trim(),
+    twelfth:document.getElementById('pf-twelfth').value.trim(),
+    graduation:document.getElementById('pf-grad').value.trim(),
+    gradPercent:document.getElementById('pf-gradp').value.trim(),
+    domicile:document.getElementById('pf-dom').value.trim(),
+    category:document.getElementById('pf-cat').value.trim(),
+    age:document.getElementById('pf-age').value.trim(),
+    gender:document.getElementById('pf-gen').value.trim(),
+    health:document.getElementById('pf-health').value.trim(),
+    notes:document.getElementById('pf-notes').value.trim()
+  };
+  scheduleSave();showProfile();
+}
+
+// ══════════════════════════════════════════════
+// THEME / CSV / KEYBOARD
+// ══════════════════════════════════════════════
+function toggleTheme(){
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',dk?'light':'dark');
+  document.getElementById('thbtn').textContent=dk?'☀':'☾';
+  localStorage.setItem('gjtTh',dk?'light':'dark');
+}
+function expCSV(){
+  const c=['rank','name','agency','tag','vacancies','posts','deadline','deadlineDate','status','website','eligible','age','fee','pay','notes'];
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent([c.join(','),...jobs.map(j=>c.map(k=>`"${(j[k]||'').toString().replace(/"/g,'""')}"`).join(','))].join('\n'));
+  a.download='govt_jobs_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeP();
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openAdd();}
+});
+const st=localStorage.getItem('gjtTh')||'light';
+document.documentElement.setAttribute('data-theme',st);
+document.getElementById('thbtn').textContent=st==='dark'?'☾':'☀';
+</script>
+</body>
+</html>
