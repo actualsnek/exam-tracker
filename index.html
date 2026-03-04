@@ -257,10 +257,11 @@
         <label class="field-label">Resources</label>
         <div class="res-list" id="modal-res-list"></div>
         <div class="res-add-row">
-          <select class="field-input res-type-sel" id="res-type-sel">
-            <option>YT</option><option>PDF</option><option>WEB</option><option>NOTE</option>
+          <select class="field-input res-type-sel" id="res-type-sel" onchange="onResTypeChange()">
+            <option value="LINK">LINK</option><option value="PDF">PDF</option>
           </select>
-          <input class="field-input" id="res-title-input" placeholder="Paste a link or title…" style="flex:1"/>
+          <input class="field-input" id="res-label-input" placeholder="Label text…" style="flex:1"/>
+          <input class="field-input" id="res-url-input" placeholder="URL…" style="flex:1.5"/>
           <button type="button" class="res-add-btn" onclick="modalAddResource()">+ Add</button>
         </div>
       </div>

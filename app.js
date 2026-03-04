@@ -335,19 +335,27 @@ function renderModalResList() {
   if (modalResources.length === 0) { list.innerHTML = ''; return; }
   list.innerHTML = modalResources.map((r, i) => `
     <div class="res-item">
-      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type}</span>
-      <span class="res-title">${escHtml(r.title)}</span>
+      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type === 'PDF' ? '⬇' : '🔗'}</span>
+      <span class="res-title">${escHtml(r.label)}</span>
       <button class="res-remove" onclick="modalRemoveResource(${i})">✕</button>
     </div>`).join('');
 }
 
 window.modalAddResource = () => {
   const type  = document.getElementById('res-type-sel').value;
-  const title = document.getElementById('res-title-input').value.trim();
-  if (!title) return;
-  modalResources.push({ type, title });
-  document.getElementById('res-title-input').value = '';
+  const label = document.getElementById('res-label-input').value.trim();
+  const url   = document.getElementById('res-url-input').value.trim();
+  if (!label || !url) return toast('Enter both a label and a URL.', 'error');
+  modalResources.push({ type, label, url });
+  document.getElementById('res-label-input').value = '';
+  document.getElementById('res-url-input').value = '';
   renderModalResList();
+};
+
+window.onResTypeChange = () => {
+  const type = document.getElementById('res-type-sel').value;
+  const urlInput = document.getElementById('res-url-input');
+  urlInput.placeholder = type === 'PDF' ? 'PDF URL…' : 'https://…';
 };
 
 window.modalRemoveResource = (idx) => {
@@ -575,8 +583,10 @@ function tableRowHTML(exam, num) {
                 ${resItems.length === 0
                   ? '<div class="res-pop-empty">No resources yet. Add via Edit.</div>'
                   : resItems.map(r => `<div class="res-pop-item">
-                      <span class="res-type-badge res-${escHtml(r.type.toLowerCase())}">${escHtml(r.type)}</span>
-                      <a href="${r.title.startsWith('http') ? escHtml(r.title) : '#'}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.title)}</a>
+                      ${r.type === 'PDF'
+                        ? `<svg class="res-pop-icon res-pop-icon-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+                        : `<svg class="res-pop-icon res-pop-icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`}
+                      <a href="${escHtml(r.url)}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.label)}</a>
                     </div>`).join('')}
               </div>
             </div>

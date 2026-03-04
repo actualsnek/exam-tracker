@@ -1226,9 +1226,10 @@ td.td-eligible { text-align: center; min-width: 70px; }
 
 /* res-type-badge already used in expanded row — extend for modal */
 .res-item .res-type-badge {
-  font-size: 9px; font-weight: 700; letter-spacing: .5px;
-  padding: 2px 6px; border-radius: 4px; flex-shrink: 0; text-transform: uppercase;
+  font-size: 13px; flex-shrink: 0; line-height: 1;
 }
+.res-item .res-type-badge.res-pdf  { color: #93c5fd; }
+.res-item .res-type-badge.res-link { color: var(--accent); }
 
 /* ── RESOURCES POPOVER (expanded row) ── */
 .res-popover-wrap { position: relative; }
@@ -1269,7 +1270,7 @@ td.td-eligible { text-align: center; min-width: 70px; }
   padding: 1px 6px; margin-left: 2px;
 }
 /* badge colors for popover (yt/pdf/web/note) */
-.res-yt   { background: #7f1d1d; color: #fca5a5; }
-.res-pdf  { background: #1e3a5f; color: #93c5fd; }
-.res-web  { background: #1a3a2a; color: #86efac; }
-.res-note { background: #3b2f1a; color: #fcd34d; }
+/* PDF = download icon (blue), LINK = chain icon (accent) */
+.res-pop-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.res-pop-icon-pdf  { color: #93c5fd; }
+.res-pop-icon-link { color: var(--accent); }
