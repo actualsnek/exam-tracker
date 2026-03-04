@@ -1,53 +1,57 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Exam Tracker</title>
-  <meta name="description" content="Personal dashboard for tracking competitive exams and government job notifications." />
-  <link rel="stylesheet" href="style.css" />
+  <meta name="description" content="Personal dashboard for tracking competitive exams, government jobs, and entrance tests." />
+  <meta name="theme-color" content="#141210" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      LOADING SCREEN
-════════════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════ -->
 <div id="loading-screen">
   <div class="loading-logo">EXAM <span>TRACKER</span></div>
   <div class="spinner"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      AUTH SCREEN
-════════════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════ -->
 <div id="auth-screen">
   <div class="auth-card">
+
     <div class="auth-logo">EXAM <span>TRACKER</span></div>
     <span class="auth-tagline">दीर्घसूत्री विनश्यति</span>
 
-    <!-- Auth Tabs -->
+    <!-- Tabs -->
     <div class="auth-tabs">
       <button class="auth-tab active" data-auth-tab="signin">Sign In</button>
-      <button class="auth-tab" data-auth-tab="signup">Create Account</button>
+      <button class="auth-tab"        data-auth-tab="signup">Create Account</button>
     </div>
 
-    <!-- Sign In Form -->
-    <div id="signin-form" class="auth-form">
+    <!-- ── Sign In ── -->
+    <div id="auth-signin-form" class="auth-form">
       <div class="form-field">
         <label class="form-label" for="signin-email">Email</label>
-        <input class="form-input" type="email" id="signin-email" placeholder="you@email.com" autocomplete="email" />
+        <input class="form-input" type="email" id="signin-email"
+               placeholder="you@email.com" autocomplete="email" />
         <span class="field-error" id="signin-email-err"></span>
       </div>
       <div class="form-field">
         <label class="form-label" for="signin-password">Password</label>
-        <input class="form-input" type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password" />
+        <input class="form-input" type="password" id="signin-password"
+               placeholder="••••••••" autocomplete="current-password" />
         <span class="field-error" id="signin-password-err"></span>
       </div>
-      <span class="field-error" id="signin-general-err"></span>
-      <button class="btn-primary" data-action="do-signin">Sign In</button>
+      <button class="btn-primary" id="signin-btn" data-action="do-signin"
+              data-label="Sign In">Sign In</button>
       <div class="auth-divider">or</div>
       <button class="btn-google" data-action="do-google">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -63,25 +67,28 @@
       </div>
     </div>
 
-    <!-- Sign Up Form -->
-    <div id="signup-form" class="auth-form" style="display:none;">
+    <!-- ── Sign Up ── -->
+    <div id="auth-signup-form" class="auth-form hidden">
       <div class="form-field">
         <label class="form-label" for="signup-name">Full Name</label>
-        <input class="form-input" type="text" id="signup-name" placeholder="Your name" autocomplete="name" />
+        <input class="form-input" type="text" id="signup-name"
+               placeholder="Your name" autocomplete="name" />
         <span class="field-error" id="signup-name-err"></span>
       </div>
       <div class="form-field">
         <label class="form-label" for="signup-email">Email</label>
-        <input class="form-input" type="email" id="signup-email" placeholder="you@email.com" autocomplete="email" />
+        <input class="form-input" type="email" id="signup-email"
+               placeholder="you@email.com" autocomplete="email" />
         <span class="field-error" id="signup-email-err"></span>
       </div>
       <div class="form-field">
         <label class="form-label" for="signup-password">Password</label>
-        <input class="form-input" type="password" id="signup-password" placeholder="Min. 6 characters" autocomplete="new-password" />
+        <input class="form-input" type="password" id="signup-password"
+               placeholder="Min. 6 characters" autocomplete="new-password" />
         <span class="field-error" id="signup-password-err"></span>
       </div>
-      <span class="field-error" id="signup-general-err"></span>
-      <button class="btn-primary" data-action="do-signup">Create Account</button>
+      <button class="btn-primary" id="signup-btn" data-action="do-signup"
+              data-label="Create Account">Create Account</button>
       <div class="auth-divider">or</div>
       <button class="btn-google" data-action="do-google">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -94,139 +101,155 @@
       </button>
     </div>
 
-    <!-- Forgot Password Form -->
-    <div id="forgot-form" class="auth-form" style="display:none;">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:4px;">Enter your email and we'll send a password reset link.</p>
+    <!-- ── Forgot Password ── -->
+    <div id="auth-forgot-form" class="auth-form hidden">
+      <p style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6;">
+        Enter your email and we'll send a reset link.
+      </p>
       <div class="form-field">
         <label class="form-label" for="forgot-email">Email</label>
-        <input class="form-input" type="email" id="forgot-email" placeholder="you@email.com" autocomplete="email" />
+        <input class="form-input" type="email" id="forgot-email"
+               placeholder="you@email.com" autocomplete="email" />
         <span class="field-error" id="forgot-email-err"></span>
       </div>
-      <span class="field-error" id="forgot-general-err"></span>
-      <button class="btn-primary" data-action="do-forgot">Send Reset Email</button>
-      <div class="auth-forgot">
-        <a href="#" data-action="show-signin">Back to Sign In</a>
+      <button class="btn-primary" id="forgot-btn" data-action="do-forgot"
+              data-label="Send Reset Email">Send Reset Email</button>
+      <div class="auth-forgot" style="margin-top:10px;">
+        <a href="#" data-action="show-signin">← Back to Sign In</a>
       </div>
     </div>
 
   </div>
-</div>
+</div><!-- /#auth-screen -->
 
-<!-- ══════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      APP SCREEN
-════════════════════════════════════════════════════════════════ -->
-<div id="app-screen">
+══════════════════════════════════════════════════════════ -->
+<div id="app-screen" class="hidden">
 
-  <!-- ── Topbar ──────────────────────────────────────────────── -->
+  <!-- ── Topbar ──────────────────────────────────────────── -->
   <header id="topbar">
+
     <div class="topbar-logo">EXAM <span>TRACKER</span></div>
-    <div class="topbar-actions">
 
-      <!-- Search -->
-      <button class="topbar-btn" id="search-btn" title="Search" data-action="open-search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    <!-- Search button -->
+    <button class="topbar-btn" id="search-btn" data-action="open-search" title="Search exams">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+
+    <!-- Export / Import dropdown -->
+    <div class="dropdown-wrap">
+      <button class="topbar-btn" id="export-btn" title="Export / Import">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
       </button>
-
-      <!-- Export / Import dropdown -->
-      <div class="dropdown-wrap">
-        <button class="topbar-btn" id="export-btn" title="Export / Import">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/>
-            <line x1="12" y1="3" x2="12" y2="15"/>
+      <div class="dropdown-menu" id="export-dropdown">
+        <button class="dropdown-item" data-action="export-json">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
           </svg>
+          Export JSON
         </button>
-        <div class="dropdown-menu" id="export-dropdown">
-          <button class="dropdown-item" data-action="export-json">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Export JSON
-          </button>
-          <button class="dropdown-item" data-action="export-csv">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Export CSV
-          </button>
-          <div class="dropdown-sep"></div>
-          <button class="dropdown-item" data-action="trigger-import">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Import JSON
-          </button>
-        </div>
+        <button class="dropdown-item" data-action="export-csv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Export CSV
+        </button>
+        <div class="dropdown-sep"></div>
+        <button class="dropdown-item" data-action="trigger-import">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Import JSON
+        </button>
       </div>
-      <!-- Hidden file input for import -->
-      <input type="file" id="import-file-input" accept=".json" style="display:none;" />
+    </div>
 
-      <!-- Theme toggle -->
-      <button class="topbar-btn" id="theme-btn" title="Toggle theme" data-action="toggle-theme">
-        <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-        <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-      </button>
+    <!-- Theme toggle -->
+    <button class="topbar-btn" id="theme-btn" data-action="toggle-theme" title="Toggle theme">
+      <!-- icon injected by JS -->
+    </button>
 
-      <!-- User dropdown -->
-      <div class="dropdown-wrap">
-        <button class="topbar-btn" id="user-btn" title="Account">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- User / Account dropdown -->
+    <div class="dropdown-wrap">
+      <div class="topbar-avatar" id="topbar-avatar" id="user-btn" title="Account">?
+        <span class="sync-dot" id="sync-dot"></span>
+      </div>
+      <div class="dropdown-menu" id="user-dropdown">
+        <div class="dropdown-header">
+          <span class="dropdown-name"  id="dropdown-name">—</span>
+          <span class="dropdown-email" id="dropdown-email">—</span>
+        </div>
+        <div class="dropdown-sep"></div>
+        <button class="dropdown-item" data-action="open-profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
             <circle cx="12" cy="7" r="4"/>
           </svg>
-          <span class="sync-dot" id="sync-dot"></span>
+          Profile & Settings
         </button>
-        <div class="dropdown-menu" id="user-dropdown">
-          <div class="dropdown-header">
-            <span class="dropdown-name" id="dd-name">—</span>
-            <span class="dropdown-email" id="dd-email">—</span>
-          </div>
-          <div class="dropdown-edu-row" id="dd-edu-row"></div>
-          <div class="dropdown-sep"></div>
-          <button class="dropdown-item" data-action="open-profile">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Edit Profile
-          </button>
-          <button class="dropdown-item" data-action="change-password">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Change Password
-          </button>
-          <div class="dropdown-sep"></div>
-          <button class="dropdown-item" data-action="do-logout">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Sign Out
-          </button>
-          <div class="dropdown-sep"></div>
-          <button class="dropdown-item danger" data-action="delete-account">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            Delete Account
-          </button>
-        </div>
+        <button class="dropdown-item" data-action="open-tags-manager">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+            <line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+          Manage Tags
+        </button>
+        <div class="dropdown-sep"></div>
+        <button class="dropdown-item" data-action="change-password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Change Password
+        </button>
+        <button class="dropdown-item" data-action="do-logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Sign Out
+        </button>
+        <div class="dropdown-sep"></div>
+        <button class="dropdown-item danger" data-action="delete-account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/><path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+          Delete Account
+        </button>
       </div>
+    </div>
 
-    </div><!-- /topbar-actions -->
   </header>
 
-  <!-- Search overlay -->
+  <!-- ── Search Overlay ──────────────────────────────────── -->
   <div id="search-overlay">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;color:var(--muted);flex-shrink:0;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
     </svg>
-    <input type="search" id="search-input" placeholder="Search exams by name, agency, tag…" autocomplete="off" />
-    <button id="search-close" data-action="close-search">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
+    <input id="search-input" type="text" placeholder="Search exams, agencies, tags…" autocomplete="off" />
+    <button id="search-close" data-action="close-search" title="Close search">✕</button>
   </div>
 
-  <!-- ── Offline Banner ──────────────────────────────────────── -->
+  <!-- ── Offline Banner ──────────────────────────────────── -->
   <div id="offline-banner">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="1" y1="1" x2="23" y2="23"/>
       <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
       <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
@@ -235,139 +258,171 @@
       <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
       <line x1="12" y1="20" x2="12.01" y2="20"/>
     </svg>
-    You're offline — showing cached data. Changes are disabled.
+    You're offline. Changes won't be saved until you reconnect.
   </div>
 
-  <!-- ── Countdown Strip ────────────────────────────────────── -->
+  <!-- ── Countdown Strip ─────────────────────────────────── -->
   <div id="countdown-strip">
-    <!-- Populated by JS -->
+    <!-- Populated by JS when exams are pinned -->
   </div>
 
-  <!-- ── Filter Bar ─────────────────────────────────────────── -->
+  <!-- ── Filter Bar ──────────────────────────────────────── -->
   <div id="filter-bar">
-    <select class="filter-select" id="filter-status">
-      <option value="">All Status</option>
-      <option value="open">Open</option>
-      <option value="closed">Closed</option>
-      <option value="na">No Date</option>
-    </select>
 
-    <select class="filter-select" id="filter-tag">
-      <option value="">All Tags</option>
-      <!-- populated by JS -->
-    </select>
+    <!-- Status chips -->
+    <div class="filter-status-group">
+      <button class="filter-chip status-chip active" data-action="filter-status" data-status="all">All</button>
+      <button class="filter-chip status-chip" data-action="filter-status" data-status="open">Open</button>
+      <button class="filter-chip status-chip" data-action="filter-status" data-status="applied">Applied</button>
+    </div>
 
-    <select class="filter-select" id="filter-agency">
-      <option value="">All Agencies</option>
-      <!-- populated by JS -->
-    </select>
+    <div class="filter-sep"></div>
 
-    <label class="filter-applied-wrap">
-      <input type="checkbox" class="filter-checkbox" id="filter-applied" />
-      Applied only
-    </label>
+    <!-- Tag dropdown -->
+    <div class="filter-tag-wrap">
+      <button class="filter-tag-btn" id="tag-filter-btn" data-action="toggle-tag-dropdown">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+          <line x1="7" y1="7" x2="7.01" y2="7"/>
+        </svg>
+        <span>Tag</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+      <!-- Tag filter dropdown -->
+      <div class="filter-tag-dropdown" id="tag-filter-dropdown">
+        <div class="filter-tag-list" id="tag-filter-list">
+          <!-- Populated by JS -->
+        </div>
+        <div class="filter-tag-footer">
+          <span class="filter-tag-footer-info" id="tag-filter-footer-info">All tags</span>
+          <button class="filter-tag-manage-btn" data-action="open-tags-manager">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            Manage
+          </button>
+        </div>
+      </div>
+    </div>
 
-    <button id="filter-clear-btn" data-action="clear-filters">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    <!-- Search pill (desktop shortcut) -->
+    <button class="filter-search-pill" data-action="open-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      Clear
+      <span>Search…</span>
     </button>
 
-    <span class="filter-count" id="filter-count"></span>
-  </div>
+  </div><!-- /#filter-bar -->
 
-  <!-- ── Main Content ───────────────────────────────────────── -->
+  <!-- ── Main Content ────────────────────────────────────── -->
   <main id="main-content">
 
-    <!-- Desktop toolbar (Add button) -->
+    <!-- Desktop toolbar -->
     <div id="table-toolbar">
       <button id="desktop-add-btn" data-action="add-exam">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
         Add Exam
       </button>
-      <span></span><!-- spacer -->
+      <span class="exam-count-label" id="exam-count-label"></span>
     </div>
 
-    <!-- Desktop Table -->
+    <!-- ── Desktop Table ──────────────────────────────────── -->
     <div id="exam-table-wrap">
       <table id="exam-table">
         <thead>
           <tr>
             <th class="col-expand-th"></th>
-            <th class="sortable" data-sort="rank"># <span class="sort-arrow">↕</span></th>
-            <th class="sortable" data-sort="name">Exam Name <span class="sort-arrow">↕</span></th>
-            <th class="sortable" data-sort="agency">Agency <span class="sort-arrow">↕</span></th>
+            <th class="col-rank-th" data-sort="rank">
+              # <span class="sort-arrow"></span>
+            </th>
+            <th data-sort="name" style="cursor:pointer;">
+              Exam Name <span class="sort-arrow"></span>
+            </th>
+            <th data-sort="agency" style="cursor:pointer;">
+              Agency <span class="sort-arrow"></span>
+            </th>
             <th>Tag</th>
-            <th class="sortable" data-sort="deadlineDate">Deadline <span class="sort-arrow">↕</span></th>
+            <th data-sort="deadlineDate" style="cursor:pointer;">
+              Deadline <span class="sort-arrow"></span>
+            </th>
             <th>Status</th>
             <th>Eligible</th>
-            <th>Apply</th>
+            <th title="Mark as applied">Applied</th>
+            <th title="Pin to countdown">📌</th>
           </tr>
         </thead>
         <tbody id="exam-tbody">
-          <!-- populated by JS -->
+          <!-- Populated by JS -->
         </tbody>
       </table>
-      <!-- Empty state inside table -->
+
+      <!-- Empty state -->
       <div id="table-empty" class="empty-state hidden">
-        <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
         </svg>
         <div class="empty-title" id="table-empty-title">No exams yet</div>
-        <div class="empty-sub" id="table-empty-sub">Add your first exam to get started.</div>
+        <div class="empty-sub"   id="table-empty-sub">Add your first exam to get started.</div>
         <button class="btn btn-accent" data-action="add-exam" id="table-empty-add-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           Add Exam
         </button>
       </div>
-    </div>
+    </div><!-- /#exam-table-wrap -->
 
-    <!-- Mobile Cards -->
+    <!-- ── Mobile Cards ───────────────────────────────────── -->
     <div id="exam-cards">
-      <!-- populated by JS -->
+      <!-- Populated by JS -->
     </div>
     <div id="cards-empty" class="empty-state hidden">
-      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
       </svg>
       <div class="empty-title" id="cards-empty-title">No exams yet</div>
-      <div class="empty-sub" id="cards-empty-sub">Add your first exam to get started.</div>
+      <div class="empty-sub"   id="cards-empty-sub">Tap + to add your first exam.</div>
     </div>
 
   </main>
 
-  <!-- ── Mobile FAB ─────────────────────────────────────────── -->
-  <button id="fab-add" data-action="add-exam" title="Add Exam">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- ── Mobile FAB ──────────────────────────────────────── -->
+  <button id="fab-add" data-action="add-exam" title="Add Exam" aria-label="Add Exam">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
   </button>
 
-  <!-- ── Mobile Bottom Nav ──────────────────────────────────── -->
+  <!-- ── Mobile Bottom Nav ────────────────────────────────── -->
   <nav id="bottom-nav">
-    <button class="nav-btn active" id="nav-exams" data-action="nav-exams">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+    <button class="nav-btn active" data-action="nav-exams">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
       </svg>
       EXAMS
     </button>
-    <button class="nav-btn" id="nav-add" data-action="add-exam">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="nav-btn" data-action="add-exam">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8"  y1="12" x2="16" y2="12"/>
       </svg>
       ADD
     </button>
-    <button class="nav-btn" id="nav-profile" data-action="open-profile">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="nav-btn" data-action="nav-profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
         <circle cx="12" cy="7" r="4"/>
       </svg>
@@ -377,49 +432,59 @@
 
 </div><!-- /#app-screen -->
 
-<!-- ══════════════════════════════════════════════════════════════
-     SIDE PANEL
-════════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════
+     SIDE PANEL + OVERLAY
+══════════════════════════════════════════════════════════ -->
 <div id="panel-overlay"></div>
 <aside id="side-panel" role="dialog" aria-modal="true" aria-label="Panel">
-  <!-- All panel content is built by JS -->
-  <div id="panel-inner" style="display:contents;"></div>
+  <!-- All content built by JS -->
 </aside>
 
-<!-- ══════════════════════════════════════════════════════════════
-     DELETE ACCOUNT MODAL
-════════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════
+     MODAL OVERLAY (delete confirm, tag manager, import)
+══════════════════════════════════════════════════════════ -->
 <div id="modal-overlay">
-  <div class="modal-card" id="modal-card">
-    <div class="modal-title" id="modal-title">Delete your account?</div>
-    <div class="modal-body" id="modal-body">
-      All your exams and data will be permanently deleted. This cannot be undone.
+  <div class="modal-card">
+    <div class="modal-title"    id="modal-title">Confirm</div>
+    <div class="modal-body"     id="modal-body"></div>
+    <!-- Optional typed-input for dangerous confirmations -->
+    <div id="modal-input-wrap" class="hidden" style="margin-bottom:14px;">
+      <input class="modal-confirm-input" type="text" id="modal-confirm-input" />
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" id="modal-cancel-btn" data-action="close-modal">Cancel</button>
-      <button class="btn btn-danger" id="modal-confirm-btn" data-action="confirm-delete-account">Delete My Account</button>
+      <button class="btn btn-ghost" data-action="close-modal">Cancel</button>
+      <button class="btn btn-danger" id="modal-confirm-btn" data-action="confirm-delete-account">
+        Confirm
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      TOAST CONTAINER
-════════════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════ -->
 <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
 
-<!-- ══════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════
      DELETED ACCOUNT SCREEN
-════════════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════════════════ -->
 <div id="deleted-screen">
   <div class="loading-logo">EXAM <span>TRACKER</span></div>
   <h2>Account deleted.</h2>
   <p>Your data has been permanently removed.</p>
-  <button class="btn btn-ghost" style="margin-top:8px;" onclick="location.reload()">Back to Sign In</button>
+  <button class="btn btn-ghost" style="margin-top:12px;" onclick="location.reload()">
+    ← Back to Sign In
+  </button>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     FIREBASE + APP SCRIPTS
-════════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════
+     HIDDEN IMPORT INPUT
+══════════════════════════════════════════════════════════ -->
+<input type="file" id="import-file-input" accept=".json" style="display:none;" />
+
+<!-- ══════════════════════════════════════════════════════
+     FIREBASE (compat SDK — no bundler needed)
+══════════════════════════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
