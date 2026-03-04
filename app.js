@@ -5,7 +5,7 @@
 
 // ── SECTION 1: Firebase Init ─────────────────────────────────────
 const firebaseConfig = {
-  apiKey: "AIzaSyDrwfDQfocEqCCEXXnjoE8PSphVpuDkxMg",
+  apiKey: "AIzaSyC1aDvKtiUt_M68BdoCjXtrrV1QH3E6OdA",
   authDomain: "exam-tracker-a02ad.firebaseapp.com",
   projectId: "exam-tracker-a02ad",
   storageBucket: "exam-tracker-a02ad.firebasestorage.app",
