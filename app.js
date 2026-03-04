@@ -54,7 +54,7 @@ let currentUser  = null;
 let allExams     = [];
 let filteredExams = [];
 let activeStatus = 'all';
-let activeTag    = null;
+let activeTags   = new Set();
 let searchQuery  = '';
 let expandedCards = new Set();
 
@@ -239,6 +239,7 @@ window.saveExam = async () => {
     pattern:     document.getElementById('f-pattern').value.trim(),
     tags:        document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
     applied:     document.getElementById('f-applied').checked,
+    eligible:    document.getElementById('f-eligible') ? document.getElementById('f-eligible').checked : false,
     pinned,
   };
 
@@ -287,14 +288,34 @@ window.toggleApplied = async (id) => {
   const exam = allExams.find(e => e.id === id);
   if (!exam) return;
   const newVal = !exam.applied;
-  // Optimistic UI
   exam.applied = newVal;
-  renderCards();
+  renderTable();
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { applied: newVal });
   } catch (e) {
     exam.applied = !newVal;
-    renderCards();
+    renderTable();
+    toast('Update failed.', 'error');
+  }
+};
+
+window.togglePin = async (id) => {
+  const exam = allExams.find(e => e.id === id);
+  if (!exam) return;
+  const newVal = !exam.pinned;
+  if (newVal) {
+    const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
+    if (pinnedCount >= 3) return toast('Max 3 pinned exams. Unpin one first.', 'error');
+  }
+  exam.pinned = newVal;
+  renderTable();
+  renderCountdowns();
+  try {
+    await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { pinned: newVal });
+  } catch (e) {
+    exam.pinned = !newVal;
+    renderTable();
+    renderCountdowns();
     toast('Update failed.', 'error');
   }
 };
@@ -331,6 +352,7 @@ window.openEditExam = (id) => {
   document.getElementById('f-pattern').value    = exam.pattern || '';
   document.getElementById('f-tags').value       = (exam.tags || []).join(', ');
   document.getElementById('f-applied').checked  = !!exam.applied;
+  if (document.getElementById('f-eligible')) document.getElementById('f-eligible').checked = !!exam.eligible;
   document.getElementById('f-pinned').checked   = !!exam.pinned;
   document.getElementById('exam-modal').style.display = 'flex';
 };
@@ -353,7 +375,7 @@ window.checkPinLimit = (checkbox) => {
 // ════════════════════════════════════════════════════
 
 function renderAll() {
-  renderTagFilters();
+  renderTagDropdown();
   applyFilters();
   renderCountdowns();
 }
@@ -361,12 +383,17 @@ function renderAll() {
 function applyFilters() {
   let exams = [...allExams];
 
-  if (activeStatus !== 'all') {
+  if (activeStatus === 'applied') {
+    exams = exams.filter(e => e.applied);
+  } else if (activeStatus !== 'all') {
     exams = exams.filter(e => e.status === activeStatus);
   }
-  if (activeTag) {
-    exams = exams.filter(e => (e.tags || []).includes(activeTag));
+
+  // active tags = multi-select
+  if (activeTags.size > 0) {
+    exams = exams.filter(e => (e.tags || []).some(t => activeTags.has(t)));
   }
+
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     exams = exams.filter(e =>
@@ -376,117 +403,169 @@ function applyFilters() {
     );
   }
   filteredExams = exams;
-  renderCards();
+  renderTable();
 }
 
-function renderCards() {
-  const container = document.getElementById('exam-cards');
-  const empty     = document.getElementById('list-empty');
+function renderTable() {
+  const tbody  = document.getElementById('exam-tbody');
+  const empty  = document.getElementById('list-empty');
+  const scroll = document.getElementById('table-scroll');
+  const count  = document.getElementById('table-count');
+
+  count.textContent = `${filteredExams.length} exam${filteredExams.length !== 1 ? 's' : ''}`;
 
   if (filteredExams.length === 0) {
-    container.innerHTML = '';
-    empty.style.display = 'block';
+    empty.style.display  = 'block';
+    scroll.style.display = 'none';
     return;
   }
-  empty.style.display = 'none';
+  empty.style.display  = 'none';
+  scroll.style.display = '';
 
-  container.innerHTML = filteredExams.map(exam => cardHTML(exam)).join('');
+  tbody.innerHTML = filteredExams.map((exam, i) => tableRowHTML(exam, i + 1)).join('');
 }
 
-function cardHTML(exam) {
-  const statusBadge = `<span class="badge ${exam.status || 'open'}">${capitalize(exam.status || 'open')}</span>`;
+function tableRowHTML(exam, num) {
+  const isExpanded = expandedCards.has(exam.id);
 
+  // Deadline
   const dateStr = exam.lastDate || exam.examDate;
-  let dateDisplay = '';
+  let deadlineHTML = '<span class="deadline-normal">—</span>';
   if (dateStr) {
     const days = daysUntil(dateStr);
-    if (days !== null) {
-      if (days < 0)        dateDisplay = `<span class="card-date-warn">Closed</span>`;
-      else if (days <= 7)  dateDisplay = `<span class="card-date-warn">⏰ ${days}d left</span>`;
-      else if (days <= 30) dateDisplay = `<span class="card-date-ok">📅 ${days}d left</span>`;
-      else                 dateDisplay = `<span style="font-size:10px;color:var(--muted)">📅 ${formatDate(dateStr)}</span>`;
+    if (days === null) {
+      deadlineHTML = '<span class="deadline-normal">—</span>';
+    } else if (days < 0) {
+      deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
+    } else if (days <= 7) {
+      deadlineHTML = `<span class="deadline-warn">${formatDate(dateStr)}</span>`;
+    } else if (days <= 30) {
+      deadlineHTML = `<span class="deadline-ok">${formatDate(dateStr)}</span>`;
+    } else {
+      deadlineHTML = `<span class="deadline-normal">${formatDate(dateStr)}</span>`;
     }
   }
 
-  const tagBadges = (exam.tags || []).map(t => `<span class="badge tag">${t}</span>`).join('');
-  const pinDot    = exam.pinned ? `<span class="pin-dot" title="Pinned"></span>` : '';
+  // Tags — show first 2 + overflow count
+  const tags = exam.tags || [];
+  let tagsHTML = '—';
+  if (tags.length > 0) {
+    tagsHTML = `<span class="tag-badge">${escHtml(tags[0])}</span>`;
+    if (tags.length > 1) tagsHTML += `<span class="tag-more">+${tags.length - 1}</span>`;
+  }
 
-  const isExpanded = expandedCards.has(exam.id);
+  const statusCls = exam.status || 'open';
+  const statusLabel = capitalize(statusCls);
 
-  const expandedDetail = isExpanded ? `
-    <div class="card-detail open">
-      ${exam.eligibility ? `<div class="detail-section"><div class="detail-label">Eligibility</div><div class="detail-text">${escHtml(exam.eligibility)}</div></div>` : ''}
-      ${exam.syllabus    ? `<div class="detail-section"><div class="detail-label">Syllabus</div><div class="detail-text">${escHtml(exam.syllabus)}</div></div>` : ''}
-      ${exam.pattern     ? `<div class="detail-section"><div class="detail-label">Exam Pattern</div><div class="detail-text">${escHtml(exam.pattern)}</div></div>` : ''}
-      ${exam.website     ? `<div class="detail-section"><div class="detail-label">Website</div><a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="detail-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>${escHtml(exam.website)}</a></div>` : ''}
-    </div>` : '';
-
-  const hasDetails = exam.eligibility || exam.syllabus || exam.pattern || exam.website;
+  // Expanded detail row
+  const detailRow = isExpanded ? `
+  <tr class="detail-row" id="detail-${exam.id}">
+    <td colspan="10">
+      <div class="detail-inner">
+        ${exam.eligibility ? `<div class="detail-block"><div class="detail-label">Eligibility</div><div class="detail-text">${escHtml(exam.eligibility)}</div></div>` : ''}
+        ${exam.syllabus    ? `<div class="detail-block"><div class="detail-label">Syllabus</div><div class="detail-text">${escHtml(exam.syllabus)}</div></div>` : ''}
+        ${exam.pattern     ? `<div class="detail-block"><div class="detail-label">Exam Pattern</div><div class="detail-text">${escHtml(exam.pattern)}</div></div>` : ''}
+        ${exam.website     ? `<div class="detail-block"><div class="detail-label">Website</div><a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="detail-link">🌐 ${escHtml(exam.website)}</a></div>` : ''}
+        ${!exam.eligibility && !exam.syllabus && !exam.pattern && !exam.website ? '<div style="color:var(--muted);font-size:12px">No details added yet. Click Edit to add.</div>' : ''}
+      </div>
+    </td>
+  </tr>` : '';
 
   return `
-    <div class="exam-card${exam.pinned ? ' pinned' : ''}" id="card-${exam.id}">
-      <div class="card-top">
-        <div class="card-badge">${escHtml((exam.agency || '?').substring(0,6).toUpperCase())}</div>
-        <div class="card-info">
-          <div class="card-name">${escHtml(exam.name)}${pinDot}</div>
-          <div class="card-agency">${escHtml(exam.agency)}</div>
-          <div class="card-chips">
-            ${statusBadge}
-            ${dateDisplay}
-            ${tagBadges}
-          </div>
-        </div>
-        <div class="card-applied">
-          <div class="checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
-          <div class="card-applied-label">applied</div>
-        </div>
+  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}" id="row-${exam.id}">
+    <td class="td-expand">
+      <button class="expand-btn" onclick="toggleExpand('${exam.id}')" title="Expand">${isExpanded ? '▼' : '▶'}</button>
+    </td>
+    <td class="td-num">${num}</td>
+    <td class="td-name">${escHtml(exam.name)}</td>
+    <td class="td-agency">${escHtml(exam.agency || '—')}</td>
+    <td class="td-tag">${tagsHTML}</td>
+    <td class="td-deadline">${deadlineHTML}</td>
+    <td class="td-status"><span class="status-pill ${statusCls}">${statusLabel}</span></td>
+    <td class="td-applied">
+      <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
+    </td>
+    <td class="td-pin">
+      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}">📌</button>
+    </td>
+    <td class="td-actions">
+      <div class="action-btns">
+        <button class="action-btn" onclick="openEditExam('${exam.id}')">✏</button>
+        <button class="action-btn delete" onclick="deleteExam('${exam.id}')">🗑</button>
       </div>
-      ${expandedDetail}
-      <div class="card-actions">
-        ${hasDetails ? `<button class="card-btn${isExpanded ? ' accent' : ''}" onclick="toggleExpand('${exam.id}')">${isExpanded ? 'Collapse ▴' : 'Details ▾'}</button>` : ''}
-        <button class="card-btn" onclick="openEditExam('${exam.id}')">✏ Edit</button>
-        <button class="card-btn danger" onclick="deleteExam('${exam.id}')">🗑</button>
-      </div>
-    </div>`;
+    </td>
+  </tr>${detailRow}`;
 }
 
 window.toggleExpand = (id) => {
   if (expandedCards.has(id)) expandedCards.delete(id);
   else expandedCards.add(id);
-  renderCards();
+  renderTable();
 };
 
-// ── Tag filter chips ──────────────────────────────
-function renderTagFilters() {
+window.toggleTagFilter = (tag) => {
+  if (activeTags.has(tag)) activeTags.delete(tag);
+  else activeTags.add(tag);
+  renderTagDropdown();
+  applyFilters();
+};
+
+function renderTagDropdown() {
   const allTags = [...new Set(allExams.flatMap(e => e.tags || []))].sort();
-  const container = document.getElementById('tag-filters');
+  const list    = document.getElementById('tag-dd-list');
+  const countEl = document.getElementById('tag-active-count');
+  const btn     = document.querySelector('.tag-dd-btn');
 
   if (allTags.length === 0) {
-    container.innerHTML = '';
+    list.innerHTML = '<div class="tag-dd-empty">No tags yet</div>';
+    countEl.style.display = 'none';
+    btn.classList.remove('has-active');
     return;
   }
 
-  container.innerHTML = allTags.map(tag =>
-    `<button class="chip${activeTag === tag ? ' active' : ''}" onclick="setTagFilter('${escHtml(tag)}', this)">${escHtml(tag)}</button>`
-  ).join('');
+  list.innerHTML = allTags.map(tag => `
+    <div class="tag-dd-item${activeTags.has(tag) ? ' active' : ''}" onclick="toggleTagFilter('${escHtml(tag)}')">
+      <div class="tag-dd-checkbox"></div>
+      <span>${escHtml(tag)}</span>
+    </div>`).join('');
+
+  if (activeTags.size > 0) {
+    countEl.textContent   = activeTags.size;
+    countEl.style.display = '';
+    btn.classList.add('has-active');
+  } else {
+    countEl.style.display = 'none';
+    btn.classList.remove('has-active');
+  }
 }
+
+window.toggleTagDropdown = () => {
+  const menu = document.getElementById('tag-dd-menu');
+  const open = menu.style.display === 'none' || !menu.style.display;
+  menu.style.display = open ? 'block' : 'none';
+  if (open) {
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', closeTagDdOutside, { once: true });
+    }, 10);
+  }
+};
+
+function closeTagDdOutside(e) {
+  const wrap = document.getElementById('tag-dd-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('tag-dd-menu').style.display = 'none';
+  } else {
+    // Re-listen if click was inside
+    setTimeout(() => document.addEventListener('click', closeTagDdOutside, { once: true }), 10);
+  }
+}
+
 
 window.setStatusFilter = (status, btn) => {
   activeStatus = status;
   document.querySelectorAll('#status-filters .chip').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  applyFilters();
-};
-
-window.setTagFilter = (tag, btn) => {
-  if (activeTag === tag) {
-    activeTag = null;
-    document.querySelectorAll('#tag-filters .chip').forEach(b => b.classList.remove('active'));
-  } else {
-    activeTag = tag;
-    document.querySelectorAll('#tag-filters .chip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
   applyFilters();
 };
 
@@ -534,14 +613,6 @@ function renderCountdowns() {
 //  SEARCH
 // ════════════════════════════════════════════════════
 
-window.toggleSearch = () => {
-  const bar = document.getElementById('search-bar');
-  const isHidden = bar.style.display === 'none' || !bar.style.display;
-  bar.style.display = isHidden ? 'block' : 'none';
-  if (isHidden) setTimeout(() => document.getElementById('search-input').focus(), 50);
-  else { searchQuery = ''; document.getElementById('search-input').value = ''; applyFilters(); }
-};
-
 window.handleSearch = (val) => {
   searchQuery = val.trim();
   applyFilters();
@@ -549,9 +620,9 @@ window.handleSearch = (val) => {
 
 window.clearSearch = () => {
   searchQuery = '';
-  document.getElementById('search-input').value = '';
+  const inp = document.getElementById('search-input');
+  if (inp) inp.value = '';
   applyFilters();
-  document.getElementById('search-input').focus();
 };
 
 // ════════════════════════════════════════════════════

@@ -80,9 +80,6 @@
   <header class="topbar">
     <div class="topbar-logo">EXAM <span>TRACKER</span></div>
     <div class="topbar-right">
-      <button class="icon-btn" onclick="toggleSearch()" title="Search" id="search-toggle-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
       <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
         <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -91,14 +88,6 @@
     </div>
   </header>
 
-  <!-- SEARCH BAR (collapsible) -->
-  <div id="search-bar" class="search-bar" style="display:none">
-    <div class="search-inner">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="search-input" class="search-input" placeholder="Search exams, agencies, tags…" oninput="handleSearch(this.value)"/>
-      <button class="search-clear" onclick="clearSearch()">✕</button>
-    </div>
-  </div>
 
   <!-- COUNTDOWN STRIP -->
   <div class="countdown-strip" id="countdown-strip">
@@ -110,15 +99,37 @@
 
   <!-- FILTER BAR -->
   <div class="filter-bar">
+    <!-- Status pills -->
     <div class="filter-group" id="status-filters">
-      <button class="chip active" data-status="all" onclick="setStatusFilter('all',this)">All</button>
-      <button class="chip" data-status="open" onclick="setStatusFilter('open',this)">Open</button>
-      <button class="chip" data-status="upcoming" onclick="setStatusFilter('upcoming',this)">Upcoming</button>
-      <button class="chip" data-status="closed" onclick="setStatusFilter('closed',this)">Closed</button>
+      <button class="chip active" data-status="all"      onclick="setStatusFilter('all',this)">All</button>
+      <button class="chip"        data-status="open"     onclick="setStatusFilter('open',this)">Open</button>
+      <button class="chip"        data-status="upcoming" onclick="setStatusFilter('upcoming',this)">Upcoming</button>
+      <button class="chip"        data-status="closed"   onclick="setStatusFilter('closed',this)">Closed</button>
+      <button class="chip"        data-status="applied"  onclick="setStatusFilter('applied',this)">Applied</button>
     </div>
+
+    <!-- Tag dropdown -->
+    <div class="tag-dd-wrap" id="tag-dd-wrap">
+      <button class="tag-dd-btn" onclick="toggleTagDropdown()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Tag
+        <span class="tag-active-count" id="tag-active-count" style="display:none">0</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="tag-dd-menu" id="tag-dd-menu" style="display:none">
+        <div id="tag-dd-list"><div class="tag-dd-empty">No tags yet</div></div>
+      </div>
+    </div>
+
     <div class="filter-sep"></div>
-    <div class="filter-group" id="tag-filters" style="flex:1;flex-wrap:nowrap;overflow-x:auto;"></div>
+
+    <!-- Right side: search + add -->
     <div class="filter-right">
+      <!-- Inline search box -->
+      <div class="inline-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="search-input" class="inline-search-input" placeholder="Search…" oninput="handleSearch(this.value)"/>
+      </div>
       <button class="btn-add" onclick="openAddExam()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Exam
@@ -126,21 +137,39 @@
     </div>
   </div>
 
-  <!-- EXAM LIST -->
-  <main class="exam-list" id="exam-list">
+  <!-- EXAM TABLE -->
+  <main class="exam-list">
+    <div class="table-meta">
+      <span class="table-count" id="table-count"></span>
+    </div>
+
     <div class="list-empty" id="list-empty" style="display:none">
       <div class="empty-icon">📋</div>
       <div class="empty-title">No exams yet</div>
       <div class="empty-sub">Add your first exam to get started</div>
       <button class="btn-primary" style="margin-top:16px;width:auto;padding:10px 24px;" onclick="openAddExam()">Add Exam</button>
     </div>
-    <div id="exam-cards"></div>
-  </main>
 
-  <!-- FAB -->
-  <button class="fab" onclick="openAddExam()" title="Add Exam">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
+    <div class="table-scroll" id="table-scroll">
+      <table class="exam-table">
+        <thead>
+          <tr>
+            <th class="th-expand"></th>
+            <th class="th-num">#</th>
+            <th class="th-name">EXAM NAME</th>
+            <th class="th-agency">AGENCY</th>
+            <th class="th-tag">TAG</th>
+            <th class="th-deadline">DEADLINE</th>
+            <th class="th-status">STATUS</th>
+            <th class="th-applied">APPLIED</th>
+            <th class="th-pin">PIN</th>
+            <th class="th-actions"></th>
+          </tr>
+        </thead>
+        <tbody id="exam-tbody"></tbody>
+      </table>
+    </div>
+  </main>
 
 </div>
 
