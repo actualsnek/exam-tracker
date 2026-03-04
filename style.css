@@ -280,6 +280,23 @@ a:hover { color: var(--accent-h); }
 .icon-btn svg { width: 15px; height: 15px; }
 .icon-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--muted); }
 
+.data-dd-wrap { position: relative; }
+.data-dd-menu {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--r-lg); box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  z-index: 200; min-width: 160px; overflow: hidden;
+}
+.data-dd-item {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; padding: 10px 14px;
+  background: none; border: none; border-bottom: 1px solid var(--border2);
+  color: var(--text2); font-size: 12px; font-family: var(--font);
+  cursor: pointer; text-align: left; transition: background .12s;
+}
+.data-dd-item:last-child { border-bottom: none; }
+.data-dd-item:hover { background: var(--surface); color: var(--text); }
+
 .avatar {
   width: 32px; height: 32px;
   border-radius: 50%;

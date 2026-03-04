@@ -80,6 +80,23 @@
   <header class="topbar">
     <div class="topbar-logo"><span class="topbar-logo-text">EXAM <span>TRACKER</span></span><div class="topbar-tagline">दीर्घसूत्री विनश्यति ।</div></div>
     <div class="topbar-right">
+      <!-- Data dropdown -->
+      <div class="data-dd-wrap" id="data-dd-wrap">
+        <button class="icon-btn" id="data-dd-btn" onclick="toggleDataDropdown()" title="Import / Export data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="15" height="15"><line x1="12" y1="3" x2="12" y2="10"/><polyline points="9 6 12 3 15 6"/><line x1="12" y1="21" x2="12" y2="14"/><polyline points="15 18 12 21 9 18"/></svg>
+        </button>
+        <div class="data-dd-menu" id="data-dd-menu" style="display:none">
+          <button class="data-dd-item" onclick="exportJSON(); document.getElementById('data-dd-menu').style.display='none'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export JSON
+          </button>
+          <label class="data-dd-item" style="cursor:pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Import JSON
+            <input type="file" accept=".json" style="display:none" onchange="importJSON(event); document.getElementById('data-dd-menu').style.display='none'"/>
+          </label>
+        </div>
+      </div>
       <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
         <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -360,37 +377,14 @@
           <span class="pref-row-label">Change Password</span>
           <svg class="pref-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
-      </div>
-
-      <!-- Data section -->
-      <div class="pref-section-title">Data</div>
-      <div class="pref-list">
-        <button class="pref-row" onclick="exportJSON()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span class="pref-row-label">Export as JSON</span>
-          <svg class="pref-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-        <button class="pref-row" onclick="exportCSV()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span class="pref-row-label">Export as CSV</span>
-          <svg class="pref-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-        <label class="pref-row" style="cursor:pointer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          <span class="pref-row-label">Import JSON</span>
-          <svg class="pref-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          <input type="file" accept=".json" style="display:none" onchange="importJSON(event)"/>
-        </label>
-      </div>
-
-      <!-- Danger Zone -->
-      <div class="pref-section-title" style="color:var(--no)">Danger Zone</div>
-      <div class="pref-list pref-list-danger">
         <button class="pref-row pref-row-signout" onclick="handleSignOut()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           <span class="pref-row-label">Sign Out</span>
           <svg class="pref-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
+      </div>
+
+      <div class="pref-list pref-list-danger" style="margin-top:8px">
         <button class="pref-row pref-row-delete" onclick="confirmDeleteAccount()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           <span class="pref-row-label">Delete Account</span>

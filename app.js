@@ -1070,18 +1070,24 @@ window.exportJSON = () => {
   toast('Exported JSON!', 'success');
 };
 
-window.exportCSV = () => {
-  if (allExams.length === 0) return toast('No exams to export.', 'error');
-  const cols = ['name','agency','status','lastDate','examDate','website','eligibility','syllabus','pattern','applied','pinned','tags'];
-  const rows = allExams.map(e =>
-    cols.map(c => {
-      const val = c === 'tags' ? (e.tags || []).join(';') : (e[c] ?? '');
-      return `"${String(val).replace(/"/g,'""')}"`;
-    }).join(',')
-  );
-  downloadFile([cols.join(','), ...rows].join('\n'), 'exams.csv', 'text/csv');
-  toast('Exported CSV!', 'success');
+window.toggleDataDropdown = () => {
+  const menu = document.getElementById('data-dd-menu');
+  const open = menu.style.display === 'none' || !menu.style.display;
+  menu.style.display = open ? 'block' : 'none';
+  if (open) {
+    setTimeout(() => document.addEventListener('click', closeDataDdOutside, { once: true }), 10);
+  }
 };
+
+function closeDataDdOutside(e) {
+  const wrap = document.getElementById('data-dd-wrap');
+  if (!wrap || !wrap.contains(e.target)) {
+    const menu = document.getElementById('data-dd-menu');
+    if (menu) menu.style.display = 'none';
+  } else {
+    setTimeout(() => document.addEventListener('click', closeDataDdOutside, { once: true }), 10);
+  }
+}
 
 window.importJSON = async (event) => {
   const file = event.target.files[0];
