@@ -538,6 +538,8 @@ function buildExpandStatsGrid(exam, gridClassName) {
   return statsGrid;
 }
 
+function expandBtnSep() { return el('div', { className: 'expand-btn-sep' }); }
+
 function buildExpandActions(exam, wrapClassName) {
   const actions = el('div', { className: wrapClassName });
 
@@ -545,12 +547,14 @@ function buildExpandActions(exam, wrapClassName) {
   detailBtn.appendChild(svgIcon('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>', 12));
   detailBtn.appendChild(document.createTextNode(' Full Details'));
   actions.appendChild(detailBtn);
+  actions.appendChild(expandBtnSep());
 
   if (!isOffline) {
     const editBtn = el('button', { className: 'expand-btn', 'data-action': 'open-edit', 'data-id': exam.id });
     editBtn.appendChild(svgIcon('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 12));
     editBtn.appendChild(document.createTextNode(' Edit'));
     actions.appendChild(editBtn);
+    actions.appendChild(expandBtnSep());
   }
 
   const pinBtn = el('button', { className: `expand-btn${exam.pinned ? ' expand-btn-pinned' : ''}`, 'data-action': 'toggle-pin', 'data-id': exam.id });
@@ -560,6 +564,7 @@ function buildExpandActions(exam, wrapClassName) {
   actions.appendChild(pinBtn);
 
   if (exam.website) {
+    actions.appendChild(expandBtnSep());
     const webBtn = el('a', { className: 'expand-btn', href: exam.website, target: '_blank', rel: 'noopener' });
     webBtn.appendChild(svgIcon('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>', 12));
     webBtn.appendChild(document.createTextNode(' Apply'));
@@ -575,14 +580,17 @@ function buildExpandRow(exam, colspan) {
   const td = el('td', { className: 'expand-cell', colSpan: String(colspan) });
   const inner = el('div', { className: 'expand-inner' });
 
-  inner.appendChild(buildExpandStatsGrid(exam, 'expand-stats'));
-
+  // Info zone: stats + notes side by side
+  const info = el('div', { className: 'expand-info' });
+  info.appendChild(buildExpandStatsGrid(exam, 'expand-stats'));
   if (exam.notes) {
     const notesEl = el('div', { className: 'expand-notes' });
     notesEl.textContent = exam.notes.length > 120 ? exam.notes.slice(0, 120) + '…' : exam.notes;
-    inner.appendChild(notesEl);
+    info.appendChild(notesEl);
   }
+  inner.appendChild(info);
 
+  // Action bar below
   inner.appendChild(buildExpandActions(exam, 'expand-actions'));
   td.appendChild(inner);
   tr.appendChild(td);
