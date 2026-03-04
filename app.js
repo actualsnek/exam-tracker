@@ -1266,8 +1266,13 @@ function parseMd(md) {
     return `<ol>${items}</ol>`;
   });
 
-  // Links
-  html = html.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // Links — sanitize URL to block javascript: and data: XSS vectors
+  html = html.replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => {
+    const trimmed = url.trim();
+    const safe = /^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed);
+    if (!safe) return escHtml(label);
+    return `<a href="${trimmed}" target="_blank" rel="noopener">${label}</a>`;
+  });
 
   // Paragraphs — wrap bare lines not already wrapped in tags
   html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
