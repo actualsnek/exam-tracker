@@ -88,10 +88,6 @@ function showAuthScreen() {
 
 function updateUserUI() {
   if (!currentUser) return;
-  const initials = (currentUser.displayName || currentUser.email || '?')
-    .split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
-  document.getElementById('user-avatar').textContent = initials;
-  document.getElementById('profile-avatar-big').textContent = initials;
   document.getElementById('profile-name-display').textContent = currentUser.displayName || '(no name)';
   document.getElementById('profile-email-display').textContent = currentUser.email || '';
   // Stat cards

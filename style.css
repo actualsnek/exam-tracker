@@ -146,6 +146,7 @@ a:hover { color: var(--accent-h); }
   margin-bottom: 4px;
 }
 .auth-logo span { color: var(--accent); }
+.auth-tagline { font-family: var(--font); font-size: 10px; color: var(--muted); letter-spacing: .3px; font-weight: 400; margin-top: 2px; opacity: .8; }
 .auth-sub { text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 24px; }
 
 .auth-tabs {
@@ -254,14 +255,16 @@ a:hover { color: var(--accent-h); }
   z-index: 100;
   gap: 8px;
 }
-.topbar-logo {
+.topbar-logo { 
   font-family: var(--serif);
   font-size: 16px;
   letter-spacing: -.3px;
   margin-right: auto;
   color: var(--text);
+  display: flex; flex-direction: column; gap: 1px;
 }
 .topbar-logo span { color: var(--accent); }
+.topbar-tagline { font-family: var(--font); font-size: 9px; color: var(--muted); letter-spacing: .3px; font-weight: 400; opacity: .8; }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
 
 .icon-btn {
@@ -1021,9 +1024,9 @@ td.td-eligible { text-align: center; width: 56px; min-width: 56px; }
 .pref-list-danger { border-color: rgba(248,113,113,.12); }
 .pref-row-signout { color: var(--text2); }
 .pref-row-signout svg:first-child { color: var(--muted); }
-.pref-row-delete { color: var(--no); }
+.pref-row-delete { color: var(--no); font-weight: 600; background: rgba(248,113,113,.05); }
 .pref-row-delete svg:first-child { color: var(--no); }
-.pref-row-delete:hover { background: rgba(248,113,113,.07); }
+.pref-row-delete:hover { background: rgba(248,113,113,.12); }
 .pref-row-delete .pref-chevron { color: var(--no); opacity: .5; }
 
 /* ════════════════════════════════════════
