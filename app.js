@@ -449,8 +449,12 @@ window.toggleResPopover = (id) => {
     pop.style.left = rect.left + 'px';
     pop.style.display = 'block';
     const handler = (e) => {
-      if (!wrap.contains(e.target)) {
+      if (!wrap.contains(e.target) && !pop.contains(e.target)) {
         pop.style.display = 'none';
+        document.removeEventListener('click', handler, true);
+      } else if (!wrap.contains(e.target) && pop.contains(e.target)) {
+        // click was on a link inside the popover — let it navigate, then close
+        setTimeout(() => { pop.style.display = 'none'; }, 0);
         document.removeEventListener('click', handler, true);
       }
     };
