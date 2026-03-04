@@ -398,9 +398,53 @@ function render() {
   const active = filterState.status || filterState.tag || filterState.agency || filterState.applied || filterState.search;
   qs('#filter-clear-btn').classList.toggle('show', !!active);
   updateUserDropdown();
+  updateSidebar();
 }
 
-function getFiltered() {
+function updateSidebar() {
+  const totalEl    = qs('#sb-total-val');
+  const appliedEl  = qs('#sb-applied-val');
+  const openEl     = qs('#sb-open-val');
+  const eligibleEl = qs('#sb-eligible-val');
+  const upcomingEl = qs('#sb-upcoming-list');
+  if (!totalEl) return;
+
+  const total   = exams.length;
+  const applied = exams.filter(e => e.applied).length;
+  const open    = exams.filter(e => computeStatus(e) === 'open').length;
+  const eligible = exams.filter(e => e.eligible === 'yes').length;
+
+  totalEl.textContent    = total;
+  appliedEl.textContent  = applied;
+  openEl.textContent     = open;
+  eligibleEl.textContent = eligible;
+
+  if (upcomingEl) {
+    const withDeadlines = exams
+      .filter(e => e.deadlineDate)
+      .sort((a, b) => new Date(a.deadlineDate) - new Date(b.deadlineDate))
+      .slice(0, 4);
+    if (withDeadlines.length === 0) {
+      upcomingEl.innerHTML = '<div class="sidebar-empty-note">No deadlines set</div>';
+    } else {
+      upcomingEl.innerHTML = '';
+      withDeadlines.forEach(e => {
+        const diff = diffDays(e.deadlineDate);
+        const urgency = diff === null ? '' : diff < 0 ? 'past' : diff <= 7 ? 'urgent' : diff <= 30 ? 'soon' : 'far';
+        const item = el('div', { className: `sidebar-upcoming-item ${urgency}` });
+        const name = el('div', { className: 'sidebar-upcoming-name' });
+        name.textContent = e.name;
+        const days = el('div', { className: 'sidebar-upcoming-days' });
+        days.textContent = diff === null ? '—' : diff < 0 ? 'Past' : diff === 0 ? 'Today!' : `${diff}d`;
+        item.appendChild(name);
+        item.appendChild(days);
+        upcomingEl.appendChild(item);
+      });
+    }
+  }
+}
+
+
   let list = [...exams];
 
   // Search
@@ -692,7 +736,7 @@ function renderTable(list) {
 
     // Expanded detail row
     if (isExpanded) {
-      tbody.appendChild(buildExpandRow(exam, 9));
+      tbody.appendChild(buildExpandRow(exam, 8));
     }
   });
 
