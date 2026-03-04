@@ -111,7 +111,7 @@ function examDocRef(id)  { return examsRef().doc(id); }
 
 async function loadData() {
   setSyncDot('saving');
-  const TIMEOUT = 15000;
+  const TIMEOUT = 5000;
   try {
     const race = await Promise.race([
       fetchAll(),
@@ -121,25 +121,18 @@ async function loadData() {
     setSyncDot('ok');
     return race;
   } catch (err) {
-    if (err.message === 'timeout') {
-      const cache = readOfflineCache();
-      if (cache) {
-        exams    = cache.exams    || [];
-        profile  = cache.profile  || {};
-        settings = cache.settings || {};
-        tags     = cache.tags     || [];
-        goOffline();
-        render();
-      } else {
-        hideLoading();
-        showScreen('app');
-        toast('Unable to load data. Check your connection.', 'err', false);
-      }
+    const cache = readOfflineCache();
+    if (cache) {
+      exams    = cache.exams    || [];
+      profile  = cache.profile  || {};
+      settings = cache.settings || {};
+      tags     = cache.tags     || [];
+      goOffline();
+      render();
     } else {
-      // Non-timeout error (permissions, etc) — still try to show app
       hideLoading();
       showScreen('app');
-      toast('Unable to load data: ' + (err.message || err.code || 'unknown error'), 'err', false);
+      toast('Unable to load data. Check your connection.', 'err', false);
     }
     setSyncDot('error');
     throw err;
@@ -164,7 +157,17 @@ async function fetchAll() {
   }
 
   exams = [];
-  examsSnap.forEach(doc => exams.push(doc.data()));
+  examsSnap.forEach(doc => {
+    const data = doc.data();
+    // Deserialize pattern rows from JSON string
+    if (data.pattern && data.pattern.rowsJson) {
+      try { data.pattern = { rows: JSON.parse(data.pattern.rowsJson) }; } catch(e) {}
+    }
+    if (!data.pattern || !data.pattern.rows) {
+      data.pattern = { rows: [['Stage','Type','Duration','Marks'],['—','—','—','—']] };
+    }
+    exams.push(data);
+  });
 
   // Seed defaults for new users
   if (tags.length === 0 && exams.length === 0) {
@@ -206,7 +209,7 @@ async function seedDefaults() {
       applied: false,
       pinned: false,
       eligibilityInfo: [],
-      pattern: { rows: [['Stage','Type','Duration','Marks'],['—','—','—','—']] },
+      pattern: { rowsJson: JSON.stringify([['Stage','Type','Duration','Marks'],['—','—','—','—']]) },
       syllabus: { link: '', curated: [] },
       createdAt: now(),
       updatedAt: now()
@@ -228,7 +231,12 @@ async function seedDefaults() {
 
 async function saveExamDoc(exam) {
   exam.updatedAt = now();
-  await examDocRef(exam.id).set(exam);
+  // Firestore doesn't support nested arrays - serialize pattern rows as JSON string
+  const toSave = { ...exam };
+  if (toSave.pattern && toSave.pattern.rows) {
+    toSave.pattern = { rowsJson: JSON.stringify(toSave.pattern.rows) };
+  }
+  await examDocRef(exam.id).set(toSave);
   writeOfflineCache();
 }
 
@@ -1228,7 +1236,7 @@ async function saveExamForm() {
         applied: false,
         pinned: false,
         eligibilityInfo: [],
-        pattern: { rows: [['Stage','Type','Duration','Marks'],['—','—','—','—']] },
+        pattern: { rowsJson: JSON.stringify([['Stage','Type','Duration','Marks'],['—','—','—','—']]) },
         syllabus: { link: '', curated: [] },
         createdAt: now()
       };
@@ -1893,7 +1901,11 @@ async function confirmImport() {
     const batch = db.batch();
     _importQueue.forEach(exam => {
       exam.updatedAt = now();
-      batch.set(examDocRef(exam.id), exam);
+      const toSave = { ...exam };
+      if (toSave.pattern && toSave.pattern.rows) {
+        toSave.pattern = { rowsJson: JSON.stringify(toSave.pattern.rows) };
+      }
+      batch.set(examDocRef(exam.id), toSave);
     });
     await batch.commit();
     exams.push(..._importQueue);
