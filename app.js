@@ -302,13 +302,10 @@ window.toggleApplied = async (id) => {
   const exam = allExams.find(e => e.id === id);
   if (!exam) return;
   const newVal = !exam.applied;
-  exam.applied = newVal;
-  renderTable();
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { applied: newVal });
+    // onSnapshot will update allExams and re-render
   } catch (e) {
-    exam.applied = !newVal;
-    renderTable();
     toast('Update failed.', 'error');
   }
 };
@@ -321,15 +318,10 @@ window.togglePin = async (id) => {
     const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
     if (pinnedCount >= 3) return toast('Max 3 pinned exams. Unpin one first.', 'error');
   }
-  exam.pinned = newVal;
-  renderTable();
-  renderCountdowns();
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { pinned: newVal });
+    // onSnapshot will update allExams and re-render
   } catch (e) {
-    exam.pinned = !newVal;
-    renderTable();
-    renderCountdowns();
     toast('Update failed.', 'error');
   }
 };
@@ -792,34 +784,74 @@ window.handleSignOut = async () => {
   await signOut(auth);
 };
 
-window.handleEditDisplayName = async () => {
-  const current = currentUser.displayName || '';
-  const name = window.prompt('Enter new display name:', current);
-  if (name === null) return; // cancelled
-  if (!name.trim()) return toast('Name cannot be empty.', 'error');
-  try {
-    await updateProfile(currentUser, { displayName: name.trim() });
-    updateUserUI();
-    toast('Display name updated!', 'success');
-  } catch (e) {
-    toast('Failed to update name.', 'error');
-  }
+window.handleEditDisplayName = () => {
+  openInputModal(
+    'Edit Display Name',
+    'Display Name',
+    'text',
+    currentUser.displayName || '',
+    'Your name',
+    async (value) => {
+      if (!value.trim()) return toast('Name cannot be empty.', 'error');
+      try {
+        await updateProfile(currentUser, { displayName: value.trim() });
+        updateUserUI();
+        toast('Display name updated!', 'success');
+      } catch (e) {
+        toast('Failed to update name.', 'error');
+      }
+    }
+  );
 };
 
-window.handleChangePassword = async () => {
-  const newPass = window.prompt('Enter new password (min 6 characters):');
-  if (newPass === null) return; // cancelled
-  if (!newPass || newPass.length < 6) return toast('Enter a new password (min 6 chars).', 'error');
-  try {
-    await updatePassword(currentUser, newPass);
-    toast('Password updated!', 'success');
-  } catch (e) {
-    if (e.code === 'auth/requires-recent-login') {
-      toast('Please sign out and sign back in, then try again.', 'error');
-    } else {
-      toast('Failed to update password.', 'error');
+window.handleChangePassword = () => {
+  openInputModal(
+    'Change Password',
+    'New Password',
+    'password',
+    '',
+    'min 6 characters',
+    async (value) => {
+      if (!value || value.length < 6) return toast('Enter a new password (min 6 chars).', 'error');
+      try {
+        await updatePassword(currentUser, value);
+        toast('Password updated!', 'success');
+      } catch (e) {
+        if (e.code === 'auth/requires-recent-login') {
+          toast('Please sign out and sign back in, then try again.', 'error');
+        } else {
+          toast('Failed to update password.', 'error');
+        }
+      }
     }
-  }
+  );
+};
+
+// ── Input Modal (replaces window.prompt) ─────────────
+let inputModalCallback = null;
+
+function openInputModal(title, label, type, defaultValue, placeholder, callback) {
+  document.getElementById('input-modal-title').textContent = title;
+  document.getElementById('input-modal-label').textContent = label;
+  const field = document.getElementById('input-modal-field');
+  field.type        = type;
+  field.value       = defaultValue;
+  field.placeholder = placeholder;
+  inputModalCallback = callback;
+  const confirmBtn = document.getElementById('input-modal-confirm-btn');
+  confirmBtn.onclick = async () => {
+    if (inputModalCallback) await inputModalCallback(field.value);
+    closeInputModal();
+  };
+  // Allow Enter key to submit
+  field.onkeydown = (e) => { if (e.key === 'Enter') confirmBtn.click(); };
+  document.getElementById('input-modal').style.display = 'flex';
+  setTimeout(() => field.focus(), 50);
+}
+
+window.closeInputModal = () => {
+  document.getElementById('input-modal').style.display = 'none';
+  inputModalCallback = null;
 };
 
 window.handleForgotPasswordFromProfile = async () => {
@@ -947,13 +979,14 @@ window.importJSON = async (event) => {
       }));
 
     if (toImport.length === 0) return toast('No valid exams found in file.', 'error');
+    if (toImport.length > 60) return toast('Import limit is 60 exams per file.', 'error');
 
     // Firestore batch limit is 500 — chunk to be safe
     const CHUNK = 400;
     for (let i = 0; i < toImport.length; i += CHUNK) {
       const batch = writeBatch(db);
       toImport.slice(i, i + CHUNK).forEach(clean => {
-        batch.set(doc(examsRef()), clean);
+        batch.set(doc(collection(db, 'users', currentUser.uid, 'exams')), clean);
       });
       await batch.commit();
     }
