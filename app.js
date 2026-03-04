@@ -250,7 +250,8 @@ window.saveExam = async () => {
     pattern:     modalDraft.pattern,
     tags:        document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
     applied:     document.getElementById('f-applied').checked,
-    eligible:    document.getElementById('f-eligible') ? document.getElementById('f-eligible').checked : false,
+    year:        document.getElementById('f-year').value.trim(),
+    cycle:       document.getElementById('f-cycle').value.trim(),
     pinned,
     resources:   modalResources.slice(),
   };
@@ -387,12 +388,11 @@ function setModalDraftPreview(field) {
 window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
-  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags'].forEach(id => {
+  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags','f-year','f-cycle'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('f-status').value = 'open';
   document.getElementById('f-applied').checked = false;
-  if (document.getElementById('f-eligible')) document.getElementById('f-eligible').checked = false;
   document.getElementById('f-pinned').checked = false;
   // Reset draft
   modalDraft = { eligibility: '', syllabus: '', pattern: '' };
@@ -415,7 +415,8 @@ window.openEditExam = (id) => {
   document.getElementById('f-website').value    = exam.website || '';
   document.getElementById('f-tags').value       = (exam.tags || []).join(', ');
   document.getElementById('f-applied').checked  = !!exam.applied;
-  if (document.getElementById('f-eligible')) document.getElementById('f-eligible').checked = !!exam.eligible;
+  document.getElementById('f-year').value        = exam.year  || '';
+  document.getElementById('f-cycle').value       = exam.cycle || '';
   document.getElementById('f-pinned').checked   = !!exam.pinned;
   // Load draft from exam data
   modalDraft = {
@@ -586,7 +587,11 @@ function tableRowHTML(exam, num) {
     else                   deadlineHTML = `<span class="deadline-normal">${formatDate(dateStr)}</span>`;
   }
 
-  // Tags in main row — show first tag only
+  // Year / Cycle
+  let cycleHTML = '<span style="color:var(--muted)">—</span>';
+  if (exam.year || exam.cycle) {
+    cycleHTML = escHtml([exam.year, exam.cycle].filter(Boolean).join(' / '));
+  }
   const tags = exam.tags || [];
   let tagsHTML = '<span style="color:var(--muted)">—</span>';
   if (tags.length > 0) {
@@ -596,8 +601,6 @@ function tableRowHTML(exam, num) {
 
   const statusCls   = exam.status || 'open';
   const statusLabel = capitalize(statusCls);
-  const eligibleCls = exam.eligible ? 'eligible-yes' : 'eligible-no';
-  const eligibleLbl = exam.eligible ? 'Yes' : 'No';
 
   // ── EXPANDED PANEL ──────────────────────────────
   const resItems = (exam.resources || []);
@@ -605,7 +608,7 @@ function tableRowHTML(exam, num) {
 
   const detailRow = isExpanded ? `
   <tr class="detail-row">
-    <td colspan="11">
+    <td colspan="10">
       <div class="exp-panel">
 
         <!-- Top row: Eligibility · Exam Pattern · Syllabus | Website · Resources -->
@@ -675,11 +678,11 @@ function tableRowHTML(exam, num) {
     </td>
     <td class="td-num">${num}</td>
     <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
+    <td class="td-cycle">${cycleHTML}</td>
     <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.agency || '—')}</td>
     <td class="td-tag">${tagsHTML}</td>
     <td class="td-deadline">${deadlineHTML}</td>
     <td class="td-status"><span class="status-pill ${statusCls}">${statusLabel}</span></td>
-    <td class="td-eligible"><span class="eligible-pill ${eligibleCls}">${eligibleLbl}</span></td>
     <td class="td-applied">
       <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
     </td>
