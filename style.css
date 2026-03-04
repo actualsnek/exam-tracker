@@ -390,6 +390,23 @@ a:hover { color: var(--accent-h); }
 .filter-sep { width: 1px; height: 18px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
 .filter-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
+.sort-wrap {
+  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+}
+.sort-select {
+  appearance: none; -webkit-appearance: none;
+  padding: 5px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  background: var(--bg2); color: var(--text2);
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  font-family: var(--font);
+  white-space: nowrap; transition: all .15s;
+  outline: none;
+}
+.sort-select:hover { border-color: var(--muted); color: var(--text); }
+.sort-select:focus { border-color: var(--accent); color: var(--text); }
+
 .chip {
   padding: 5px 13px;
   border-radius: 100px;

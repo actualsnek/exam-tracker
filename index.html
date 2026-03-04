@@ -123,6 +123,22 @@
 
     <div class="filter-sep"></div>
 
+    <!-- Sort dropdown -->
+    <div class="sort-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;color:var(--muted)"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+      <select id="sort-select" class="sort-select" onchange="setSortOrder(this.value)">
+        <option value="createdAt_desc">Added ↓</option>
+        <option value="createdAt_asc">Added ↑</option>
+        <option value="deadline_asc">Deadline ↑</option>
+        <option value="deadline_desc">Deadline ↓</option>
+        <option value="name_asc">Name A–Z</option>
+        <option value="name_desc">Name Z–A</option>
+        <option value="status_asc">Status</option>
+      </select>
+    </div>
+
+    <div class="filter-sep"></div>
+
     <!-- Right side: search + add -->
     <div class="filter-right">
       <!-- Inline search box -->

@@ -576,7 +576,7 @@ function tableRowHTML(exam, num) {
 
           ${exam.website || resItems.length > 0 ? '<div class="exp-field-sep"></div>' : ''}
 
-          ${exam.website ? `<a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="exp-field-btn exp-field-link">
+          ${exam.website ? `<a href="${exam.website}" target="_blank" rel="noopener" class="exp-field-btn exp-field-link">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             ${escHtml(websiteHostname)}
           </a>` : ''}
@@ -594,7 +594,7 @@ function tableRowHTML(exam, num) {
                       ${r.type === 'PDF'
                         ? `<svg class="res-pop-icon res-pop-icon-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
                         : `<svg class="res-pop-icon res-pop-icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`}
-                      <a href="${escHtml(r.url)}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.label)}</a>
+                      <a href="${r.url}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.label)}</a>
                     </div>`).join('')}
               </div>
             </div>
