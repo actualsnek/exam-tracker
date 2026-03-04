@@ -44,6 +44,7 @@
   --shadow: 0 4px 24px rgba(0,0,0,.4);
   --shadow-lg: 0 8px 48px rgba(0,0,0,.6);
   --topbar-h: 50px;
+  --countdown-h: 96px;
   --transition: .18s ease;
 }
 
@@ -361,6 +362,9 @@ a:hover { color: var(--accent-h); }
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
+  position: sticky;
+  top: var(--topbar-h);
+  z-index: 95;
 }
 .countdown-strip::-webkit-scrollbar { display: none; }
 .countdown-label {
@@ -405,7 +409,7 @@ a:hover { color: var(--accent-h); }
   align-items: center;
   flex-wrap: nowrap;
   position: sticky;
-  top: var(--topbar-h);
+  top: calc(var(--topbar-h) + var(--countdown-h));
   z-index: 90;
   overflow: visible;
 }
@@ -1356,3 +1360,51 @@ td.td-eligible { text-align: center; width: 56px; min-width: 56px; }
 .res-pop-icon { width: 14px; height: 14px; flex-shrink: 0; }
 .res-pop-icon-pdf  { color: #93c5fd; }
 .res-pop-icon-link { color: var(--accent); }
+
+/* ════════════════════════════════════════
+   MODIFIER CLASSES (consolidated from inline styles)
+════════════════════════════════════════ */
+
+/* btn-primary variants */
+.btn-primary--auto { width: auto; padding: 9px 20px; margin: 0; }
+.btn-primary--cta  { width: auto; padding: 10px 24px; margin-top: 16px; }
+
+/* field-group flex variants */
+.field-group--flex-1 { flex: 1; }
+.field-group--flex-2 { flex: 2; }
+
+/* field-input flex variants */
+.field-input--flex-1  { flex: 1; }
+.field-input--flex-15 { flex: 1.5; }
+
+/* form-row variants */
+.form-row--toggles { gap: 20px; align-items: center; padding-top: 4px; }
+
+/* modal-body variants */
+.modal-body--flush { gap: 0; padding: 0; }
+
+/* pref-list spacing variant */
+.pref-list--mt { margin-top: 8px; }
+
+/* label hint text */
+.label-hint { color: var(--muted); font-weight: 400; }
+
+/* confirm modal content */
+.confirm-message { color: var(--text2); font-size: 13px; line-height: 1.6; }
+.confirm-password-group { margin-top: 12px; }
+
+/* data-dd-item label cursor */
+.data-dd-item--label { cursor: pointer; }
+
+/* panel footer button row */
+.panel-footer-actions { display: flex; gap: 8px; }
+
+/* md-split fill variant (fv edit mode) */
+.md-split--fill { flex: 1; min-height: 0; }
+
+/* md-back-btn SVG size */
+.md-back-icon { width: 14px; height: 14px; }
+
+/* tag-dd-btn inline SVG sizes */
+.dd-btn-icon    { width: 12px; height: 12px; flex-shrink: 0; }
+.dd-btn-chevron { width: 10px; height: 10px; flex-shrink: 0; }

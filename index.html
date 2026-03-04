@@ -88,7 +88,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export JSON
           </button>
-          <label class="data-dd-item" style="cursor:pointer">
+          <label class="data-dd-item data-dd-item--label">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Import JSON
             <input type="file" accept=".json" style="display:none" onchange="importJSON(event); document.getElementById('data-dd-menu').style.display='none'"/>
@@ -118,9 +118,9 @@
     <!-- Status dropdown -->
     <div class="tag-dd-wrap" id="status-dd-wrap">
       <button class="tag-dd-btn" id="status-dd-btn" onclick="toggleStatusDropdown()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dd-btn-icon"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
         <span id="status-dd-label">Status</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dd-btn-chevron"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="tag-dd-menu" id="status-dd-menu" style="display:none">
         <div id="status-dd-list">
@@ -136,10 +136,10 @@
     <!-- Tag dropdown (unchanged) -->
     <div class="tag-dd-wrap" id="tag-dd-wrap">
       <button class="tag-dd-btn" onclick="toggleTagDropdown()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dd-btn-icon"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
         Tag
         <span class="tag-active-count" id="tag-active-count" style="display:none">0</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dd-btn-chevron"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="tag-dd-menu" id="tag-dd-menu" style="display:none">
         <div id="tag-dd-list"><div class="tag-dd-empty">No tags yet</div></div>
@@ -149,9 +149,9 @@
     <!-- Sort dropdown -->
     <div class="tag-dd-wrap" id="sort-dd-wrap">
       <button class="tag-dd-btn" id="sort-dd-btn" onclick="toggleSortDropdown()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="dd-btn-icon"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
         <span id="sort-dd-label">Sort</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="dd-btn-chevron"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="tag-dd-menu" id="sort-dd-menu" style="display:none">
         <div id="sort-dd-list">
@@ -191,7 +191,7 @@
       <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
       <div class="empty-title">No exams yet</div>
       <div class="empty-sub">Add your first exam to get started</div>
-      <button class="btn-primary" style="margin-top:16px;width:auto;padding:10px 24px;" onclick="openAddExam()">Add Exam</button>
+      <button class="btn-primary btn-primary--cta" onclick="openAddExam()">Add Exam</button>
     </div>
 
     <div class="table-scroll" id="table-scroll">
@@ -232,18 +232,18 @@
       <input type="hidden" id="exam-id"/>
 
       <div class="form-row">
-        <div class="field-group" style="flex:2">
+        <div class="field-group field-group--flex-2">
           <label class="field-label">Exam Name *</label>
           <input type="text" id="f-name" class="field-input" placeholder="e.g. SSC CGL 2025"/>
         </div>
-        <div class="field-group" style="flex:1">
+        <div class="field-group field-group--flex-1">
           <label class="field-label">Agency *</label>
           <input type="text" id="f-agency" class="field-input" placeholder="e.g. SSC"/>
         </div>
       </div>
 
       <div class="form-row">
-        <div class="field-group" style="flex:1">
+        <div class="field-group field-group--flex-1">
           <label class="field-label">Status</label>
           <select id="f-status" class="field-input field-select">
             <option value="open">Open</option>
@@ -251,11 +251,11 @@
             <option value="closed">Closed</option>
           </select>
         </div>
-        <div class="field-group" style="flex:1">
+        <div class="field-group field-group--flex-1">
           <label class="field-label">Last Apply Date</label>
           <input type="date" id="f-last-date" class="field-input"/>
         </div>
-        <div class="field-group" style="flex:1">
+        <div class="field-group field-group--flex-1">
           <label class="field-label">Exam Date</label>
           <input type="date" id="f-exam-date" class="field-input"/>
         </div>
@@ -291,7 +291,7 @@
       </div>
 
       <div class="field-group">
-        <label class="field-label">Tags <span style="color:var(--muted);font-weight:400">(comma separated)</span></label>
+        <label class="field-label">Tags <span class="label-hint">(comma separated)</span></label>
         <input type="text" id="f-tags" class="field-input" placeholder="Banking, Central Govt, State…"/>
       </div>
 
@@ -303,13 +303,13 @@
           <select class="field-input res-type-sel" id="res-type-sel" onchange="onResTypeChange()">
             <option value="LINK">LINK</option><option value="PDF">PDF</option>
           </select>
-          <input class="field-input" id="res-label-input" placeholder="Label text…" style="flex:1"/>
-          <input class="field-input" id="res-url-input" placeholder="URL…" style="flex:1.5"/>
+          <input class="field-input field-input--flex-1" id="res-label-input" placeholder="Label text…"/>
+          <input class="field-input field-input--flex-15" id="res-url-input" placeholder="URL…"/>
           <button type="button" class="res-add-btn" onclick="modalAddResource()">+ Add</button>
         </div>
       </div>
 
-      <div class="form-row" style="gap:20px;align-items:center;padding-top:4px">
+      <div class="form-row form-row--toggles">
         <label class="toggle-label">
           <input type="checkbox" id="f-applied" class="toggle-check"/>
           <div class="toggle-track"></div>
@@ -337,7 +337,7 @@
       <div class="modal-title">Profile & Settings</div>
       <button class="modal-close" onclick="closeProfile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div class="modal-body" style="gap:0;padding:0">
+    <div class="modal-body modal-body--flush">
 
       <!-- Avatar + name + email -->
       <div class="profile-hero">
@@ -382,7 +382,7 @@
         </button>
       </div>
 
-      <div class="pref-list pref-list-danger" style="margin-top:8px">
+      <div class="pref-list pref-list-danger pref-list--mt">
         <button class="pref-row pref-row-delete" onclick="confirmDeleteAccount()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           <span class="pref-row-label">Delete Account</span>
@@ -404,8 +404,8 @@
       <div class="modal-title" id="confirm-title">Confirm</div>
     </div>
     <div class="modal-body">
-      <p id="confirm-message" style="color:var(--text2);font-size:13px;line-height:1.6"></p>
-      <div id="confirm-password-group" style="display:none;margin-top:12px">
+      <p id="confirm-message" class="confirm-message"></p>
+      <div id="confirm-password-group" class="confirm-password-group" style="display:none">
         <label class="field-label">Enter your password to confirm</label>
         <input type="password" id="confirm-password-input" class="field-input" placeholder="Your current password"/>
       </div>
@@ -423,7 +423,7 @@
 
     <div class="md-panel-header">
       <button class="md-back-btn" onclick="closeMdPanel()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="md-back-icon"><polyline points="15 18 9 12 15 6"/></svg>
       </button>
       <div>
         <div class="md-panel-title" id="md-panel-title">Syllabus — SSC CGL 2025</div>
@@ -464,9 +464,9 @@
 
     <div class="md-panel-footer">
       <span class="md-save-status" id="md-save-status"></span>
-      <div style="display:flex;gap:8px">
+      <div class="panel-footer-actions">
         <button class="btn-ghost" onclick="closeMdPanel()">Cancel</button>
-        <button class="btn-primary" style="width:auto;padding:9px 20px;margin:0" onclick="saveMdPanel()">Save</button>
+        <button class="btn-primary btn-primary--auto" onclick="saveMdPanel()">Save</button>
       </div>
     </div>
 
@@ -495,7 +495,7 @@
     <div id="fv-edit-mode" style="display:none">
       <div class="md-panel-header">
         <button class="md-back-btn" onclick="switchToViewMode()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="md-back-icon"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div>
           <div class="md-panel-title" id="fv-edit-title">Edit</div>
@@ -518,7 +518,7 @@
       <button class="md-tool" onclick="mdInsert('> ','')" title="Blockquote"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg></button>
       <button class="md-tool" onclick="mdInsert('`','`')" title="Inline Code"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
       </div>
-      <div class="md-split" style="flex:1;min-height:0">
+      <div class="md-split md-split--fill">
         <div class="md-pane md-write-pane">
           <div class="md-pane-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> WRITE</div>
           <textarea id="fv-editor-textarea" class="md-textarea" oninput="fvLivePreview()" placeholder="Write in Markdown…"></textarea>
@@ -531,9 +531,9 @@
       </div>
       <div class="md-panel-footer">
         <span class="md-save-status" id="fv-save-status"></span>
-        <div style="display:flex;gap:8px">
+        <div class="panel-footer-actions">
           <button class="btn-ghost" onclick="switchToViewMode()">Cancel</button>
-          <button class="btn-primary" style="width:auto;padding:9px 20px;margin:0" onclick="saveFvPanel()">Save Changes</button>
+          <button class="btn-primary btn-primary--auto" onclick="saveFvPanel()">Save Changes</button>
         </div>
       </div>
     </div>
@@ -558,7 +558,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeInputModal()">Cancel</button>
-      <button class="btn-primary" id="input-modal-confirm-btn" style="width:auto;padding:9px 20px;margin:0">Save</button>
+      <button class="btn-primary btn-primary--auto" id="input-modal-confirm-btn">Save</button>
     </div>
   </div>
 </div>
