@@ -1062,10 +1062,16 @@ window.confirmDeleteAccount = () => {
 // ════════════════════════════════════════════════════
 
 window.exportJSON = () => {
-  const data = allExams.map(e => {
-    const { id, createdAt, ...rest } = e;
-    return rest;
-  });
+  const data = allExams.map(e => ({
+    name:        e.name        || '',
+    agency:      e.agency      || '',
+    tags:        Array.isArray(e.tags) ? e.tags : [],
+    syllabus:    e.syllabus    || '',
+    eligibility: e.eligibility || '',
+    pattern:     e.pattern     || '',
+    website:     e.website     || '',
+    resources:   Array.isArray(e.resources) ? e.resources : [],
+  }));
   downloadFile(JSON.stringify(data, null, 2), 'exams.json', 'application/json');
   toast('Exported JSON!', 'success');
 };
@@ -1103,15 +1109,15 @@ window.importJSON = async (event) => {
       .map(exam => ({
         name:        String(exam.name || ''),
         agency:      String(exam.agency || ''),
-        status:      ['open','upcoming','closed'].includes(exam.status) ? exam.status : 'open',
-        lastDate:    exam.lastDate || '',
-        examDate:    exam.examDate || '',
+        status:      'open',
+        lastDate:    '',
+        examDate:    '',
         website:     exam.website || '',
         eligibility: exam.eligibility || '',
         syllabus:    exam.syllabus || '',
         pattern:     exam.pattern || '',
         tags:        Array.isArray(exam.tags) ? exam.tags : [],
-        applied:     !!exam.applied,
+        applied:     false,
         pinned:      false,
         resources:   Array.isArray(exam.resources)
                        ? exam.resources.filter(r => r.type && r.label && r.url)
