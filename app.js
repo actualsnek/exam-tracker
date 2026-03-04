@@ -1509,3 +1509,15 @@ function escHtml(s) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
+
+// Sync horizontal scroll between fixed header and table body
+(function syncTableScroll() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const headerWrap = document.querySelector('.table-header-wrap');
+    const bodyScroll = document.getElementById('table-scroll');
+    if (!headerWrap || !bodyScroll) return;
+    bodyScroll.addEventListener('scroll', () => {
+      headerWrap.scrollLeft = bodyScroll.scrollLeft;
+    });
+  });
+})();
