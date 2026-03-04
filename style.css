@@ -992,29 +992,24 @@ td.td-eligible { text-align: center; min-width: 70px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* md field trigger inside exam modal */
-.md-field-row {
-  display: flex; align-items: stretch; gap: 8px;
-}
-.md-field-preview {
-  flex: 1; min-height: 52px; max-height: 80px; overflow: hidden;
+/* compact md trigger button in exam modal */
+.md-compact-btn {
+  width: 100%; display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px;
   background: var(--bg2); border: 1px solid var(--border);
-  border-radius: var(--r); padding: 8px 12px;
-  font-size: 12px; color: var(--text2); line-height: 1.5;
-  cursor: pointer; transition: border-color var(--transition);
-  white-space: pre-wrap; word-break: break-word;
-  position: relative;
+  border-radius: var(--r); cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  text-align: left;
 }
-.md-field-preview:hover { border-color: var(--accent); }
-.md-field-empty { color: var(--muted); font-style: italic; font-size: 12px; }
-.md-field-btn {
-  padding: 0 12px; flex-shrink: 0;
-  background: var(--accent-bg); border: 1px solid var(--accent-soft);
-  color: var(--accent); font-size: 11px; font-weight: 500;
-  border-radius: var(--r); cursor: pointer; white-space: nowrap;
-  transition: all var(--transition);
+.md-compact-btn svg { width: 13px; height: 13px; color: var(--muted); flex-shrink: 0; }
+.md-compact-btn:hover { border-color: var(--accent); background: var(--accent-bg); }
+.md-compact-btn:hover svg { color: var(--accent); }
+.md-compact-btn span:nth-child(2) { flex: 1; font-size: 12px; color: var(--text2); }
+.md-compact-btn.has-content span:nth-child(2) { color: var(--text); }
+.md-compact-arrow {
+  font-size: 11px; color: var(--accent); font-weight: 500;
+  white-space: nowrap; flex-shrink: 0;
 }
-.md-field-btn:hover { background: var(--accent); color: #fff; }
 
 /* ════════════════════════════════════════
    MARKDOWN EDITOR PANEL

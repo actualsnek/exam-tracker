@@ -328,20 +328,20 @@ window.togglePin = async (id) => {
 let modalDraft = { eligibility: '', syllabus: '', pattern: '' };
 
 function setModalDraftPreview(field) {
-  const el = document.getElementById('prev-' + field);
-  if (!el) return;
+  const statusEl = document.getElementById('md-status-' + field);
+  const btn      = document.getElementById('btn-' + field);
+  if (!statusEl || !btn) return;
   const val = modalDraft[field];
   if (val && val.trim()) {
-    // Strip markdown for preview
-    const plain = val
-      .replace(/#{1,6} /g, '').replace(/\*\*(.+?)\*\*/g, '$1')
-      .replace(/\*(.+?)\*/g, '$1').replace(/`(.+?)`/g, '$1')
-      .replace(/^[-*] /gm, '• ').replace(/^\d+\. /gm, '')
-      .replace(/\[(.+?)\]\(.+?\)/g, '$1').replace(/^---$/gm, '').trim();
-    el.innerHTML = `<span style="white-space:pre-wrap">${escHtml(plain)}</span>`;
+    // Show first line as status
+    const firstLine = val.split('\n').find(l => l.trim()) || '';
+    const plain = firstLine.replace(/#{1,6} /g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`(.+?)`/g,'$1').trim();
+    statusEl.textContent = plain ? plain.substring(0, 60) + (plain.length > 60 ? '…' : '') : 'Content added ✓';
+    btn.classList.add('has-content');
   } else {
-    const labels = { eligibility: 'eligibility', syllabus: 'syllabus', pattern: 'exam pattern' };
-    el.innerHTML = `<span class="md-field-empty">Click to add ${labels[field]}…</span>`;
+    const labels = { eligibility: 'Not added', syllabus: 'Not added', pattern: 'Not added' };
+    statusEl.textContent = labels[field];
+    btn.classList.remove('has-content');
   }
 }
 
