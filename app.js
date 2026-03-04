@@ -32,6 +32,7 @@ let offlinePollTimer = null;
 let activePanelExamId = null;
 let activeTabIndex   = 0;
 let panelMode        = null; // current panel mode string
+let expandedExamIds  = new Set(); // ids of expanded rows/cards
 
 // ── SECTION 3: Constants ─────────────────────────────────────────
 const DEFAULT_TAGS = [
@@ -339,17 +340,9 @@ function computeStatus(exam) {
   return diffDays(exam.deadlineDate) >= 0 ? 'open' : 'closed';
 }
 
-function deadlineClass(diff) {
-  if (diff === null) return 'dl-none';
-  if (diff < 0)  return 'dl-past';
-  if (diff === 0) return 'dl-today';
-  if (diff <= 30) return 'dl-soon';
-  return 'dl-far';
-}
-
 function deadlineDisplay(exam) {
   const diff = diffDays(exam.deadlineDate);
-  const cls  = deadlineClass(diff);
+  const cls  = diff === null ? 'dl-none' : diff < 0 ? 'dl-past' : diff === 0 ? 'dl-today' : diff <= 30 ? 'dl-soon' : 'dl-far';
   const span = el('span', { className: cls });
   if (diff === null) {
     span.textContent = '—';
@@ -399,8 +392,11 @@ function render() {
   const filtered = getFiltered();
   renderTable(filtered);
   renderCards(filtered);
-  updateFilterCount(filtered.length);
-  updateFilterClearBtn();
+  const n = filtered.length;
+  const fc = qs('#filter-count');
+  if (fc) fc.textContent = `${n} exam${n !== 1 ? 's' : ''}`;
+  const active = filterState.status || filterState.tag || filterState.agency || filterState.applied || filterState.search;
+  qs('#filter-clear-btn').classList.toggle('show', !!active);
   updateUserDropdown();
 }
 
@@ -460,16 +456,6 @@ function getFiltered() {
   return list;
 }
 
-function updateFilterCount(n) {
-  const el2 = qs('#filter-count');
-  if (el2) el2.textContent = `${n} exam${n !== 1 ? 's' : ''}`;
-}
-
-function updateFilterClearBtn() {
-  const active = filterState.status || filterState.tag || filterState.agency || filterState.applied || filterState.search;
-  qs('#filter-clear-btn').classList.toggle('show', !!active);
-}
-
 function updateFilterSelects() {
   // Tag select
   const tagSel = qs('#filter-tag');
@@ -515,6 +501,94 @@ function updateUserDropdown() {
 }
 
 // ── SECTION 10: Render Table + Cards ─────────────────────────────
+// ── Shared expand helpers (used by both table rows and cards) ─────
+
+function buildExpandStatItems(exam) {
+  const items = [];
+  if (exam.examType === 'job') {
+    if (exam.vacancies) items.push(['Vacancies', exam.vacancies]);
+    if (exam.pay)       items.push(['Pay Scale', exam.pay]);
+    if (exam.posts)     items.push(['Posts', exam.posts]);
+  } else {
+    if (exam.seats)   items.push(['Seats', exam.seats]);
+    if (exam.subject) items.push(['Subject', exam.subject]);
+  }
+  if (exam.age) items.push(['Age Limit', exam.age]);
+  if (exam.fee) items.push(['Fee', exam.fee]);
+  return items;
+}
+
+function buildExpandStatsGrid(exam, gridClassName) {
+  const statItems = buildExpandStatItems(exam);
+  const statsGrid = el('div', { className: gridClassName });
+  if (statItems.length === 0) {
+    const none = el('span', { className: 'expand-empty' });
+    none.textContent = 'No extra details added yet.';
+    statsGrid.appendChild(none);
+  } else {
+    statItems.forEach(([k, v]) => {
+      const item = el('div', { className: 'expand-stat-item' });
+      const key  = el('span', { className: 'expand-stat-key' }); key.textContent = k;
+      const val  = el('span', { className: 'expand-stat-val' }); val.textContent = v;
+      item.appendChild(key);
+      item.appendChild(val);
+      statsGrid.appendChild(item);
+    });
+  }
+  return statsGrid;
+}
+
+function buildExpandActions(exam, wrapClassName) {
+  const actions = el('div', { className: wrapClassName });
+
+  const detailBtn = el('button', { className: 'expand-btn expand-btn-primary', 'data-action': 'open-detail', 'data-id': exam.id });
+  detailBtn.appendChild(svgIcon('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>', 12));
+  detailBtn.appendChild(document.createTextNode(' Full Details'));
+  actions.appendChild(detailBtn);
+
+  if (!isOffline) {
+    const editBtn = el('button', { className: 'expand-btn', 'data-action': 'open-edit', 'data-id': exam.id });
+    editBtn.appendChild(svgIcon('<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>', 12));
+    editBtn.appendChild(document.createTextNode(' Edit'));
+    actions.appendChild(editBtn);
+  }
+
+  const pinBtn = el('button', { className: `expand-btn${exam.pinned ? ' expand-btn-pinned' : ''}`, 'data-action': 'toggle-pin', 'data-id': exam.id });
+  pinBtn.appendChild(svgIcon('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>', 12));
+  pinBtn.appendChild(document.createTextNode(exam.pinned ? ' Pinned' : ' Pin'));
+  if (isOffline) pinBtn.disabled = true;
+  actions.appendChild(pinBtn);
+
+  if (exam.website) {
+    const webBtn = el('a', { className: 'expand-btn', href: exam.website, target: '_blank', rel: 'noopener' });
+    webBtn.appendChild(svgIcon('<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>', 12));
+    webBtn.appendChild(document.createTextNode(' Apply'));
+    actions.appendChild(webBtn);
+  }
+
+  return actions;
+}
+
+function buildExpandRow(exam, colspan) {
+  const tr = el('tr', { className: 'expand-row' });
+  tr.dataset.expandId = exam.id;
+  const td = el('td', { className: 'expand-cell', colSpan: String(colspan) });
+  const inner = el('div', { className: 'expand-inner' });
+
+  inner.appendChild(buildExpandStatsGrid(exam, 'expand-stats'));
+
+  if (exam.notes) {
+    const notesEl = el('div', { className: 'expand-notes' });
+    notesEl.textContent = exam.notes.length > 120 ? exam.notes.slice(0, 120) + '…' : exam.notes;
+    inner.appendChild(notesEl);
+  }
+
+  inner.appendChild(buildExpandActions(exam, 'expand-actions'));
+  td.appendChild(inner);
+  tr.appendChild(td);
+  return tr;
+}
+
 function renderTable(list) {
   const tbody = qs('#exam-tbody');
   const empty = qs('#table-empty');
@@ -535,10 +609,19 @@ function renderTable(list) {
   empty && empty.classList.add('hidden');
 
   list.forEach(exam => {
-    const status = computeStatus(exam);
-    const diff   = diffDays(exam.deadlineDate);
-    const tr     = el('tr');
+    const status   = computeStatus(exam);
+    const diff     = diffDays(exam.deadlineDate);
+    const isExpanded = expandedExamIds.has(exam.id);
+    const tr       = el('tr', { className: `exam-tr${isExpanded ? ' row-expanded' : ''}` });
     if (exam.applied) tr.classList.add('applied-row');
+    tr.dataset.examId = exam.id;
+
+    // Expand toggle
+    const tdExpand = el('td', { className: 'col-expand' });
+    const chevron = el('button', { className: `expand-toggle${isExpanded ? ' open' : ''}`, 'data-action': 'toggle-expand', 'data-id': exam.id, title: isExpanded ? 'Collapse' : 'Expand' });
+    chevron.appendChild(svgIcon('<polyline points="6 9 12 15 18 9"/>', 12));
+    tdExpand.appendChild(chevron);
+    tr.appendChild(tdExpand);
 
     // Rank
     const tdRank = el('td', { className: 'col-rank' });
@@ -595,6 +678,11 @@ function renderTable(list) {
     tr.appendChild(tdAp);
 
     tbody.appendChild(tr);
+
+    // Expanded detail row
+    if (isExpanded) {
+      tbody.appendChild(buildExpandRow(exam, 9));
+    }
   });
 
   // Update sort arrows
@@ -630,15 +718,21 @@ function renderCards(list) {
   emptyCards && emptyCards.classList.add('hidden');
 
   list.forEach(exam => {
-    const status = computeStatus(exam);
-    const card = el('div', { className: `exam-card${exam.applied ? ' applied-card' : ''}` });
+    const status     = computeStatus(exam);
+    const isExpanded = expandedExamIds.has(exam.id);
+    const card       = el('div', { className: `exam-card${exam.applied ? ' applied-card' : ''}${isExpanded ? ' card-expanded' : ''}` });
 
-    // Row 1: name + status pill
+    // Row 1: name + status pill + expand chevron
     const row1 = el('div', { className: 'card-row1' });
     const nameEl = el('div', { className: 'card-name', 'data-action': 'open-detail', 'data-id': exam.id });
     nameEl.textContent = exam.name;
     row1.appendChild(nameEl);
-    row1.appendChild(makeStatusPill(status));
+    const row1Right = el('div', { className: 'card-row1-right' });
+    row1Right.appendChild(makeStatusPill(status));
+    const chevron = el('button', { className: `card-expand-toggle${isExpanded ? ' open' : ''}`, 'data-action': 'toggle-expand', 'data-id': exam.id, title: isExpanded ? 'Collapse' : 'Expand' });
+    chevron.appendChild(svgIcon('<polyline points="6 9 12 15 18 9"/>', 13));
+    row1Right.appendChild(chevron);
+    row1.appendChild(row1Right);
     card.appendChild(row1);
 
     // Row 2: agency + tag
@@ -680,6 +774,22 @@ function renderCards(list) {
     row4.appendChild(cb);
 
     card.appendChild(row4);
+
+    // Expandable section
+    if (isExpanded) {
+      const expSection = el('div', { className: 'card-expand-body' });
+      expSection.appendChild(buildExpandStatsGrid(exam, 'card-expand-stats'));
+
+      if (exam.notes) {
+        const notesEl = el('div', { className: 'expand-notes' });
+        notesEl.textContent = exam.notes.length > 100 ? exam.notes.slice(0, 100) + '…' : exam.notes;
+        expSection.appendChild(notesEl);
+      }
+
+      expSection.appendChild(buildExpandActions(exam, 'card-expand-actions'));
+      card.appendChild(expSection);
+    }
+
     container.appendChild(card);
   });
 }
@@ -805,7 +915,7 @@ function closePanel() {
   }, 280);
 }
 
-function makePanelHeader(metaChildren = [], onClose) {
+function makePanelHeader(metaChildren = []) {
   const header = el('div', { className: 'panel-header' });
   const meta   = el('div', { className: 'panel-header-meta' });
   metaChildren.forEach(c => c && meta.appendChild(c));
@@ -912,16 +1022,16 @@ function openDetail(id) {
 
     // Type-specific fields
     if (exam.examType === 'job') {
-      if (exam.posts)     tab0.appendChild(makeDetailRowText('Posts', exam.posts));
-      if (exam.vacancies) tab0.appendChild(makeDetailRowText('Vacancies', exam.vacancies));
-      if (exam.pay)       tab0.appendChild(makeDetailRowText('Pay Scale', exam.pay));
+      if (exam.posts)     tab0.appendChild(makeDetailRow('Posts', exam.posts));
+      if (exam.vacancies) tab0.appendChild(makeDetailRow('Vacancies', exam.vacancies));
+      if (exam.pay)       tab0.appendChild(makeDetailRow('Pay Scale', exam.pay));
     } else {
-      if (exam.subject)   tab0.appendChild(makeDetailRowText('Subject', exam.subject));
-      if (exam.seats)     tab0.appendChild(makeDetailRowText('Seats', exam.seats));
+      if (exam.subject)   tab0.appendChild(makeDetailRow('Subject', exam.subject));
+      if (exam.seats)     tab0.appendChild(makeDetailRow('Seats', exam.seats));
     }
 
-    if (exam.age)     tab0.appendChild(makeDetailRowText('Age Limit', exam.age));
-    if (exam.fee)     tab0.appendChild(makeDetailRowText('Fee', exam.fee));
+    if (exam.age)     tab0.appendChild(makeDetailRow('Age Limit', exam.age));
+    if (exam.fee)     tab0.appendChild(makeDetailRow('Fee', exam.fee));
 
     // Website
     if (exam.website) {
@@ -933,7 +1043,7 @@ function openDetail(id) {
       tab0.appendChild(wr);
     }
 
-    if (exam.notes) tab0.appendChild(makeDetailRowText('Notes', exam.notes));
+    if (exam.notes) tab0.appendChild(makeDetailRow('Notes', exam.notes));
 
     const appliedRow = makeDetailRow('Applied', null);
     const appliedVal = appliedRow.querySelector('.detail-value');
@@ -986,10 +1096,6 @@ function makeDetailRow(label, value) {
   row.appendChild(lbl);
   row.appendChild(val);
   return row;
-}
-
-function makeDetailRowText(label, value) {
-  return makeDetailRow(label, value || '—');
 }
 
 function buildEligibilityView(container, exam) {
@@ -2512,6 +2618,14 @@ document.addEventListener('click', e => {
     case 'toggle-pin':   togglePin(id);           break;
     case 'toggle-applied-detail': toggleAppliedFromDetail(id); break;
     case 'open-elig-tab': openEligTab(id);        break;
+    case 'toggle-expand':
+      if (expandedExamIds.has(id)) {
+        expandedExamIds.delete(id);
+      } else {
+        expandedExamIds.add(id);
+      }
+      render();
+      break;
 
     // Sub-editors
     case 'open-elig-edit': openEligibilityEdit(id); break;
