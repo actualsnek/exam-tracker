@@ -241,6 +241,7 @@ window.saveExam = async () => {
     applied:     document.getElementById('f-applied').checked,
     eligible:    document.getElementById('f-eligible') ? document.getElementById('f-eligible').checked : false,
     pinned,
+    resources:   modalResources.slice(),
   };
 
   const btn = document.getElementById('save-exam-btn');
@@ -326,6 +327,33 @@ window.togglePin = async (id) => {
 
 // modalDraft holds temp values for eligibility/syllabus/pattern while modal is open
 let modalDraft = { eligibility: '', syllabus: '', pattern: '' };
+let modalResources = []; // temp resources list while modal is open
+
+function renderModalResList() {
+  const list = document.getElementById('modal-res-list');
+  if (!list) return;
+  if (modalResources.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = modalResources.map((r, i) => `
+    <div class="res-item">
+      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type}</span>
+      <span class="res-title">${escHtml(r.title)}</span>
+      <button class="res-remove" onclick="modalRemoveResource(${i})">✕</button>
+    </div>`).join('');
+}
+
+window.modalAddResource = () => {
+  const type  = document.getElementById('res-type-sel').value;
+  const title = document.getElementById('res-title-input').value.trim();
+  if (!title) return;
+  modalResources.push({ type, title });
+  document.getElementById('res-title-input').value = '';
+  renderModalResList();
+};
+
+window.modalRemoveResource = (idx) => {
+  modalResources.splice(idx, 1);
+  renderModalResList();
+};
 
 function setModalDraftPreview(field) {
   const span = document.getElementById('prev-' + field);
@@ -358,6 +386,8 @@ window.openAddExam = () => {
   document.getElementById('f-pinned').checked = false;
   // Reset draft
   modalDraft = { eligibility: '', syllabus: '', pattern: '' };
+  modalResources = [];
+  renderModalResList();
   ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
   document.getElementById('exam-modal').style.display = 'flex';
 };
@@ -383,6 +413,8 @@ window.openEditExam = (id) => {
     syllabus:    exam.syllabus    || '',
     pattern:     exam.pattern     || '',
   };
+  modalResources = (exam.resources || []).map(r => ({ ...r }));
+  renderModalResList();
   ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
   document.getElementById('exam-modal').style.display = 'flex';
 };

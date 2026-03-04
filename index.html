@@ -209,7 +209,7 @@
           </select>
         </div>
         <div class="field-group" style="flex:1">
-          <label class="field-label">Last Date</label>
+          <label class="field-label">Last Apply Date</label>
           <input type="date" id="f-last-date" class="field-input"/>
         </div>
         <div class="field-group" style="flex:1">
@@ -223,33 +223,46 @@
         <input type="url" id="f-website" class="field-input" placeholder="https://ssc.nic.in"/>
       </div>
 
-      <div class="field-group">
-        <label class="field-label">Eligibility</label>
-        <button type="button" class="md-inline-btn" onclick="openMdFromModal('eligibility')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          <span id="prev-eligibility">Not added</span>
-        </button>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">Syllabus</label>
-        <button type="button" class="md-inline-btn" onclick="openMdFromModal('syllabus')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          <span id="prev-syllabus">Not added</span>
-        </button>
-      </div>
-
-      <div class="field-group">
-        <label class="field-label">Exam Pattern</label>
-        <button type="button" class="md-inline-btn" onclick="openMdFromModal('pattern')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          <span id="prev-pattern">Not added</span>
-        </button>
+      <div class="md-fields-row">
+        <div class="field-group">
+          <label class="field-label">Eligibility</label>
+          <button type="button" class="md-inline-btn" onclick="openMdFromModal('eligibility')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span id="prev-eligibility">Not added</span>
+          </button>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Syllabus</label>
+          <button type="button" class="md-inline-btn" onclick="openMdFromModal('syllabus')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span id="prev-syllabus">Not added</span>
+          </button>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Pattern</label>
+          <button type="button" class="md-inline-btn" onclick="openMdFromModal('pattern')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span id="prev-pattern">Not added</span>
+          </button>
+        </div>
       </div>
 
       <div class="field-group">
         <label class="field-label">Tags <span style="color:var(--muted);font-weight:400">(comma separated)</span></label>
         <input type="text" id="f-tags" class="field-input" placeholder="Banking, Central Govt, State…"/>
+      </div>
+
+      <!-- Resources -->
+      <div class="field-group">
+        <label class="field-label">Resources</label>
+        <div class="res-list" id="modal-res-list"></div>
+        <div class="res-add-row">
+          <select class="field-input res-type-sel" id="res-type-sel">
+            <option>YT</option><option>PDF</option><option>WEB</option><option>NOTE</option>
+          </select>
+          <input class="field-input" id="res-title-input" placeholder="Paste a link or title…" style="flex:1"/>
+          <button type="button" class="res-add-btn" onclick="modalAddResource()">+ Add</button>
+        </div>
       </div>
 
       <div class="form-row" style="gap:20px;align-items:center;padding-top:4px">

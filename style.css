@@ -1189,3 +1189,43 @@ td.td-eligible { text-align: center; min-width: 70px; }
   .countdown-strip { padding: 10px 12px; }
   .filter-bar { padding: 8px 12px; }
 }
+
+/* ── MODAL: MD-FIELDS-ROW (Eligibility · Syllabus · Pattern side by side) ── */
+.md-fields-row {
+  display: flex;
+  gap: 8px;
+}
+.md-fields-row .field-group { flex: 1; }
+
+/* ── MODAL: RESOURCES ── */
+.res-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; }
+.res-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: var(--r); font-size: 12px;
+}
+.res-item .res-title { flex: 1; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.res-remove {
+  background: none; border: none; color: var(--muted);
+  font-size: 11px; cursor: pointer; padding: 0 2px; transition: color .15s;
+}
+.res-remove:hover { color: #f87171; }
+
+.res-add-row { display: flex; gap: 6px; align-items: center; }
+.res-type-sel { width: 72px; flex-shrink: 0; padding: 7px 6px; }
+.res-add-btn {
+  padding: 7px 12px; border-radius: var(--r);
+  border: 1px solid var(--accent-soft);
+  background: var(--accent-bg); color: var(--accent);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  white-space: nowrap; transition: all .15s; flex-shrink: 0;
+  font-family: var(--font);
+}
+.res-add-btn:hover { background: var(--accent); color: #fff; }
+
+/* res-type-badge already used in expanded row — extend for modal */
+.res-item .res-type-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: .5px;
+  padding: 2px 6px; border-radius: 4px; flex-shrink: 0; text-transform: uppercase;
+}
