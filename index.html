@@ -225,17 +225,32 @@
 
       <div class="field-group">
         <label class="field-label">Eligibility</label>
-        <textarea id="f-eligibility" class="field-input field-textarea" placeholder="Age, qualification, etc."></textarea>
+        <div class="md-field-row">
+          <div class="md-field-preview" id="prev-eligibility" onclick="openMdFromModal('eligibility')">
+            <span class="md-field-empty">Click to add eligibility…</span>
+          </div>
+          <button type="button" class="md-field-btn" onclick="openMdFromModal('eligibility')">↗ Edit / View</button>
+        </div>
       </div>
 
       <div class="field-group">
         <label class="field-label">Syllabus</label>
-        <textarea id="f-syllabus" class="field-input field-textarea" placeholder="Topics, subjects, sections…"></textarea>
+        <div class="md-field-row">
+          <div class="md-field-preview" id="prev-syllabus" onclick="openMdFromModal('syllabus')">
+            <span class="md-field-empty">Click to add syllabus…</span>
+          </div>
+          <button type="button" class="md-field-btn" onclick="openMdFromModal('syllabus')">↗ Edit / View</button>
+        </div>
       </div>
 
       <div class="field-group">
         <label class="field-label">Exam Pattern</label>
-        <textarea id="f-pattern" class="field-input field-textarea" placeholder="Number of questions, marks, duration…"></textarea>
+        <div class="md-field-row">
+          <div class="md-field-preview" id="prev-pattern" onclick="openMdFromModal('pattern')">
+            <span class="md-field-empty">Click to add exam pattern…</span>
+          </div>
+          <button type="button" class="md-field-btn" onclick="openMdFromModal('pattern')">↗ Edit / View</button>
+        </div>
       </div>
 
       <div class="field-group">
@@ -346,6 +361,61 @@
     </div>
   </div>
 </div>
+
+<!-- MARKDOWN EDITOR PANEL (slide-in from right) -->
+<div id="md-panel" class="md-panel" style="display:none">
+  <div class="md-panel-inner">
+
+    <div class="md-panel-header">
+      <button class="md-back-btn" onclick="closeMdPanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div>
+        <div class="md-panel-title" id="md-panel-title">Syllabus — SSC CGL 2025</div>
+        <div class="md-panel-sub">Markdown supported · changes save instantly</div>
+      </div>
+      <button class="md-panel-close" onclick="closeMdPanel()">✕</button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="md-toolbar">
+      <button class="md-tool" onclick="mdInsert('**','**')" title="Bold"><b>B</b></button>
+      <button class="md-tool" onclick="mdInsert('*','*')" title="Italic"><i>I</i></button>
+      <button class="md-tool" onclick="mdInsert('## ','')" title="H1">H1</button>
+      <button class="md-tool" onclick="mdInsert('### ','')" title="H2">H2</button>
+      <button class="md-tool" onclick="mdInsert('- ','')" title="Bullet list">• List</button>
+      <button class="md-tool" onclick="mdInsert('1. ','')" title="Numbered list">1. List</button>
+      <button class="md-tool md-tool-table" onclick="mdInsertTable()" title="Table">⊞ Table</button>
+      <button class="md-tool" onclick="mdInsert('\n---\n','')" title="Horizontal rule">— HR</button>
+      <button class="md-tool" onclick="mdInsert('> ','')" title="Quote">" Quote</button>
+      <button class="md-tool" onclick="mdInsert('`','`')" title="Code">`code`</button>
+      <span class="md-tool-hint">emoji: just type 🎯 ✅ ⚠️</span>
+    </div>
+
+    <!-- Split pane -->
+    <div class="md-split">
+      <div class="md-pane md-write-pane">
+        <div class="md-pane-label">— WRITE</div>
+        <textarea id="md-editor-textarea" class="md-textarea" oninput="mdPreview()" placeholder="Write in Markdown…"></textarea>
+      </div>
+      <div class="md-divider"></div>
+      <div class="md-pane md-preview-pane">
+        <div class="md-pane-label">→ PREVIEW</div>
+        <div id="md-preview" class="md-preview-content"></div>
+      </div>
+    </div>
+
+    <div class="md-panel-footer">
+      <span class="md-save-status" id="md-save-status"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn-ghost" onclick="closeMdPanel()">Cancel</button>
+        <button class="btn-primary" style="width:auto;padding:9px 20px;margin:0" onclick="saveMdPanel()">Save</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="md-overlay" class="md-overlay" style="display:none" onclick="closeMdPanel()"></div>
 
 <!-- TOAST -->
 <div id="toast" class="toast" style="display:none"></div>

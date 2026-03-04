@@ -234,9 +234,9 @@ window.saveExam = async () => {
     lastDate:    document.getElementById('f-last-date').value,
     examDate:    document.getElementById('f-exam-date').value,
     website:     document.getElementById('f-website').value.trim(),
-    eligibility: document.getElementById('f-eligibility').value.trim(),
-    syllabus:    document.getElementById('f-syllabus').value.trim(),
-    pattern:     document.getElementById('f-pattern').value.trim(),
+    eligibility: modalDraft.eligibility,
+    syllabus:    modalDraft.syllabus,
+    pattern:     modalDraft.pattern,
     tags:        document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
     applied:     document.getElementById('f-applied').checked,
     eligible:    document.getElementById('f-eligible') ? document.getElementById('f-eligible').checked : false,
@@ -324,15 +324,40 @@ window.togglePin = async (id) => {
 //  EXAM MODAL — OPEN / CLOSE / POPULATE
 // ════════════════════════════════════════════════════
 
+// modalDraft holds temp values for eligibility/syllabus/pattern while modal is open
+let modalDraft = { eligibility: '', syllabus: '', pattern: '' };
+
+function setModalDraftPreview(field) {
+  const el = document.getElementById('prev-' + field);
+  if (!el) return;
+  const val = modalDraft[field];
+  if (val && val.trim()) {
+    // Strip markdown for preview
+    const plain = val
+      .replace(/#{1,6} /g, '').replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1').replace(/`(.+?)`/g, '$1')
+      .replace(/^[-*] /gm, '• ').replace(/^\d+\. /gm, '')
+      .replace(/\[(.+?)\]\(.+?\)/g, '$1').replace(/^---$/gm, '').trim();
+    el.innerHTML = `<span style="white-space:pre-wrap">${escHtml(plain)}</span>`;
+  } else {
+    const labels = { eligibility: 'eligibility', syllabus: 'syllabus', pattern: 'exam pattern' };
+    el.innerHTML = `<span class="md-field-empty">Click to add ${labels[field]}…</span>`;
+  }
+}
+
 window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
-  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-eligibility','f-syllabus','f-pattern','f-tags'].forEach(id => {
+  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('f-status').value = 'open';
   document.getElementById('f-applied').checked = false;
+  if (document.getElementById('f-eligible')) document.getElementById('f-eligible').checked = false;
   document.getElementById('f-pinned').checked = false;
+  // Reset draft
+  modalDraft = { eligibility: '', syllabus: '', pattern: '' };
+  ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
   document.getElementById('exam-modal').style.display = 'flex';
 };
 
@@ -347,13 +372,17 @@ window.openEditExam = (id) => {
   document.getElementById('f-last-date').value  = exam.lastDate || '';
   document.getElementById('f-exam-date').value  = exam.examDate || '';
   document.getElementById('f-website').value    = exam.website || '';
-  document.getElementById('f-eligibility').value = exam.eligibility || '';
-  document.getElementById('f-syllabus').value   = exam.syllabus || '';
-  document.getElementById('f-pattern').value    = exam.pattern || '';
   document.getElementById('f-tags').value       = (exam.tags || []).join(', ');
   document.getElementById('f-applied').checked  = !!exam.applied;
   if (document.getElementById('f-eligible')) document.getElementById('f-eligible').checked = !!exam.eligible;
   document.getElementById('f-pinned').checked   = !!exam.pinned;
+  // Load draft from exam data
+  modalDraft = {
+    eligibility: exam.eligibility || '',
+    syllabus:    exam.syllabus    || '',
+    pattern:     exam.pattern     || '',
+  };
+  ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
   document.getElementById('exam-modal').style.display = 'flex';
 };
 
@@ -465,18 +494,18 @@ function tableRowHTML(exam, num) {
           <div class="exp-card">
             <div class="exp-card-head">
               <span class="exp-card-title">ELIGIBILITY</span>
-              <button class="exp-edit-btn" onclick="openEditExam('${exam.id}')">↗ Edit / View</button>
+              <button class="exp-edit-btn" onclick="openMdPanel('${exam.id}','eligibility')">↗ Edit / View</button>
             </div>
-            <div class="exp-card-body">${exam.eligibility ? escHtml(exam.eligibility) : '<span class="exp-empty">Not added</span>'}</div>
+            <div class="exp-card-body">${exam.eligibility ? renderMdPreviewInline(exam.eligibility) : '<span class="exp-empty">Not added</span>'}</div>
           </div>
 
           <div class="exp-card">
             <div class="exp-card-head">
               <span class="exp-card-title">SYLLABUS</span>
-              <button class="exp-edit-btn" onclick="openEditExam('${exam.id}')">↗ Edit / View</button>
+              <button class="exp-edit-btn" onclick="openMdPanel('${exam.id}','syllabus')">↗ Edit / View</button>
             </div>
             <div class="exp-card-body">
-              ${exam.syllabus ? escHtml(exam.syllabus) : '<span class="exp-empty">Not added</span>'}
+              ${exam.syllabus ? renderMdPreviewInline(exam.syllabus) : '<span class="exp-empty">Not added</span>'}
               ${exam.website ? `<div class="exp-file-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><a href="${escHtml(exam.website)}" target="_blank" rel="noopener">${escHtml(exam.name.replace(/ /g,'_'))}_Syllabus.pdf</a></div>` : ''}
             </div>
           </div>
@@ -484,9 +513,9 @@ function tableRowHTML(exam, num) {
           <div class="exp-card">
             <div class="exp-card-head">
               <span class="exp-card-title">EXAM PATTERN</span>
-              <button class="exp-edit-btn" onclick="openEditExam('${exam.id}')">↗ Edit / View</button>
+              <button class="exp-edit-btn" onclick="openMdPanel('${exam.id}','pattern')">↗ Edit / View</button>
             </div>
-            <div class="exp-card-body">${exam.pattern ? escHtml(exam.pattern) : '<span class="exp-empty">Not added</span>'}</div>
+            <div class="exp-card-body">${exam.pattern ? renderMdPreviewInline(exam.pattern) : '<span class="exp-empty">Not added</span>'}</div>
           </div>
 
         </div>
@@ -890,6 +919,200 @@ function toast(msg, type = '') {
   el.style.display = 'block';
   if (toastTimer) clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2800);
+}
+
+// ════════════════════════════════════════════════════
+//  MARKDOWN EDITOR PANEL
+// ════════════════════════════════════════════════════
+
+let mdPanelExamId  = null;
+let mdPanelField   = null;
+let mdPanelContext = null; // 'row' | 'modal'
+
+const fieldLabels = {
+  eligibility: 'Eligibility',
+  syllabus:    'Syllabus',
+  pattern:     'Exam Pattern',
+};
+
+// Called from expanded row cards
+window.openMdPanel = (examId, field) => {
+  const exam = allExams.find(e => e.id === examId);
+  if (!exam) return;
+  mdPanelExamId  = examId;
+  mdPanelField   = field;
+  mdPanelContext = 'row';
+
+  const examName = document.getElementById('f-name')?.value.trim() || exam.name;
+  document.getElementById('md-panel-title').textContent = `${fieldLabels[field]} — ${examName}`;
+  const ta = document.getElementById('md-editor-textarea');
+  ta.value = exam[field] || '';
+  mdPreview();
+  document.getElementById('md-save-status').textContent = '';
+  document.getElementById('md-panel').style.display   = 'flex';
+  document.getElementById('md-overlay').style.display = 'block';
+  ta.focus();
+};
+
+// Called from Add/Edit exam modal fields
+window.openMdFromModal = (field) => {
+  mdPanelField   = field;
+  mdPanelContext = 'modal';
+  mdPanelExamId  = null;
+
+  const examName = document.getElementById('f-name')?.value.trim() || 'New Exam';
+  document.getElementById('md-panel-title').textContent = `${fieldLabels[field]} — ${examName || 'New Exam'}`;
+  const ta = document.getElementById('md-editor-textarea');
+  ta.value = modalDraft[field] || '';
+  mdPreview();
+  document.getElementById('md-save-status').textContent = '';
+  document.getElementById('md-panel').style.display   = 'flex';
+  document.getElementById('md-overlay').style.display = 'block';
+  ta.focus();
+};
+
+window.closeMdPanel = () => {
+  document.getElementById('md-panel').style.display   = 'none';
+  document.getElementById('md-overlay').style.display = 'none';
+  mdPanelExamId  = null;
+  mdPanelField   = null;
+  mdPanelContext = null;
+};
+
+window.saveMdPanel = async () => {
+  if (!mdPanelField) return;
+  const value    = document.getElementById('md-editor-textarea').value;
+  const statusEl = document.getElementById('md-save-status');
+
+  if (mdPanelContext === 'modal') {
+    // Just store in draft — no Firestore yet
+    modalDraft[mdPanelField] = value;
+    setModalDraftPreview(mdPanelField);
+    statusEl.textContent = '✓ Saved to draft';
+    setTimeout(closeMdPanel, 400);
+    return;
+  }
+
+  // context === 'row' — save directly to Firestore
+  statusEl.textContent = 'Saving…';
+  try {
+    await updateDoc(doc(db, 'users', currentUser.uid, 'exams', mdPanelExamId), {
+      [mdPanelField]: value
+    });
+    const exam = allExams.find(e => e.id === mdPanelExamId);
+    if (exam) exam[mdPanelField] = value;
+    statusEl.textContent = '✓ Saved';
+    setTimeout(() => { closeMdPanel(); renderTable(); }, 500);
+  } catch (e) {
+    statusEl.textContent = '✗ Save failed';
+    toast('Save failed.', 'error');
+  }
+};
+
+window.mdPreview = () => {
+  const raw = document.getElementById('md-editor-textarea').value;
+  document.getElementById('md-preview').innerHTML = parseMd(raw);
+};
+
+// Toolbar helpers
+window.mdInsert = (before, after) => {
+  const ta = document.getElementById('md-editor-textarea');
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const selected = ta.value.substring(s, e);
+  const replacement = before + (selected || 'text') + after;
+  ta.value = ta.value.substring(0, s) + replacement + ta.value.substring(e);
+  ta.selectionStart = s + before.length;
+  ta.selectionEnd   = s + before.length + (selected || 'text').length;
+  ta.focus();
+  mdPreview();
+};
+
+window.mdInsertTable = () => {
+  const tbl = '\n| Column 1 | Column 2 | Column 3 |\n|---|---|---|\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |\n';
+  const ta  = document.getElementById('md-editor-textarea');
+  const pos = ta.selectionStart;
+  ta.value  = ta.value.substring(0, pos) + tbl + ta.value.substring(pos);
+  ta.focus();
+  mdPreview();
+};
+
+// ── Minimal Markdown parser ───────────────────────
+function parseMd(md) {
+  if (!md) return '';
+  let html = escHtml(md);
+
+  // Headings
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm,  '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm,   '<h1>$1</h1>');
+
+  // HR
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Blockquote
+  html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+  // Bold + italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g,     '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g,         '<em>$1</em>');
+
+  // Inline code
+  html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+
+  // Tables — detect pipe rows
+  html = html.replace(/((^\|.+\|\n?)+)/gm, (match) => {
+    const rows = match.trim().split('\n').filter(r => r.trim());
+    if (rows.length < 2) return match;
+    let out = '<table>';
+    rows.forEach((row, i) => {
+      if (/^\|[-| ]+\|$/.test(row.replace(/&lt;|&gt;/g,'-'))) return; // separator row
+      const cells = row.split('|').filter((_, ci) => ci > 0 && ci < row.split('|').length - 1);
+      if (i === 0) {
+        out += '<tr>' + cells.map(c => `<th>${c.trim()}</th>`).join('') + '</tr>';
+      } else if (!/^[-| ]+$/.test(row.replace(/\|/g,''))) {
+        out += '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+      }
+    });
+    out += '</table>';
+    return out;
+  });
+
+  // Unordered list
+  html = html.replace(/(^- .+$\n?)+/gm, match => {
+    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+
+  // Ordered list
+  html = html.replace(/(^\d+\. .+$\n?)+/gm, match => {
+    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+
+  // Links
+  html = html.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+  // Paragraphs — wrap bare lines not already wrapped in tags
+  html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
+
+  return html;
+}
+
+// Inline preview for exp-card-body (renders but truncated)
+function renderMdPreviewInline(md) {
+  if (!md) return '';
+  // Plain text fallback for card preview — strip markdown symbols
+  const plain = md
+    .replace(/#{1,6} /g, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/`(.+?)`/g, '$1')
+    .replace(/^[-*] /gm, '• ')
+    .replace(/^\d+\. /gm, '')
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    .replace(/^---$/gm, '');
+  return `<span style="white-space:pre-wrap;font-size:12px">${escHtml(plain)}</span>`;
 }
 
 // ════════════════════════════════════════════════════
