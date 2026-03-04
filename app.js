@@ -6,11 +6,11 @@
 // ── SECTION 1: Firebase Init ─────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyC1aDvKtiUt_M68BdoCjXtrrV1QH3E6OdA",
-  authDomain: "exam-tracker-a02ad.firebaseapp.com",
-  projectId: "exam-tracker-a02ad",
-  storageBucket: "exam-tracker-a02ad.firebasestorage.app",
-  messagingSenderId: "556305448977",
-  appId: "1:556305448977:web:35a93ea264b7e731c8f1b0"
+  authDomain: "exam-tracker-81038.firebaseapp.com",
+  projectId: "exam-tracker-81038",
+  storageBucket: "exam-tracker-81038.firebasestorage.app",
+  messagingSenderId: "286825354385",
+  appId: "1:286825354385:web:586d46ef481cfb1afe9b30"
 };
 
 firebase.initializeApp(firebaseConfig);
