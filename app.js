@@ -5,12 +5,12 @@
 
 // ── SECTION 1: Firebase Init ─────────────────────────────────────
 const firebaseConfig = {
-  apiKey: "AIzaSyC1aDvKtiUt_M68BdoCjXtrrV1QH3E6OdA",
-  authDomain: "exam-tracker-81038.firebaseapp.com",
-  projectId: "exam-tracker-81038",
-  storageBucket: "exam-tracker-81038.firebasestorage.app",
-  messagingSenderId: "286825354385",
-  appId: "1:286825354385:web:586d46ef481cfb1afe9b30"
+  apiKey: "AIzaSyDrwfDQfocEqCCEXXnjoE8PSphVpuDkxMg",
+  authDomain: "exam-tracker-a02ad.firebaseapp.com",
+  projectId: "exam-tracker-a02ad",
+  storageBucket: "exam-tracker-a02ad.firebasestorage.app",
+  messagingSenderId: "556305448977",
+  appId: "1:556305448977:web:35a93ea264b7e731c8f1b0"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -111,7 +111,7 @@ function examDocRef(id)  { return examsRef().doc(id); }
 
 async function loadData() {
   setSyncDot('saving');
-  const TIMEOUT = 5000;
+  const TIMEOUT = 15000;
   try {
     const race = await Promise.race([
       fetchAll(),
@@ -121,18 +121,25 @@ async function loadData() {
     setSyncDot('ok');
     return race;
   } catch (err) {
-    const cache = readOfflineCache();
-    if (cache) {
-      exams    = cache.exams    || [];
-      profile  = cache.profile  || {};
-      settings = cache.settings || {};
-      tags     = cache.tags     || [];
-      goOffline();
-      render();
+    if (err.message === 'timeout') {
+      const cache = readOfflineCache();
+      if (cache) {
+        exams    = cache.exams    || [];
+        profile  = cache.profile  || {};
+        settings = cache.settings || {};
+        tags     = cache.tags     || [];
+        goOffline();
+        render();
+      } else {
+        hideLoading();
+        showScreen('app');
+        toast('Unable to load data. Check your connection.', 'err', false);
+      }
     } else {
+      // Non-timeout error (permissions, etc) — still try to show app
       hideLoading();
       showScreen('app');
-      toast('Unable to load data. Check your connection.', 'err', false);
+      toast('Unable to load data: ' + (err.message || err.code || 'unknown error'), 'err', false);
     }
     setSyncDot('error');
     throw err;
