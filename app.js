@@ -423,6 +423,25 @@ window.closeExamModal = () => {
   document.getElementById('exam-modal').style.display = 'none';
 };
 
+window.toggleResPopover = (id) => {
+  const pop = document.getElementById('res-pop-' + id);
+  if (!pop) return;
+  const isOpen = pop.style.display !== 'none';
+  // Close all other open popovers first
+  document.querySelectorAll('.res-popover').forEach(el => el.style.display = 'none');
+  if (!isOpen) {
+    pop.style.display = 'block';
+    // Close when clicking outside
+    const handler = (e) => {
+      if (!document.getElementById('res-wrap-' + id)?.contains(e.target)) {
+        pop.style.display = 'none';
+        document.removeEventListener('click', handler, true);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', handler, true), 0);
+  }
+};
+
 window.checkPinLimit = (checkbox) => {
   const id = document.getElementById('exam-id').value;
   const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
