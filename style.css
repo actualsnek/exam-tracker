@@ -83,13 +83,24 @@
 
 /* ── BASE ── */
 html { font-size: 14px; }
+html, body {
+  height: 100%;
+}
 body {
   font-family: var(--font);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  height: 100%;
   transition: background var(--transition), color var(--transition);
   -webkit-font-smoothing: antialiased;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 button { font-family: var(--font); cursor: pointer; }
@@ -395,8 +406,8 @@ a:hover { color: var(--accent-h); }
    FILTER BAR
 ════════════════════════════════════════ */
 .sticky-header {
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
+  position: relative;
   z-index: 100;
 }
 
@@ -413,6 +424,9 @@ a:hover { color: var(--accent-h); }
 
 .exam-list {
   padding: 0 0 60px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 .filter-group { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
 .filter-sep { width: 1px; height: 18px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
