@@ -931,44 +931,70 @@ td.td-eligible { text-align: center; min-width: 70px; }
 /* ════════════════════════════════════════
    PROFILE MODAL STYLES
 ════════════════════════════════════════ */
-.profile-top {
-  display: flex; align-items: center; gap: 14px;
-  padding-bottom: 16px; margin-bottom: 16px;
+.modal-profile { max-width: 480px; }
+.modal-profile .modal-body { padding: 0; gap: 0; }
+
+.profile-hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 22px 20px;
   border-bottom: 1px solid var(--border);
+  text-align: center;
 }
 .profile-avatar {
-  width: 52px; height: 52px; border-radius: 50%;
+  width: 64px; height: 64px; border-radius: 50%;
   background: var(--accent); color: #fff;
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px; font-weight: 600; flex-shrink: 0;
+  font-size: 22px; font-weight: 700; flex-shrink: 0;
+  margin-bottom: 10px;
 }
 .profile-name { font-size: 16px; font-weight: 600; color: var(--text); }
-.profile-email { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.profile-email { font-size: 12px; color: var(--accent); margin-top: 3px; }
 
-.settings-section {
-  margin-bottom: 20px; padding-bottom: 20px;
+.profile-stats {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+.profile-stat {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 14px 8px;
+  border-right: 1px solid var(--border);
+}
+.profile-stat:last-child { border-right: none; }
+.profile-stat-val { font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; }
+.profile-stat-label { font-size: 10px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+.pref-section-title {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted);
+  padding: 14px 18px 6px;
+}
+.pref-list {
+  display: flex; flex-direction: column;
+  border-top: 1px solid var(--border2);
   border-bottom: 1px solid var(--border2);
+  margin-bottom: 2px;
 }
-.settings-section:last-child { border-bottom: none; margin-bottom: 0; }
-.settings-section-title {
-  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
-  font-weight: 700; color: var(--muted); margin-bottom: 12px;
+.pref-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 18px;
+  background: none; border: none; border-bottom: 1px solid var(--border2);
+  color: var(--text2); font-size: 13px; font-family: var(--font);
+  cursor: pointer; text-align: left; transition: background .12s;
+  width: 100%;
 }
+.pref-row:last-child { border-bottom: none; }
+.pref-row:hover { background: var(--surface2); color: var(--text); }
+.pref-row svg:first-child { width: 15px; height: 15px; flex-shrink: 0; color: var(--muted); }
+.pref-row-label { flex: 1; }
+.pref-chevron { width: 14px; height: 14px; color: var(--muted); flex-shrink: 0; }
 
-.data-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.btn-data {
-  padding: 8px 14px;
-  border-radius: var(--r); border: 1px solid var(--border);
-  background: var(--bg2); color: var(--text2);
-  font-size: 12px; font-weight: 500;
-  display: flex; align-items: center; gap: 6px;
-  transition: all var(--transition); cursor: pointer;
-}
-.btn-data svg { width: 13px; height: 13px; }
-.btn-data:hover { background: var(--surface2); color: var(--text); border-color: var(--muted); }
-
-.danger-note { font-size: 11px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
-.danger-zone { border-color: rgba(248,113,113,.12); }
+.pref-list-danger { border-color: rgba(248,113,113,.12); }
+.pref-row-signout { color: var(--text2); }
+.pref-row-signout svg:first-child { color: var(--muted); }
+.pref-row-delete { color: var(--no); }
+.pref-row-delete svg:first-child { color: var(--no); }
+.pref-row-delete:hover { background: rgba(248,113,113,.07); }
+.pref-row-delete .pref-chevron { color: var(--no); opacity: .5; }
 
 /* ════════════════════════════════════════
    TOAST
@@ -1184,8 +1210,7 @@ td.td-eligible { text-align: center; min-width: 70px; }
   .card-top { padding: 10px 12px; }
   .modal-body { padding: 16px; }
   .modal-footer { padding: 12px 16px; }
-  .data-actions { flex-direction: column; }
-  .btn-data { width: 100%; justify-content: center; }
+
 }
 
 @media (max-width: 400px) {

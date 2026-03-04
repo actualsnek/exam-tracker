@@ -88,6 +88,12 @@ function updateUserUI() {
   document.getElementById('profile-avatar-big').textContent = initials;
   document.getElementById('profile-name-display').textContent = currentUser.displayName || '(no name)';
   document.getElementById('profile-email-display').textContent = currentUser.email || '';
+  // Stat cards
+  if (document.getElementById('stat-exams')) {
+    document.getElementById('stat-exams').textContent   = allExams.length;
+    document.getElementById('stat-applied').textContent = allExams.filter(e => e.applied).length;
+    document.getElementById('stat-pinned').textContent  = allExams.filter(e => e.pinned).length;
+  }
 }
 
 // ════════════════════════════════════════════════════
@@ -779,12 +785,26 @@ window.handleSignOut = async () => {
   await signOut(auth);
 };
 
+window.handleEditDisplayName = async () => {
+  const current = currentUser.displayName || '';
+  const name = window.prompt('Enter new display name:', current);
+  if (name === null) return; // cancelled
+  if (!name.trim()) return toast('Name cannot be empty.', 'error');
+  try {
+    await updateProfile(currentUser, { displayName: name.trim() });
+    updateUserUI();
+    toast('Display name updated!', 'success');
+  } catch (e) {
+    toast('Failed to update name.', 'error');
+  }
+};
+
 window.handleChangePassword = async () => {
-  const newPass = document.getElementById('new-password').value;
+  const newPass = window.prompt('Enter new password (min 6 characters):');
+  if (newPass === null) return; // cancelled
   if (!newPass || newPass.length < 6) return toast('Enter a new password (min 6 chars).', 'error');
   try {
     await updatePassword(currentUser, newPass);
-    document.getElementById('new-password').value = '';
     toast('Password updated!', 'success');
   } catch (e) {
     if (e.code === 'auth/requires-recent-login') {
