@@ -558,7 +558,8 @@ function renderTable() {
   const empty  = document.getElementById('list-empty');
   const scroll = document.getElementById('table-scroll');
   const count  = document.getElementById('table-count');
-  if (count) count.textContent = `${filteredExams.length} exam${filteredExams.length !== 1 ? 's' : ''}`;
+
+  count.textContent = `${filteredExams.length} exam${filteredExams.length !== 1 ? 's' : ''}`;
 
   if (filteredExams.length === 0) {
     empty.style.display  = 'block';
@@ -1509,15 +1510,3 @@ function escHtml(s) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
 }
-
-// Sync horizontal scroll between fixed header and table body
-(function syncTableScroll() {
-  document.addEventListener('DOMContentLoaded', () => {
-    const headerWrap = document.querySelector('.table-header-wrap');
-    const bodyScroll = document.getElementById('table-scroll');
-    if (!headerWrap || !bodyScroll) return;
-    bodyScroll.addEventListener('scroll', () => {
-      headerWrap.scrollLeft = bodyScroll.scrollLeft;
-    });
-  });
-})();
