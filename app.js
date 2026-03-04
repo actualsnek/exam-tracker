@@ -624,17 +624,17 @@ function renderTable(list) {
     if (exam.applied) tr.classList.add('applied-row');
     tr.dataset.examId = exam.id;
 
-    // Expand toggle
-    const tdExpand = el('td', { className: 'col-expand' });
+    // Merged expand-toggle + rank cell
+    const tdRankExpand = el('td', { className: 'col-rank-expand' });
     const chevron = el('button', { className: `expand-toggle${isExpanded ? ' open' : ''}`, 'data-action': 'toggle-expand', 'data-id': exam.id, title: isExpanded ? 'Collapse' : 'Expand' });
-    chevron.appendChild(svgIcon('<polyline points="6 9 12 15 18 9"/>', 12));
-    tdExpand.appendChild(chevron);
-    tr.appendChild(tdExpand);
-
-    // Rank
-    const tdRank = el('td', { className: 'col-rank' });
-    tdRank.textContent = exam.rank || '—';
-    tr.appendChild(tdRank);
+    chevron.appendChild(svgIcon('<polyline points="6 9 12 15 18 9"/>', 11));
+    tdRankExpand.appendChild(chevron);
+    if (exam.rank) {
+      const rankNum = el('span', { className: 'rank-num' });
+      rankNum.textContent = exam.rank;
+      tdRankExpand.appendChild(rankNum);
+    }
+    tr.appendChild(tdRankExpand);
 
     // Name
     const tdName = el('td', { className: 'col-name', 'data-action': 'open-detail', 'data-id': exam.id });
@@ -689,7 +689,7 @@ function renderTable(list) {
 
     // Expanded detail row
     if (isExpanded) {
-      tbody.appendChild(buildExpandRow(exam, 9));
+      tbody.appendChild(buildExpandRow(exam, 8));
     }
   });
 

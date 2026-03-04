@@ -280,31 +280,26 @@
   <!-- ── Main Content ───────────────────────────────────────── -->
   <main id="main-content">
 
-    <!-- Desktop toolbar (Add button) -->
-    <div id="table-toolbar">
-      <button id="desktop-add-btn" data-action="add-exam">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Add Exam
-      </button>
-      <span></span><!-- spacer -->
-    </div>
-
     <!-- Desktop Table -->
     <div id="exam-table-wrap">
       <table id="exam-table">
         <thead>
           <tr>
-            <th class="col-expand-th"></th>
-            <th class="sortable" data-sort="rank"># <span class="sort-arrow">↕</span></th>
-            <th class="sortable" data-sort="name">Exam Name <span class="sort-arrow">↕</span></th>
+            <th class="col-rank-expand sortable" data-sort="rank"><span class="sort-arrow">↕</span></th>
+            <th class="sortable th-primary" data-sort="name">Exam Name <span class="sort-arrow">↕</span></th>
             <th class="sortable" data-sort="agency">Agency <span class="sort-arrow">↕</span></th>
             <th>Tag</th>
-            <th class="sortable" data-sort="deadlineDate">Deadline <span class="sort-arrow">↕</span></th>
+            <th class="sortable th-primary" data-sort="deadlineDate">Deadline <span class="sort-arrow">↕</span></th>
             <th>Status</th>
             <th>Eligible</th>
-            <th>Apply</th>
+            <th class="th-add-col">
+              <button id="desktop-add-btn" data-action="add-exam">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add Exam
+              </button>
+            </th>
           </tr>
         </thead>
         <tbody id="exam-tbody">

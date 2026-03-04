@@ -758,6 +758,7 @@ img { display: block; max-width: 100%; }
   padding: 16px;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: calc(100vh - 160px);
 }
 
 @media (max-width: 767px) {
@@ -797,6 +798,17 @@ img { display: block; max-width: 100%; }
   user-select: none;
 }
 
+#exam-table th.th-primary {
+  color: var(--text2);
+}
+
+/* Add Exam button lives in the last th */
+#exam-table th.th-add-col {
+  text-align: right;
+  padding: 6px 10px;
+  background: var(--surface2);
+}
+
 #exam-table th.sortable { cursor: pointer; }
 #exam-table th.sortable:hover { color: var(--text); }
 
@@ -829,12 +841,7 @@ th.sorted .sort-arrow { opacity: 1; }
 
 #exam-table tr:not(.applied-row):hover td { background: var(--surface2); }
 
-.col-rank {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-  width: 40px;
-}
+/* col-rank merged into col-rank-expand */
 
 .col-name {
   font-weight: 500;
@@ -901,19 +908,23 @@ th.sorted .sort-arrow { opacity: 1; }
 }
 
 /* ── Expandable Rows (Desktop) ────────────────────────────────── */
-.col-expand-th {
-  width: 32px;
-  padding: 0 4px !important;
+
+/* Merged rank + expand toggle column */
+.col-rank-expand {
+  width: 48px;
+  padding: 0 8px !important;
+  text-align: center;
 }
 
-.col-expand {
-  width: 32px;
-  padding: 0 4px !important;
+/* th version */
+#exam-table th.col-rank-expand {
+  cursor: pointer;
+  font-size: 9px;
 }
 
 .expand-toggle {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -922,14 +933,24 @@ th.sorted .sort-arrow { opacity: 1; }
   background: none;
   border: none;
   cursor: pointer;
-  transition: background 0.1s, color 0.1s, transform 0.2s;
+  transition: color 0.15s, transform 0.2s;
   padding: 0;
-  flex-shrink: 0;
+  margin: 0 auto;
 }
 
-.expand-toggle:hover { background: var(--surface2); color: var(--text); }
+.expand-toggle:hover { color: var(--accent); }
 .expand-toggle.open  { transform: rotate(180deg); color: var(--accent); }
-.expand-toggle svg   { width: 12px; height: 12px; }
+.expand-toggle svg   { width: 11px; height: 11px; }
+
+.rank-num {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1px;
+  line-height: 1;
+}
 
 .exam-tr.row-expanded > td {
   border-bottom: none;
@@ -1293,35 +1314,26 @@ th.sorted .sort-arrow { opacity: 1; }
 #fab-add:hover { transform: scale(1.08); box-shadow: 0 6px 20px rgba(201,106,24,0.5); }
 #fab-add svg { width: 22px; height: 22px; }
 
-/* ── 17. Desktop Add Button ───────────────────────────────────── */
+/* ── 17. Desktop Add Button (lives in thead last th) ─────────── */
 #desktop-add-btn {
-  display: none;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 5px;
+  padding: 5px 11px;
   background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--r);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-  margin-bottom: 12px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
-@media (min-width: 768px) { #desktop-add-btn { display: flex; } }
 #desktop-add-btn:hover { background: var(--accent-h); }
-#desktop-add-btn svg { width: 14px; height: 14px; }
-
-/* Table toolbar */
-#table-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
+#desktop-add-btn svg { width: 12px; height: 12px; }
 
 /* ── 18. Mobile Bottom Nav ────────────────────────────────────── */
 #bottom-nav {
