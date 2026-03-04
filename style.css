@@ -900,8 +900,216 @@ th.sorted .sort-arrow { opacity: 1; }
   white-space: nowrap;
 }
 
-/* Deadline label classes */
-.dl-far    { color: var(--dl-far); }
+/* ── Expandable Rows (Desktop) ────────────────────────────────── */
+.col-expand-th {
+  width: 32px;
+  padding: 0 4px !important;
+}
+
+.col-expand {
+  width: 32px;
+  padding: 0 4px !important;
+}
+
+.expand-toggle {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r);
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, transform 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.expand-toggle:hover { background: var(--surface2); color: var(--text); }
+.expand-toggle.open  { transform: rotate(180deg); color: var(--accent); }
+.expand-toggle svg   { width: 12px; height: 12px; }
+
+.exam-tr.row-expanded > td {
+  border-bottom: none;
+}
+
+.expand-row {
+  background: var(--bg);
+}
+
+.expand-row > td.expand-cell {
+  padding: 0;
+  border-bottom: 2px solid var(--border);
+}
+
+.expand-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 12px 16px 14px 40px;
+  flex-wrap: wrap;
+}
+
+.expand-stats, .card-expand-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.expand-stats {
+  flex: 1;
+  min-width: 200px;
+}
+
+.card-expand-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.expand-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 80px;
+}
+
+.expand-stat-key {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.expand-stat-val {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.expand-empty {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.expand-notes {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.5;
+  flex: 2;
+  min-width: 160px;
+  max-width: 360px;
+  padding: 2px 0;
+  border-left: 2px solid var(--border2);
+  padding-left: 12px;
+}
+
+.expand-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.expand-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  text-decoration: none;
+}
+
+.expand-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border);
+  text-decoration: none;
+}
+
+.expand-btn-primary {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent-soft);
+}
+
+.expand-btn-primary:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.expand-btn-pinned {
+  color: var(--dl-soon);
+  border-color: var(--dl-soon);
+  background: var(--accent-bg);
+}
+
+.expand-btn svg { width: 11px; height: 11px; flex-shrink: 0; }
+
+/* ── Expandable Cards (Mobile) ────────────────────────────────── */
+.card-row1-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.card-expand-toggle {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r);
+  color: var(--muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, transform 0.2s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.card-expand-toggle:hover { background: var(--surface2); color: var(--text); }
+.card-expand-toggle.open  { transform: rotate(180deg); color: var(--accent); }
+.card-expand-toggle svg   { width: 13px; height: 13px; }
+
+.card-expand-body {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border2);
+  animation: expand-in 0.18s ease;
+}
+
+@keyframes expand-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-expand-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.card-expanded {
+  border-color: var(--accent-soft);
+}
 .dl-soon   { color: var(--dl-soon); font-weight: 600; }
 .dl-today  { color: var(--dl-urgent); font-weight: 700; }
 .dl-past   { color: var(--dl-past); text-decoration: line-through; }
