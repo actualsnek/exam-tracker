@@ -342,7 +342,7 @@ function renderModalResList() {
   if (modalResources.length === 0) { list.innerHTML = ''; return; }
   list.innerHTML = modalResources.map((r, i) => `
     <div class="res-item">
-      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type === 'PDF' ? '⬇' : '🔗'}</span>
+      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type === 'PDF' ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'}</span>
       <span class="res-title">${escHtml(r.label)}</span>
       <button class="res-remove" onclick="modalRemoveResource(${i})">✕</button>
     </div>`).join('');
@@ -612,8 +612,8 @@ function tableRowHTML(exam, num) {
           </div>
           <div class="exp-actions">
             <div class="exp-bar-sep"></div>
-            <button class="exp-action-btn" onclick="openEditExam('${exam.id}')">✎ Edit</button>
-            <button class="exp-action-btn danger" onclick="deleteExam('${exam.id}')">🗑 Delete</button>
+            <button class="exp-action-btn" onclick="openEditExam('${exam.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+            <button class="exp-action-btn danger" onclick="deleteExam('${exam.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg> Delete</button>
           </div>
         </div>
 
@@ -637,7 +637,7 @@ function tableRowHTML(exam, num) {
       <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
     </td>
     <td class="td-pin">
-      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}">📌</button>
+      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
     </td>
   </tr>${detailRow}`;
 }
