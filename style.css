@@ -1229,3 +1229,47 @@ td.td-eligible { text-align: center; min-width: 70px; }
   font-size: 9px; font-weight: 700; letter-spacing: .5px;
   padding: 2px 6px; border-radius: 4px; flex-shrink: 0; text-transform: uppercase;
 }
+
+/* ── RESOURCES POPOVER (expanded row) ── */
+.res-popover-wrap { position: relative; }
+.res-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 200;
+  min-width: 260px;
+  max-width: 340px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-lg, 10px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.45);
+  overflow: hidden;
+}
+.res-pop-list { display: flex; flex-direction: column; }
+.res-pop-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background .12s;
+}
+.res-pop-item:last-child { border-bottom: none; }
+.res-pop-item:hover { background: var(--surface); }
+.res-pop-title {
+  flex: 1; font-size: 12px; color: var(--text2);
+  text-decoration: none; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  transition: color .12s;
+}
+.res-pop-title:hover { color: var(--accent); }
+.res-pop-empty { padding: 10px 14px; font-size: 12px; color: var(--muted); font-style: italic; }
+.res-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-bg); color: var(--accent);
+  border-radius: 20px; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; margin-left: 2px;
+}
+/* badge colors for popover (yt/pdf/web/note) */
+.res-yt   { background: #7f1d1d; color: #fca5a5; }
+.res-pdf  { background: #1e3a5f; color: #93c5fd; }
+.res-web  { background: #1a3a2a; color: #86efac; }
+.res-note { background: #3b2f1a; color: #fcd34d; }
