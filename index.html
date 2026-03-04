@@ -1,494 +1,325 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Exam Tracker</title>
-  <meta name="description" content="Personal dashboard for tracking competitive exams, government jobs, and entrance tests." />
-  <meta name="theme-color" content="#141210" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Exam Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════
-     LOADING SCREEN
-══════════════════════════════════════════════════════════ -->
-<div id="loading-screen">
-  <div class="loading-logo">EXAM <span>TRACKER</span></div>
-  <div class="spinner"></div>
+<!-- ═══════════════════════════════════════════════
+     AUTH SCREEN
+════════════════════════════════════════════════ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-bg-grid"></div>
+  <div class="auth-card">
+    <div class="auth-logo">EXAM <span>TRACKER</span></div>
+    <p class="auth-sub">Your personal exam command centre</p>
+
+    <div id="auth-tabs" class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <div id="auth-error" class="auth-error" style="display:none"></div>
+    <div id="auth-success" class="auth-success" style="display:none"></div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input type="email" id="login-email" class="field-input" placeholder="you@email.com"/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input type="password" id="login-password" class="field-input" placeholder="••••••••"/>
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">
+        <span id="login-btn-text">Sign In</span>
+      </button>
+      <button class="btn-link" onclick="handleForgotPassword()">Forgot password?</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" style="display:none">
+      <div class="field-group">
+        <label class="field-label">Display Name</label>
+        <input type="text" id="reg-name" class="field-input" placeholder="Your name"/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Email</label>
+        <input type="email" id="reg-email" class="field-input" placeholder="you@email.com"/>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Password</label>
+        <input type="password" id="reg-password" class="field-input" placeholder="min 6 characters"/>
+      </div>
+      <button class="btn-primary" onclick="handleRegister()">
+        <span id="register-btn-text">Create Account</span>
+      </button>
+    </div>
+
+    <div class="auth-divider"><span>or</span></div>
+    <button class="btn-google" onclick="handleGoogleLogin()">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+  </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     AUTH SCREEN
-══════════════════════════════════════════════════════════ -->
-<div id="auth-screen">
-  <div class="auth-card">
+<!-- ═══════════════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════════════ -->
+<div id="app" style="display:none">
 
-    <div class="auth-logo">EXAM <span>TRACKER</span></div>
-    <span class="auth-tagline">दीर्घसूत्री विनश्यति</span>
-
-    <!-- Tabs -->
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-auth-tab="signin">Sign In</button>
-      <button class="auth-tab"        data-auth-tab="signup">Create Account</button>
-    </div>
-
-    <!-- ── Sign In ── -->
-    <div id="auth-signin-form" class="auth-form">
-      <div class="form-field">
-        <label class="form-label" for="signin-email">Email</label>
-        <input class="form-input" type="email" id="signin-email"
-               placeholder="you@email.com" autocomplete="email" />
-        <span class="field-error" id="signin-email-err"></span>
-      </div>
-      <div class="form-field">
-        <label class="form-label" for="signin-password">Password</label>
-        <input class="form-input" type="password" id="signin-password"
-               placeholder="••••••••" autocomplete="current-password" />
-        <span class="field-error" id="signin-password-err"></span>
-      </div>
-      <button class="btn-primary" id="signin-btn" data-action="do-signin"
-              data-label="Sign In">Sign In</button>
-      <div class="auth-divider">or</div>
-      <button class="btn-google" data-action="do-google">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
-      <div class="auth-forgot">
-        <a href="#" data-action="show-forgot">Forgot password?</a>
-      </div>
-    </div>
-
-    <!-- ── Sign Up ── -->
-    <div id="auth-signup-form" class="auth-form hidden">
-      <div class="form-field">
-        <label class="form-label" for="signup-name">Full Name</label>
-        <input class="form-input" type="text" id="signup-name"
-               placeholder="Your name" autocomplete="name" />
-        <span class="field-error" id="signup-name-err"></span>
-      </div>
-      <div class="form-field">
-        <label class="form-label" for="signup-email">Email</label>
-        <input class="form-input" type="email" id="signup-email"
-               placeholder="you@email.com" autocomplete="email" />
-        <span class="field-error" id="signup-email-err"></span>
-      </div>
-      <div class="form-field">
-        <label class="form-label" for="signup-password">Password</label>
-        <input class="form-input" type="password" id="signup-password"
-               placeholder="Min. 6 characters" autocomplete="new-password" />
-        <span class="field-error" id="signup-password-err"></span>
-      </div>
-      <button class="btn-primary" id="signup-btn" data-action="do-signup"
-              data-label="Create Account">Create Account</button>
-      <div class="auth-divider">or</div>
-      <button class="btn-google" data-action="do-google">
-        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
-    </div>
-
-    <!-- ── Forgot Password ── -->
-    <div id="auth-forgot-form" class="auth-form hidden">
-      <p style="font-size:12px;color:var(--text2);margin-bottom:8px;line-height:1.6;">
-        Enter your email and we'll send a reset link.
-      </p>
-      <div class="form-field">
-        <label class="form-label" for="forgot-email">Email</label>
-        <input class="form-input" type="email" id="forgot-email"
-               placeholder="you@email.com" autocomplete="email" />
-        <span class="field-error" id="forgot-email-err"></span>
-      </div>
-      <button class="btn-primary" id="forgot-btn" data-action="do-forgot"
-              data-label="Send Reset Email">Send Reset Email</button>
-      <div class="auth-forgot" style="margin-top:10px;">
-        <a href="#" data-action="show-signin">← Back to Sign In</a>
-      </div>
-    </div>
-
-  </div>
-</div><!-- /#auth-screen -->
-
-<!-- ══════════════════════════════════════════════════════
-     APP SCREEN
-══════════════════════════════════════════════════════════ -->
-<div id="app-screen" class="hidden">
-
-  <!-- ── Topbar ──────────────────────────────────────────── -->
-  <header id="topbar">
-
+  <!-- TOPBAR -->
+  <header class="topbar">
     <div class="topbar-logo">EXAM <span>TRACKER</span></div>
-
-    <!-- Search button -->
-    <button class="topbar-btn" id="search-btn" data-action="open-search" title="Search exams">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </button>
-
-    <!-- Export / Import dropdown -->
-    <div class="dropdown-wrap">
-      <button class="topbar-btn" id="export-btn" title="Export / Import">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="toggleSearch()" title="Search" id="search-toggle-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
-      <div class="dropdown-menu" id="export-dropdown">
-        <button class="dropdown-item" data-action="export-json">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-          </svg>
-          Export JSON
-        </button>
-        <button class="dropdown-item" data-action="export-csv">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
-          Export CSV
-        </button>
-        <div class="dropdown-sep"></div>
-        <button class="dropdown-item" data-action="trigger-import">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="7 10 12 15 17 10"/>
-            <line x1="12" y1="15" x2="12" y2="3"/>
-          </svg>
-          Import JSON
-        </button>
-      </div>
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">
+        <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <div class="avatar" id="user-avatar" onclick="showProfile()">?</div>
     </div>
-
-    <!-- Theme toggle -->
-    <button class="topbar-btn" id="theme-btn" data-action="toggle-theme" title="Toggle theme">
-      <!-- icon injected by JS -->
-    </button>
-
-    <!-- User / Account dropdown -->
-    <div class="dropdown-wrap">
-      <div class="topbar-avatar" id="topbar-avatar" id="user-btn" title="Account">?
-        <span class="sync-dot" id="sync-dot"></span>
-      </div>
-      <div class="dropdown-menu" id="user-dropdown">
-        <div class="dropdown-header">
-          <span class="dropdown-name"  id="dropdown-name">—</span>
-          <span class="dropdown-email" id="dropdown-email">—</span>
-        </div>
-        <div class="dropdown-sep"></div>
-        <button class="dropdown-item" data-action="open-profile">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-          Profile & Settings
-        </button>
-        <button class="dropdown-item" data-action="open-tags-manager">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-            <line x1="7" y1="7" x2="7.01" y2="7"/>
-          </svg>
-          Manage Tags
-        </button>
-        <div class="dropdown-sep"></div>
-        <button class="dropdown-item" data-action="change-password">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          Change Password
-        </button>
-        <button class="dropdown-item" data-action="do-logout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          Sign Out
-        </button>
-        <div class="dropdown-sep"></div>
-        <button class="dropdown-item danger" data-action="delete-account">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-            <path d="M10 11v6"/><path d="M14 11v6"/>
-            <path d="M9 6V4h6v2"/>
-          </svg>
-          Delete Account
-        </button>
-      </div>
-    </div>
-
   </header>
 
-  <!-- ── Search Overlay ──────────────────────────────────── -->
-  <div id="search-overlay">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-    <input id="search-input" type="text" placeholder="Search exams, agencies, tags…" autocomplete="off" />
-    <button id="search-close" data-action="close-search" title="Close search">✕</button>
-  </div>
-
-  <!-- ── Offline Banner ──────────────────────────────────── -->
-  <div id="offline-banner">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="1" y1="1" x2="23" y2="23"/>
-      <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/>
-      <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/>
-      <path d="M10.71 5.05A16 16 0 0 1 22.56 9"/>
-      <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/>
-      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
-      <line x1="12" y1="20" x2="12.01" y2="20"/>
-    </svg>
-    You're offline. Changes won't be saved until you reconnect.
-  </div>
-
-  <!-- ── Countdown Strip ─────────────────────────────────── -->
-  <div id="countdown-strip">
-    <!-- Populated by JS when exams are pinned -->
-  </div>
-
-  <!-- ── Filter Bar ──────────────────────────────────────── -->
-  <div id="filter-bar">
-
-    <!-- Status chips -->
-    <div class="filter-status-group">
-      <button class="filter-chip status-chip active" data-action="filter-status" data-status="all">All</button>
-      <button class="filter-chip status-chip" data-action="filter-status" data-status="open">Open</button>
-      <button class="filter-chip status-chip" data-action="filter-status" data-status="applied">Applied</button>
+  <!-- SEARCH BAR (collapsible) -->
+  <div id="search-bar" class="search-bar" style="display:none">
+    <div class="search-inner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-input" class="search-input" placeholder="Search exams, agencies, tags…" oninput="handleSearch(this.value)"/>
+      <button class="search-clear" onclick="clearSearch()">✕</button>
     </div>
+  </div>
 
+  <!-- COUNTDOWN STRIP -->
+  <div class="countdown-strip" id="countdown-strip">
+    <div class="countdown-label">PINNED</div>
+    <div class="countdown-rings" id="countdown-rings">
+      <div class="countdown-empty">Pin up to 3 exams to track here</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-group" id="status-filters">
+      <button class="chip active" data-status="all" onclick="setStatusFilter('all',this)">All</button>
+      <button class="chip" data-status="open" onclick="setStatusFilter('open',this)">Open</button>
+      <button class="chip" data-status="upcoming" onclick="setStatusFilter('upcoming',this)">Upcoming</button>
+      <button class="chip" data-status="closed" onclick="setStatusFilter('closed',this)">Closed</button>
+    </div>
     <div class="filter-sep"></div>
-
-    <!-- Tag dropdown -->
-    <div class="filter-tag-wrap">
-      <button class="filter-tag-btn" id="tag-filter-btn" data-action="toggle-tag-dropdown">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;">
-          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
-          <line x1="7" y1="7" x2="7.01" y2="7"/>
-        </svg>
-        <span>Tag</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px;">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </button>
-      <!-- Tag filter dropdown -->
-      <div class="filter-tag-dropdown" id="tag-filter-dropdown">
-        <div class="filter-tag-list" id="tag-filter-list">
-          <!-- Populated by JS -->
-        </div>
-        <div class="filter-tag-footer">
-          <span class="filter-tag-footer-info" id="tag-filter-footer-info">All tags</span>
-          <button class="filter-tag-manage-btn" data-action="open-tags-manager">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px;">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-            Manage
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search pill (desktop shortcut) -->
-    <button class="filter-search-pill" data-action="open-search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <span>Search…</span>
-    </button>
-
-  </div><!-- /#filter-bar -->
-
-  <!-- ── Main Content ────────────────────────────────────── -->
-  <main id="main-content">
-
-    <!-- Desktop toolbar -->
-    <div id="table-toolbar">
-      <button id="desktop-add-btn" data-action="add-exam">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
+    <div class="filter-group" id="tag-filters" style="flex:1;flex-wrap:nowrap;overflow-x:auto;"></div>
+    <div class="filter-right">
+      <button class="btn-add" onclick="openAddExam()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Exam
       </button>
-      <span class="exam-count-label" id="exam-count-label"></span>
     </div>
+  </div>
 
-    <!-- ── Desktop Table ──────────────────────────────────── -->
-    <div id="exam-table-wrap">
-      <table id="exam-table">
-        <thead>
-          <tr>
-            <th class="col-expand-th"></th>
-            <th class="col-rank-th" data-sort="rank">
-              # <span class="sort-arrow"></span>
-            </th>
-            <th data-sort="name" style="cursor:pointer;">
-              Exam Name <span class="sort-arrow"></span>
-            </th>
-            <th data-sort="agency" style="cursor:pointer;">
-              Agency <span class="sort-arrow"></span>
-            </th>
-            <th>Tag</th>
-            <th data-sort="deadlineDate" style="cursor:pointer;">
-              Deadline <span class="sort-arrow"></span>
-            </th>
-            <th>Status</th>
-            <th>Eligible</th>
-            <th title="Mark as applied">Applied</th>
-            <th title="Pin to countdown">📌</th>
-          </tr>
-        </thead>
-        <tbody id="exam-tbody">
-          <!-- Populated by JS -->
-        </tbody>
-      </table>
-
-      <!-- Empty state -->
-      <div id="table-empty" class="empty-state hidden">
-        <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        <div class="empty-title" id="table-empty-title">No exams yet</div>
-        <div class="empty-sub"   id="table-empty-sub">Add your first exam to get started.</div>
-        <button class="btn btn-accent" data-action="add-exam" id="table-empty-add-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add Exam
-        </button>
-      </div>
-    </div><!-- /#exam-table-wrap -->
-
-    <!-- ── Mobile Cards ───────────────────────────────────── -->
-    <div id="exam-cards">
-      <!-- Populated by JS -->
+  <!-- EXAM LIST -->
+  <main class="exam-list" id="exam-list">
+    <div class="list-empty" id="list-empty" style="display:none">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">No exams yet</div>
+      <div class="empty-sub">Add your first exam to get started</div>
+      <button class="btn-primary" style="margin-top:16px;width:auto;padding:10px 24px;" onclick="openAddExam()">Add Exam</button>
     </div>
-    <div id="cards-empty" class="empty-state hidden">
-      <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/>
-        <line x1="12" y1="17" x2="12" y2="21"/>
-      </svg>
-      <div class="empty-title" id="cards-empty-title">No exams yet</div>
-      <div class="empty-sub"   id="cards-empty-sub">Tap + to add your first exam.</div>
-    </div>
-
+    <div id="exam-cards"></div>
   </main>
 
-  <!-- ── Mobile FAB ──────────────────────────────────────── -->
-  <button id="fab-add" data-action="add-exam" title="Add Exam" aria-label="Add Exam">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
+  <!-- FAB -->
+  <button class="fab" onclick="openAddExam()" title="Add Exam">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 
-  <!-- ── Mobile Bottom Nav ────────────────────────────────── -->
-  <nav id="bottom-nav">
-    <button class="nav-btn active" data-action="nav-exams">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/>
-        <line x1="12" y1="17" x2="12" y2="21"/>
-      </svg>
-      EXAMS
-    </button>
-    <button class="nav-btn" data-action="add-exam">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10"/>
-        <line x1="12" y1="8" x2="12" y2="16"/>
-        <line x1="8"  y1="12" x2="16" y2="12"/>
-      </svg>
-      ADD
-    </button>
-    <button class="nav-btn" data-action="nav-profile">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
-      PROFILE
-    </button>
-  </nav>
+</div>
 
-</div><!-- /#app-screen -->
+<!-- ═══════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════ -->
 
-<!-- ══════════════════════════════════════════════════════
-     SIDE PANEL + OVERLAY
-══════════════════════════════════════════════════════════ -->
-<div id="panel-overlay"></div>
-<aside id="side-panel" role="dialog" aria-modal="true" aria-label="Panel">
-  <!-- All content built by JS -->
-</aside>
-
-<!-- ══════════════════════════════════════════════════════
-     MODAL OVERLAY (delete confirm, tag manager, import)
-══════════════════════════════════════════════════════════ -->
-<div id="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-title"    id="modal-title">Confirm</div>
-    <div class="modal-body"     id="modal-body"></div>
-    <!-- Optional typed-input for dangerous confirmations -->
-    <div id="modal-input-wrap" class="hidden" style="margin-bottom:14px;">
-      <input class="modal-confirm-input" type="text" id="modal-confirm-input" />
+<!-- ADD / EDIT EXAM MODAL -->
+<div id="exam-modal" class="modal-overlay" style="display:none" onclick="closeModalOnOverlay(event,'exam-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="exam-modal-title">Add Exam</div>
+      <button class="modal-close" onclick="closeExamModal()">✕</button>
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" data-action="close-modal">Cancel</button>
-      <button class="btn btn-danger" id="modal-confirm-btn" data-action="confirm-delete-account">
-        Confirm
-      </button>
+    <div class="modal-body">
+      <input type="hidden" id="exam-id"/>
+
+      <div class="form-row">
+        <div class="field-group" style="flex:2">
+          <label class="field-label">Exam Name *</label>
+          <input type="text" id="f-name" class="field-input" placeholder="e.g. SSC CGL 2025"/>
+        </div>
+        <div class="field-group" style="flex:1">
+          <label class="field-label">Agency *</label>
+          <input type="text" id="f-agency" class="field-input" placeholder="e.g. SSC"/>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-group" style="flex:1">
+          <label class="field-label">Status</label>
+          <select id="f-status" class="field-input field-select">
+            <option value="open">Open</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="field-group" style="flex:1">
+          <label class="field-label">Last Date</label>
+          <input type="date" id="f-last-date" class="field-input"/>
+        </div>
+        <div class="field-group" style="flex:1">
+          <label class="field-label">Exam Date</label>
+          <input type="date" id="f-exam-date" class="field-input"/>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Website URL</label>
+        <input type="url" id="f-website" class="field-input" placeholder="https://ssc.nic.in"/>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Eligibility</label>
+        <textarea id="f-eligibility" class="field-input field-textarea" placeholder="Age, qualification, etc."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Syllabus</label>
+        <textarea id="f-syllabus" class="field-input field-textarea" placeholder="Topics, subjects, sections…"></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Exam Pattern</label>
+        <textarea id="f-pattern" class="field-input field-textarea" placeholder="Number of questions, marks, duration…"></textarea>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Tags <span style="color:var(--muted);font-weight:400">(comma separated)</span></label>
+        <input type="text" id="f-tags" class="field-input" placeholder="Banking, Central Govt, State…"/>
+      </div>
+
+      <div class="form-row" style="gap:20px;align-items:center;padding-top:4px">
+        <label class="toggle-label">
+          <input type="checkbox" id="f-applied" class="toggle-check"/>
+          <div class="toggle-track"></div>
+          <span>Applied</span>
+        </label>
+        <label class="toggle-label">
+          <input type="checkbox" id="f-pinned" class="toggle-check" onchange="checkPinLimit(this)"/>
+          <div class="toggle-track"></div>
+          <span>Pin to countdown</span>
+        </label>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeExamModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveExam()" id="save-exam-btn">Save Exam</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     TOAST CONTAINER
-══════════════════════════════════════════════════════════ -->
-<div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+<!-- PROFILE MODAL -->
+<div id="profile-modal" class="modal-overlay" style="display:none" onclick="closeModalOnOverlay(event,'profile-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Profile & Settings</div>
+      <button class="modal-close" onclick="closeProfile()">✕</button>
+    </div>
+    <div class="modal-body">
 
-<!-- ══════════════════════════════════════════════════════
-     DELETED ACCOUNT SCREEN
-══════════════════════════════════════════════════════════ -->
-<div id="deleted-screen">
-  <div class="loading-logo">EXAM <span>TRACKER</span></div>
-  <h2>Account deleted.</h2>
-  <p>Your data has been permanently removed.</p>
-  <button class="btn btn-ghost" style="margin-top:12px;" onclick="location.reload()">
-    ← Back to Sign In
-  </button>
+      <div class="profile-top">
+        <div class="profile-avatar" id="profile-avatar-big">?</div>
+        <div>
+          <div class="profile-name" id="profile-name-display">—</div>
+          <div class="profile-email" id="profile-email-display">—</div>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="settings-section">
+        <div class="settings-section-title">Security</div>
+        <div class="field-group">
+          <label class="field-label">New Password</label>
+          <input type="password" id="new-password" class="field-input" placeholder="Enter new password"/>
+        </div>
+        <button class="btn-ghost" onclick="handleChangePassword()" style="width:auto">Change Password</button>
+        <button class="btn-link" onclick="handleForgotPasswordFromProfile()" style="margin-top:6px;display:block">Send reset email instead</button>
+      </div>
+
+      <!-- Data -->
+      <div class="settings-section">
+        <div class="settings-section-title">Data</div>
+        <div class="data-actions">
+          <button class="btn-data" onclick="exportJSON()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export JSON
+          </button>
+          <button class="btn-data" onclick="exportCSV()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <label class="btn-data" style="cursor:pointer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Import JSON
+            <input type="file" accept=".json" style="display:none" onchange="importJSON(event)"/>
+          </label>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-section danger-zone">
+        <div class="settings-section-title" style="color:var(--no)">Danger Zone</div>
+        <button class="btn-danger" onclick="confirmDeleteAccount()">Delete Account Permanently</button>
+        <p class="danger-note">This deletes all your exams and account data. Cannot be undone.</p>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="handleSignOut()">Sign Out</button>
+      <button class="btn-primary" onclick="closeProfile()">Done</button>
+    </div>
+  </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════
-     HIDDEN IMPORT INPUT
-══════════════════════════════════════════════════════════ -->
-<input type="file" id="import-file-input" accept=".json" style="display:none;" />
+<!-- CONFIRM DELETE MODAL -->
+<div id="confirm-modal" class="modal-overlay" style="display:none" onclick="closeModalOnOverlay(event,'confirm-modal')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title" id="confirm-title">Confirm</div>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message" style="color:var(--text2);font-size:13px;line-height:1.6"></p>
+      <div id="confirm-password-group" style="display:none;margin-top:12px">
+        <label class="field-label">Enter your password to confirm</label>
+        <input type="password" id="confirm-password-input" class="field-input" placeholder="Your current password"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn-danger" id="confirm-action-btn">Delete</button>
+    </div>
+  </div>
+</div>
 
-<!-- ══════════════════════════════════════════════════════
-     FIREBASE (compat SDK — no bundler needed)
-══════════════════════════════════════════════════════════ -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="app.js"></script>
+<!-- TOAST -->
+<div id="toast" class="toast" style="display:none"></div>
 
+<script type="module" src="app.js"></script>
 </body>
 </html>
