@@ -1108,8 +1108,7 @@ td.td-eligible { text-align: center; min-width: 70px; }
   transition: all .12s;
 }
 .md-tool:hover { background: var(--surface2); color: var(--text); }
-.md-tool-table { font-size: 11px; }
-.md-tool-hint { font-size: 10px; color: var(--muted); margin-left: 8px; }
+.md-tool-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
 
 /* Split pane */
 .md-split {

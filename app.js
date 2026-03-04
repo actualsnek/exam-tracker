@@ -1061,8 +1061,6 @@ window.closeMdPanel = () => {
 };
 
 window.saveMdPanel = () => {
-  const field    = document.getElementById('md-panel-title').textContent.split(' — ')[0].toLowerCase().replace('exam pattern','pattern').replace('eligibility','eligibility').replace('syllabus','syllabus');
-  // derive field from title
   const titleMap = { 'Eligibility':'eligibility', 'Syllabus':'syllabus', 'Exam Pattern':'pattern' };
   const panelTitle = document.getElementById('md-panel-title').textContent;
   const derivedField = Object.keys(titleMap).find(k => panelTitle.startsWith(k));
@@ -1170,8 +1168,17 @@ window.mdPreview = () => {
 };
 
 // Toolbar helpers
+// Detect which editor panel is active and return its textarea + preview updater
+function getActiveEditor() {
+  const fvEdit = document.getElementById('fv-edit-mode');
+  if (fvEdit && fvEdit.style.display !== 'none') {
+    return { ta: document.getElementById('fv-editor-textarea'), preview: fvLivePreview };
+  }
+  return { ta: document.getElementById('md-editor-textarea'), preview: mdPreview };
+}
+
 window.mdInsert = (before, after) => {
-  const ta = document.getElementById('md-editor-textarea');
+  const { ta, preview } = getActiveEditor();
   const s = ta.selectionStart, e = ta.selectionEnd;
   const selected = ta.value.substring(s, e);
   const replacement = before + (selected || 'text') + after;
@@ -1179,16 +1186,16 @@ window.mdInsert = (before, after) => {
   ta.selectionStart = s + before.length;
   ta.selectionEnd   = s + before.length + (selected || 'text').length;
   ta.focus();
-  mdPreview();
+  preview();
 };
 
 window.mdInsertTable = () => {
   const tbl = '\n| Column 1 | Column 2 | Column 3 |\n|---|---|---|\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |\n';
-  const ta  = document.getElementById('md-editor-textarea');
+  const { ta, preview } = getActiveEditor();
   const pos = ta.selectionStart;
   ta.value  = ta.value.substring(0, pos) + tbl + ta.value.substring(pos);
   ta.focus();
-  mdPreview();
+  preview();
 };
 
 // ── Minimal Markdown parser ───────────────────────
