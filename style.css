@@ -654,6 +654,11 @@ tr.detail-row td {
 .exp-field-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 .exp-field-btn:hover { border-color: var(--accent-soft); color: var(--accent); background: var(--accent-bg); }
 .exp-field-btn.empty { opacity: .55; border-style: dashed; }
+.exp-field-sep { width: 1px; background: var(--border2); margin: 0 4px; align-self: stretch; flex-shrink: 0; }
+.exp-field-link { text-decoration: none; color: var(--text2); }
+.exp-field-link:hover { color: var(--accent); border-color: var(--accent-soft); background: var(--accent-bg); }
+.exp-field-res { color: var(--text2); }
+.exp-bar-sep { width: 1px; height: 16px; background: var(--border2); margin: 0 4px; flex-shrink: 0; }
 .fbtn-empty { font-size: 9px; color: var(--muted); font-weight: 400; margin-left: 2px; }
 
 /* ── Field View Panel ── */

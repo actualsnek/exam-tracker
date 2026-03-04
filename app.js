@@ -484,28 +484,55 @@ function tableRowHTML(exam, num) {
   const eligibleLbl = exam.eligible ? 'Yes' : 'No';
 
   // ── EXPANDED PANEL ──────────────────────────────
+  const resItems = (exam.resources || []);
+  const websiteHostname = exam.website ? (() => { try { return new URL(exam.website.startsWith('http') ? exam.website : 'https://'+exam.website).hostname; } catch(e) { return exam.website; } })() : '';
+
   const detailRow = isExpanded ? `
   <tr class="detail-row">
     <td colspan="11">
       <div class="exp-panel">
 
-        <!-- 3 small field buttons -->
+        <!-- Top row: Eligibility · Exam Pattern · Syllabus | Website · Resources -->
         <div class="exp-field-btns">
           <button class="exp-field-btn${exam.eligibility ? '' : ' empty'}" onclick="openFieldView('${exam.id}','eligibility')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Eligibility${exam.eligibility ? '' : ' <span class="fbtn-empty">empty</span>'}
           </button>
-          <button class="exp-field-btn${exam.syllabus ? '' : ' empty'}" onclick="openFieldView('${exam.id}','syllabus')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Syllabus${exam.syllabus ? '' : ' <span class="fbtn-empty">empty</span>'}
-          </button>
           <button class="exp-field-btn${exam.pattern ? '' : ' empty'}" onclick="openFieldView('${exam.id}','pattern')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
             Exam Pattern${exam.pattern ? '' : ' <span class="fbtn-empty">empty</span>'}
           </button>
+          <button class="exp-field-btn${exam.syllabus ? '' : ' empty'}" onclick="openFieldView('${exam.id}','syllabus')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Syllabus${exam.syllabus ? '' : ' <span class="fbtn-empty">empty</span>'}
+          </button>
+
+          ${exam.website || resItems.length > 0 ? '<div class="exp-field-sep"></div>' : ''}
+
+          ${exam.website ? `<a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="exp-field-btn exp-field-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            ${escHtml(websiteHostname)}
+          </a>` : ''}
+
+          <div class="res-popover-wrap" id="res-wrap-${exam.id}">
+            <button class="exp-field-btn exp-field-res" onclick="toggleResPopover('${exam.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+              Resources${resItems.length > 0 ? ` <span class="res-count">${resItems.length}</span>` : ''}
+            </button>
+            <div class="res-popover" id="res-pop-${exam.id}" style="display:none">
+              <div class="res-pop-list">
+                ${resItems.length === 0
+                  ? '<div class="res-pop-empty">No resources yet. Add via Edit.</div>'
+                  : resItems.map(r => `<div class="res-pop-item">
+                      <span class="res-type-badge res-${escHtml(r.type.toLowerCase())}">${escHtml(r.type)}</span>
+                      <a href="${r.title.startsWith('http') ? escHtml(r.title) : '#'}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.title)}</a>
+                    </div>`).join('')}
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Bottom bar: tags + actions -->
+        <!-- Bottom bar: Tags | Edit · Delete -->
         <div class="exp-bar">
           <div class="exp-tags-row">
             <span class="exp-tags-label">Tags:</span>
@@ -513,9 +540,8 @@ function tableRowHTML(exam, num) {
             <button class="exp-tag-add" onclick="openEditExam('${exam.id}')">+ add</button>
           </div>
           <div class="exp-actions">
-            ${exam.website ? `<a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="exp-action-btn website">🌐 ${escHtml(new URL(exam.website.startsWith('http') ? exam.website : 'https://'+exam.website).hostname)}</a>` : ''}
+            <div class="exp-bar-sep"></div>
             <button class="exp-action-btn" onclick="openEditExam('${exam.id}')">✎ Edit</button>
-            <button class="exp-action-btn pin" onclick="togglePin('${exam.id}')">${exam.pinned ? '📌 Unpin' : '📌 Pin'}</button>
             <button class="exp-action-btn danger" onclick="deleteExam('${exam.id}')">🗑 Delete</button>
           </div>
         </div>
