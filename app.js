@@ -919,6 +919,10 @@ window.importJSON = async (event) => {
         tags:        Array.isArray(exam.tags) ? exam.tags : [],
         applied:     !!exam.applied,
         pinned:      false,
+        resources:   Array.isArray(exam.resources)
+                       ? exam.resources.filter(r => r.type && r.label && r.url)
+                           .map(r => ({ type: String(r.type), label: String(r.label), url: String(r.url) }))
+                       : [],
         createdAt:   serverTimestamp(),
       };
       await addDoc(examsRef(), clean);
