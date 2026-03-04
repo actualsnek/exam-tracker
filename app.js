@@ -328,20 +328,21 @@ window.togglePin = async (id) => {
 let modalDraft = { eligibility: '', syllabus: '', pattern: '' };
 
 function setModalDraftPreview(field) {
-  const statusEl = document.getElementById('md-status-' + field);
-  const btn      = document.getElementById('btn-' + field);
-  if (!statusEl || !btn) return;
+  const span = document.getElementById('prev-' + field);
+  if (!span) return;
+  const btn = span.closest('button');
   const val = modalDraft[field];
   if (val && val.trim()) {
-    // Show first line as status
     const firstLine = val.split('\n').find(l => l.trim()) || '';
-    const plain = firstLine.replace(/#{1,6} /g,'').replace(/\*\*(.+?)\*\*/g,'$1').replace(/\*(.+?)\*/g,'$1').replace(/`(.+?)`/g,'$1').trim();
-    statusEl.textContent = plain ? plain.substring(0, 60) + (plain.length > 60 ? '…' : '') : 'Content added ✓';
-    btn.classList.add('has-content');
+    const plain = firstLine
+      .replace(/#{1,6} /g, '').replace(/\*\*(.+?)\*\*/g, '$1')
+      .replace(/\*(.+?)\*/g, '$1').replace(/`(.+?)`/g, '$1').trim();
+    span.textContent = plain ? (plain.length > 55 ? plain.substring(0,55)+'…' : plain) : 'Content added ✓';
+    if (btn) btn.classList.add('has-content');
   } else {
     const labels = { eligibility: 'Not added', syllabus: 'Not added', pattern: 'Not added' };
-    statusEl.textContent = labels[field];
-    btn.classList.remove('has-content');
+    span.textContent = labels[field];
+    if (btn) btn.classList.remove('has-content');
   }
 }
 
