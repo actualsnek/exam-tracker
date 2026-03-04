@@ -283,6 +283,7 @@ window.deleteExam = async (id) => {
       try {
         await deleteDoc(doc(db, 'users', currentUser.uid, 'exams', id));
         toast('Exam deleted.', 'success');
+        closeConfirmModal();
         await loadExams();
       } catch (e) {
         toast('Delete failed.', 'error');
@@ -341,12 +342,9 @@ function renderModalResList() {
   if (modalResources.length === 0) { list.innerHTML = ''; return; }
   list.innerHTML = modalResources.map((r, i) => `
     <div class="res-item">
-      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type === 'PDF'
-        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
-        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`
-      }</span>
+      <span class="res-type-badge res-${r.type.toLowerCase()}">${r.type === 'PDF' ? '⬇' : '🔗'}</span>
       <span class="res-title">${escHtml(r.label)}</span>
-      <button class="res-remove" onclick="modalRemoveResource(${i})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="10" height="10"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="res-remove" onclick="modalRemoveResource(${i})">✕</button>
     </div>`).join('');
 }
 
@@ -614,7 +612,7 @@ function tableRowHTML(exam, num) {
           </div>
           <div class="exp-actions">
             <div class="exp-bar-sep"></div>
-            <button class="exp-action-btn" onclick="openEditExam('${exam.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+            <button class="exp-action-btn" onclick="openEditExam('${exam.id}')">✎ Edit</button>
             <button class="exp-action-btn danger" onclick="deleteExam('${exam.id}')">🗑 Delete</button>
           </div>
         </div>
@@ -626,10 +624,7 @@ function tableRowHTML(exam, num) {
   return `
   <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}" id="row-${exam.id}">
     <td class="td-expand">
-      <button class="expand-btn${isExpanded ? ' open' : ''}" onclick="toggleExpand('${exam.id}')">${isExpanded
-        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg>`
-        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>`
-      }</button>
+      <button class="expand-btn${isExpanded ? ' open' : ''}" onclick="toggleExpand('${exam.id}')">${isExpanded ? '▼' : '▶'}</button>
     </td>
     <td class="td-num">${num}</td>
     <td class="td-name">${escHtml(exam.name)}</td>
@@ -642,7 +637,7 @@ function tableRowHTML(exam, num) {
       <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
     </td>
     <td class="td-pin">
-      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}"><svg viewBox="0 0 24 24" fill="${exam.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7z"/><circle cx="12" cy="9" r="2.5" fill="${exam.pinned ? 'white' : 'currentColor'}" stroke="none"/></svg></button>
+      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}">📌</button>
     </td>
   </tr>${detailRow}`;
 }
@@ -833,42 +828,55 @@ window.handleForgotPasswordFromProfile = async () => {
 
 // ── Delete Account ────────────────────────────────
 window.confirmDeleteAccount = () => {
+  // Detect if user signed in with Google (no password)
+  const isGoogle = currentUser?.providerData?.some(p => p.providerId === 'google.com');
+
   openConfirm(
     'Delete Account',
     'This will permanently delete your account and ALL exam data. This action cannot be undone.',
-    true,
+    !isGoogle, // only show password field for email/password users
     async () => {
-      const password = document.getElementById('confirm-password-input').value;
       try {
         // Re-authenticate
-        const credential = EmailAuthProvider.credential(currentUser.email, password);
-        await reauthenticateWithCredential(currentUser, credential);
+        if (isGoogle) {
+          // Google users must re-auth via popup
+          await reauthenticateWithCredential(
+            currentUser,
+            await (async () => {
+              const { GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+              const result = await signInWithPopup(auth, gProvider);
+              return GoogleAuthProvider.credentialFromResult(result);
+            })()
+          );
+        } else {
+          const password = document.getElementById('confirm-password-input').value;
+          if (!password) return toast('Enter your password to confirm.', 'error');
+          const credential = EmailAuthProvider.credential(currentUser.email, password);
+          await reauthenticateWithCredential(currentUser, credential);
+        }
 
-        // Delete all exams
+        // Delete all Firestore exam data
         const snap = await getDocs(examsRef());
         const batch = writeBatch(db);
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
 
-        // Delete auth user
+        // Clear local state immediately
+        allExams = [];
+
+        // Delete Firebase Auth user
         await deleteUser(currentUser);
+
+        // onAuthStateChanged will fire and call showAuthScreen()
         toast('Account deleted.', 'success');
+        closeConfirmModal();
       } catch (e) {
         if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
           toast('Wrong password. Account not deleted.', 'error');
-        } else if (e.code === 'auth/popup-closed-by-user') {
-          // Google user — try just delete
-          try {
-            const snap = await getDocs(examsRef());
-            const batch = writeBatch(db);
-            snap.docs.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-            await deleteUser(currentUser);
-          } catch (e2) {
-            toast('Re-authentication required. Sign out and sign back in.', 'error');
-          }
+        } else if (e.code === 'auth/requires-recent-login') {
+          toast('Please sign out, sign back in, then try again.', 'error');
         } else {
-          toast('Delete failed. Try signing out and signing back in first.', 'error');
+          toast('Delete failed: ' + (e.message || e.code), 'error');
         }
       }
     }
@@ -975,7 +983,6 @@ window.closeConfirmModal = () => {
 
 document.getElementById('confirm-action-btn').addEventListener('click', async () => {
   if (confirmCallback) await confirmCallback();
-  closeConfirmModal();
 });
 
 // ════════════════════════════════════════════════════
