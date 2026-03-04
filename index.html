@@ -78,13 +78,11 @@
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo"><span class="topbar-logo-text">EXAM <span>TRACKER</span></span><div class="topbar-tagline">दीर्घसूत्री विनश्यति ।</div></div>
+    <div class="topbar-logo"><span class="topbar-logo-text"><span class="logo-exam">EXAM</span> <span class="logo-tracker">TRACKER</span></span><div class="topbar-tagline">दीर्घसूत्री विनश्यति ।</div></div>
     <div class="topbar-right">
       <!-- Data dropdown -->
       <div class="data-dd-wrap" id="data-dd-wrap">
-        <button class="icon-btn" id="data-dd-btn" onclick="toggleDataDropdown()" title="Import / Export data">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="15" height="15"><line x1="12" y1="3" x2="12" y2="10"/><polyline points="9 6 12 3 15 6"/><line x1="12" y1="21" x2="12" y2="14"/><polyline points="15 18 12 21 9 18"/></svg>
-        </button>
+        <button class="icon-btn" id="data-dd-btn" onclick="toggleDataDropdown()" title="Import / Export data" style="font-size:13px;font-weight:600;letter-spacing:-1px">↑↓</button>
         <div class="data-dd-menu" id="data-dd-menu" style="display:none">
           <button class="data-dd-item" onclick="exportJSON(); document.getElementById('data-dd-menu').style.display='none'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>

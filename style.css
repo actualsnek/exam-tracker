@@ -263,9 +263,11 @@ a:hover { color: var(--accent-h); }
   display: flex; flex-direction: column; gap: 0px; line-height: 1;
 }
 .topbar-logo-text { font-size: 16px; white-space: nowrap; }
+.logo-exam { color: var(--text); font-weight: 700; }
+.logo-tracker { color: var(--accent); }
 .topbar-logo-text span { color: var(--accent); }
 .topbar-logo span { color: var(--accent); }
-.topbar-tagline { font-family: var(--font); font-size: 9px; color: var(--muted); letter-spacing: .3px; font-weight: 400; opacity: .75; margin-top: 2px; white-space: nowrap; }
+.topbar-tagline { font-family: var(--font); font-size: 9px; color: var(--accent); letter-spacing: .8px; font-weight: 500; opacity: .6; margin-top: 3px; white-space: nowrap; font-style: italic; }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
 
 .icon-btn {
