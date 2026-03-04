@@ -433,48 +433,87 @@ function tableRowHTML(exam, num) {
   let deadlineHTML = '<span class="deadline-normal">—</span>';
   if (dateStr) {
     const days = daysUntil(dateStr);
-    if (days === null) {
-      deadlineHTML = '<span class="deadline-normal">—</span>';
-    } else if (days < 0) {
-      deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
-    } else if (days <= 7) {
-      deadlineHTML = `<span class="deadline-warn">${formatDate(dateStr)}</span>`;
-    } else if (days <= 30) {
-      deadlineHTML = `<span class="deadline-ok">${formatDate(dateStr)}</span>`;
-    } else {
-      deadlineHTML = `<span class="deadline-normal">${formatDate(dateStr)}</span>`;
-    }
+    if (days === null)      deadlineHTML = '<span class="deadline-normal">—</span>';
+    else if (days < 0)     deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
+    else if (days <= 7)    deadlineHTML = `<span class="deadline-warn">${formatDate(dateStr)}</span>`;
+    else if (days <= 30)   deadlineHTML = `<span class="deadline-ok">${formatDate(dateStr)}</span>`;
+    else                   deadlineHTML = `<span class="deadline-normal">${formatDate(dateStr)}</span>`;
   }
 
-  // Tags — show first 2 + overflow count
+  // Tags in main row — show first tag only
   const tags = exam.tags || [];
-  let tagsHTML = '—';
+  let tagsHTML = '<span style="color:var(--muted)">—</span>';
   if (tags.length > 0) {
     tagsHTML = `<span class="tag-badge">${escHtml(tags[0])}</span>`;
     if (tags.length > 1) tagsHTML += `<span class="tag-more">+${tags.length - 1}</span>`;
   }
 
-  const statusCls = exam.status || 'open';
+  const statusCls   = exam.status || 'open';
   const statusLabel = capitalize(statusCls);
+  const eligibleCls = exam.eligible ? 'eligible-yes' : 'eligible-no';
+  const eligibleLbl = exam.eligible ? 'Yes' : 'No';
 
-  // Expanded detail row
+  // ── EXPANDED PANEL ──────────────────────────────
   const detailRow = isExpanded ? `
-  <tr class="detail-row" id="detail-${exam.id}">
-    <td colspan="10">
-      <div class="detail-inner">
-        ${exam.eligibility ? `<div class="detail-block"><div class="detail-label">Eligibility</div><div class="detail-text">${escHtml(exam.eligibility)}</div></div>` : ''}
-        ${exam.syllabus    ? `<div class="detail-block"><div class="detail-label">Syllabus</div><div class="detail-text">${escHtml(exam.syllabus)}</div></div>` : ''}
-        ${exam.pattern     ? `<div class="detail-block"><div class="detail-label">Exam Pattern</div><div class="detail-text">${escHtml(exam.pattern)}</div></div>` : ''}
-        ${exam.website     ? `<div class="detail-block"><div class="detail-label">Website</div><a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="detail-link">🌐 ${escHtml(exam.website)}</a></div>` : ''}
-        ${!exam.eligibility && !exam.syllabus && !exam.pattern && !exam.website ? '<div style="color:var(--muted);font-size:12px">No details added yet. Click Edit to add.</div>' : ''}
+  <tr class="detail-row">
+    <td colspan="11">
+      <div class="exp-panel">
+
+        <!-- 3 detail cards -->
+        <div class="exp-cards">
+
+          <div class="exp-card">
+            <div class="exp-card-head">
+              <span class="exp-card-title">ELIGIBILITY</span>
+              <button class="exp-edit-btn" onclick="openEditExam('${exam.id}')">↗ Edit / View</button>
+            </div>
+            <div class="exp-card-body">${exam.eligibility ? escHtml(exam.eligibility) : '<span class="exp-empty">Not added</span>'}</div>
+          </div>
+
+          <div class="exp-card">
+            <div class="exp-card-head">
+              <span class="exp-card-title">SYLLABUS</span>
+              <button class="exp-edit-btn" onclick="openEditExam('${exam.id}')">↗ Edit / View</button>
+            </div>
+            <div class="exp-card-body">
+              ${exam.syllabus ? escHtml(exam.syllabus) : '<span class="exp-empty">Not added</span>'}
+              ${exam.website ? `<div class="exp-file-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><a href="${escHtml(exam.website)}" target="_blank" rel="noopener">${escHtml(exam.name.replace(/ /g,'_'))}_Syllabus.pdf</a></div>` : ''}
+            </div>
+          </div>
+
+          <div class="exp-card">
+            <div class="exp-card-head">
+              <span class="exp-card-title">EXAM PATTERN</span>
+              <button class="exp-edit-btn" onclick="openEditExam('${exam.id}')">↗ Edit / View</button>
+            </div>
+            <div class="exp-card-body">${exam.pattern ? escHtml(exam.pattern) : '<span class="exp-empty">Not added</span>'}</div>
+          </div>
+
+        </div>
+
+        <!-- Bottom bar: tags + actions -->
+        <div class="exp-bar">
+          <div class="exp-tags-row">
+            <span class="exp-tags-label">Tags:</span>
+            ${tags.map(t => `<span class="exp-tag" onclick="toggleTagFilter('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}
+            <button class="exp-tag-add" onclick="openEditExam('${exam.id}')">+ add</button>
+          </div>
+          <div class="exp-actions">
+            ${exam.website ? `<a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="exp-action-btn website">🌐 ${escHtml(new URL(exam.website.startsWith('http') ? exam.website : 'https://'+exam.website).hostname)}</a>` : ''}
+            <button class="exp-action-btn" onclick="openEditExam('${exam.id}')">✎ Edit</button>
+            <button class="exp-action-btn pin" onclick="togglePin('${exam.id}')">${exam.pinned ? '📌 Unpin' : '📌 Pin'}</button>
+            <button class="exp-action-btn danger" onclick="deleteExam('${exam.id}')">🗑 Delete</button>
+          </div>
+        </div>
+
       </div>
     </td>
   </tr>` : '';
 
   return `
-  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}" id="row-${exam.id}">
+  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}" id="row-${exam.id}">
     <td class="td-expand">
-      <button class="expand-btn" onclick="toggleExpand('${exam.id}')" title="Expand">${isExpanded ? '▼' : '▶'}</button>
+      <button class="expand-btn${isExpanded ? ' open' : ''}" onclick="toggleExpand('${exam.id}')">${isExpanded ? '▼' : '▶'}</button>
     </td>
     <td class="td-num">${num}</td>
     <td class="td-name">${escHtml(exam.name)}</td>
@@ -482,17 +521,12 @@ function tableRowHTML(exam, num) {
     <td class="td-tag">${tagsHTML}</td>
     <td class="td-deadline">${deadlineHTML}</td>
     <td class="td-status"><span class="status-pill ${statusCls}">${statusLabel}</span></td>
+    <td class="td-eligible"><span class="eligible-pill ${eligibleCls}">${eligibleLbl}</span></td>
     <td class="td-applied">
       <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
     </td>
     <td class="td-pin">
       <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}">📌</button>
-    </td>
-    <td class="td-actions">
-      <div class="action-btns">
-        <button class="action-btn" onclick="openEditExam('${exam.id}')">✏</button>
-        <button class="action-btn delete" onclick="deleteExam('${exam.id}')">🗑</button>
-      </div>
     </td>
   </tr>${detailRow}`;
 }
