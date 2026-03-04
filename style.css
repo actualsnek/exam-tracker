@@ -559,7 +559,7 @@ a:hover { color: var(--accent-h); }
   cursor: default;
 }
 .exam-table tbody tr.exam-row:hover { background: var(--bg2); }
-.exam-table tbody tr.exam-row.pinned-row { border-left: 2px solid var(--accent); }
+.exam-table tbody tr.exam-row.pinned-row {  }
 
 .exam-table td {
   padding: 10px 14px;

@@ -678,8 +678,8 @@ function tableRowHTML(exam, num) {
       <button class="expand-btn${isExpanded ? ' open' : ''}" onclick="toggleExpand('${exam.id}')">${isExpanded ? '▼' : '▶'}</button>
     </td>
     <td class="td-num">${num}</td>
-    <td class="td-name">${escHtml(exam.name)}</td>
-    <td class="td-agency">${escHtml(exam.agency || '—')}</td>
+    <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
+    <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.agency || '—')}</td>
     <td class="td-tag">${tagsHTML}</td>
     <td class="td-deadline">${deadlineHTML}</td>
     <td class="td-status"><span class="status-pill ${statusCls}">${statusLabel}</span></td>
