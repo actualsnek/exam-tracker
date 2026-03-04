@@ -789,19 +789,18 @@ window.toggleStatusDropdown = () => {
   document.getElementById('tag-dd-menu').style.display = 'none';
   menu.style.display = open ? 'block' : 'none';
   if (open) {
-    setTimeout(() => {
-      document.addEventListener('click', function handler(e) {
-        if (!document.getElementById('status-dd-wrap').contains(e.target)) {
-          menu.style.display = 'none';
-        } else {
-          setTimeout(() => document.addEventListener('click', handler, { once: true }), 10);
-          return;
-        }
-        document.removeEventListener('click', handler);
-      }, { once: true });
-    }, 10);
+    setTimeout(() => document.addEventListener('click', closeStatusDdOutside, { once: true }), 10);
   }
 };
+
+function closeStatusDdOutside(e) {
+  const wrap = document.getElementById('status-dd-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('status-dd-menu').style.display = 'none';
+  } else {
+    setTimeout(() => document.addEventListener('click', closeStatusDdOutside, { once: true }), 10);
+  }
+}
 
 window.toggleSortDropdown = () => {
   const menu = document.getElementById('sort-dd-menu');
@@ -811,19 +810,18 @@ window.toggleSortDropdown = () => {
   document.getElementById('tag-dd-menu').style.display = 'none';
   menu.style.display = open ? 'block' : 'none';
   if (open) {
-    setTimeout(() => {
-      document.addEventListener('click', function handler(e) {
-        if (!document.getElementById('sort-dd-wrap').contains(e.target)) {
-          menu.style.display = 'none';
-        } else {
-          setTimeout(() => document.addEventListener('click', handler, { once: true }), 10);
-          return;
-        }
-        document.removeEventListener('click', handler);
-      }, { once: true });
-    }, 10);
+    setTimeout(() => document.addEventListener('click', closeSortDdOutside, { once: true }), 10);
   }
 };
+
+function closeSortDdOutside(e) {
+  const wrap = document.getElementById('sort-dd-wrap');
+  if (!wrap.contains(e.target)) {
+    document.getElementById('sort-dd-menu').style.display = 'none';
+  } else {
+    setTimeout(() => document.addEventListener('click', closeSortDdOutside, { once: true }), 10);
+  }
+}
 
 function updateClearAll() {
   const btn = document.getElementById('btn-clear-all');
@@ -1443,9 +1441,12 @@ function parseMd(md) {
 
   // Links — sanitize URL to block javascript: and data: XSS vectors
   html = html.replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => {
-    const trimmed = url.trim();
-    const safe = /^https?:\/\//i.test(trimmed) || /^mailto:/i.test(trimmed);
-    if (!safe) return escHtml(label);
+    let trimmed = url.trim();
+    if (!/^https?:\/\//i.test(trimmed) && !/^mailto:/i.test(trimmed)) {
+      // block javascript:/data: but auto-prefix bare domains
+      if (/^(javascript|data|vbscript):/i.test(trimmed)) return escHtml(label);
+      trimmed = 'https://' + trimmed;
+    }
     return `<a href="${trimmed}" target="_blank" rel="noopener">${label}</a>`;
   });
 
