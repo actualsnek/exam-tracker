@@ -238,7 +238,6 @@ window.saveExam = async () => {
     syllabus:    modalDraft.syllabus,
     pattern:     modalDraft.pattern,
     tags:        document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
-    resources:   modalDraft.resources || [],
     applied:     document.getElementById('f-applied').checked,
     eligible:    document.getElementById('f-eligible') ? document.getElementById('f-eligible').checked : false,
     pinned,
@@ -347,42 +346,7 @@ function setModalDraftPreview(field) {
   }
 }
 
-// ── Resources modal helpers ───────────────────────
-function renderResourcesList() {
-  const list = document.getElementById('f-resources-list');
-  if (!list) return;
-  const items = modalDraft.resources || [];
-  if (items.length === 0) { list.innerHTML = ''; return; }
-  list.innerHTML = items.map((r, i) => `
-    <div class="res-item">
-      <span class="res-type-badge res-${r.type.toLowerCase()}">${escHtml(r.type)}</span>
-      <span class="res-title">${escHtml(r.title)}</span>
-      <button type="button" class="res-remove" onclick="removeResource(${i})">✕</button>
-    </div>`).join('');
-}
-
-window.addResource = () => {
-  const type  = document.getElementById('res-type').value;
-  const title = document.getElementById('res-url').value.trim();
-  if (!title) return;
-  if (!modalDraft.resources) modalDraft.resources = [];
-  modalDraft.resources.push({ type, title });
-  document.getElementById('res-url').value = '';
-  renderResourcesList();
-};
-
-window.removeResource = (i) => {
-  modalDraft.resources.splice(i, 1);
-  renderResourcesList();
-};
-
-// Allow Enter key to add resource
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && document.activeElement?.id === 'res-url') {
-    e.preventDefault();
-    addResource();
-  }
-});
+window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
   ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags'].forEach(id => {
@@ -393,9 +357,8 @@ document.addEventListener('keydown', (e) => {
   if (document.getElementById('f-eligible')) document.getElementById('f-eligible').checked = false;
   document.getElementById('f-pinned').checked = false;
   // Reset draft
-  modalDraft = { eligibility: '', syllabus: '', pattern: '', resources: [] };
+  modalDraft = { eligibility: '', syllabus: '', pattern: '' };
   ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
-  renderResourcesList();
   document.getElementById('exam-modal').style.display = 'flex';
 };
 
@@ -419,10 +382,8 @@ window.openEditExam = (id) => {
     eligibility: exam.eligibility || '',
     syllabus:    exam.syllabus    || '',
     pattern:     exam.pattern     || '',
-    resources:   exam.resources   ? JSON.parse(JSON.stringify(exam.resources)) : [],
   };
   ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
-  renderResourcesList();
   document.getElementById('exam-modal').style.display = 'flex';
 };
 
@@ -553,20 +514,6 @@ function tableRowHTML(exam, num) {
           </div>
           <div class="exp-actions">
             ${exam.website ? `<a href="${escHtml(exam.website)}" target="_blank" rel="noopener" class="exp-action-btn website">🌐 ${escHtml(new URL(exam.website.startsWith('http') ? exam.website : 'https://'+exam.website).hostname)}</a>` : ''}
-            <div class="res-popover-wrap" id="res-wrap-${exam.id}">
-              <button class="exp-action-btn res-btn" onclick="toggleResPopover('${exam.id}')">
-                ⚑ Resources${(exam.resources||[]).length > 0 ? ` <span class="res-count">${(exam.resources||[]).length}</span>` : ''}
-              </button>
-              <div class="res-popover" id="res-pop-${exam.id}" style="display:none">
-                <div class="res-pop-list" id="res-pop-list-${exam.id}">
-                  ${(exam.resources||[]).length === 0 ? '<div class="res-pop-empty">No resources yet</div>' :
-                    (exam.resources||[]).map(r => `<div class="res-pop-item">
-                      <span class="res-type-badge res-${r.type.toLowerCase()}">${escHtml(r.type)}</span>
-                      <a href="${r.title.startsWith('http') ? escHtml(r.title) : '#'}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.title)}</a>
-                    </div>`).join('')}
-                </div>
-              </div>
-            </div>
             <button class="exp-action-btn" onclick="openEditExam('${exam.id}')">✎ Edit</button>
             <button class="exp-action-btn pin" onclick="togglePin('${exam.id}')">${exam.pinned ? '📌 Unpin' : '📌 Pin'}</button>
             <button class="exp-action-btn danger" onclick="deleteExam('${exam.id}')">🗑 Delete</button>
@@ -597,23 +544,6 @@ function tableRowHTML(exam, num) {
     </td>
   </tr>${detailRow}`;
 }
-
-window.toggleResPopover = (id) => {
-  const pop = document.getElementById('res-pop-' + id);
-  if (!pop) return;
-  const isOpen = pop.style.display !== 'none';
-  // close all others first
-  document.querySelectorAll('.res-popover').forEach(p => p.style.display = 'none');
-  if (!isOpen) {
-    pop.style.display = 'block';
-    setTimeout(() => document.addEventListener('click', function closeRP(e) {
-      if (!document.getElementById('res-wrap-' + id)?.contains(e.target)) {
-        pop.style.display = 'none';
-        document.removeEventListener('click', closeRP);
-      }
-    }), 10);
-  }
-};
 
 window.toggleExpand = (id) => {
   if (expandedCards.has(id)) expandedCards.delete(id);
