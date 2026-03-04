@@ -55,23 +55,32 @@ const DEFAULT_EXAMS = [
 const LS_THEME   = 'gjtTh';
 const LS_OFFLINE = 'et_offline';
 
-// Default pattern rows — UPSC-style: Stage | Paper | Type | Duration | Marks | Remarks
+// Default pattern — UPSC/Gov job style (6 columns, multi-stage)
 function DEFAULT_PATTERN_ROWS() {
   return [
     ['Stage', 'Paper', 'Type', 'Duration', 'Marks', 'Remarks'],
     ['Prelims', 'GS Paper I', 'Objective (MCQ)', '2 hrs', '200', 'Counts for merit'],
     ['Prelims', 'GS Paper II (CSAT)', 'Objective (MCQ)', '2 hrs', '200', 'Qualifying — min 33%'],
-    ['Mains', 'Paper A — Indian Language', 'Descriptive', '3 hrs', '300', 'Qualifying only'],
-    ['Mains', 'Paper B — English', 'Descriptive', '3 hrs', '300', 'Qualifying only'],
     ['Mains', 'Essay (Paper I)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
     ['Mains', 'GS I (Paper II)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
     ['Mains', 'GS II (Paper III)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
     ['Mains', 'GS III (Paper IV)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
     ['Mains', 'GS IV — Ethics (Paper V)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
-    ['Mains', 'Optional Paper I (Paper VI)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
-    ['Mains', 'Optional Paper II (Paper VII)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
-    ['Interview', 'Personality Test', 'Interview', '30–40 min', '275', 'Final stage'],
+    ['Mains', 'Optional Paper I', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'Optional Paper II', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Interview', 'Personality Test', 'Interview', '30–45 min', '275', 'Final stage'],
     ['', 'TOTAL (Merit)', '', '', '2025', 'Mains 1750 + Interview 275'],
+  ];
+}
+
+// Default pattern — Entrance exam style (JEE/NEET)
+function DEFAULT_ENTRANCE_PATTERN_ROWS() {
+  return [
+    ['Stage', 'Subject', 'Type', 'Duration', 'Marks', 'Remarks'],
+    ['Paper 1', 'Physics', 'Objective (MCQ)', '3 hrs', '100', '25 Qs × 4 marks'],
+    ['Paper 1', 'Chemistry', 'Objective (MCQ)', '3 hrs', '100', '25 Qs × 4 marks'],
+    ['Paper 1', 'Mathematics / Biology', 'Objective (MCQ)', '3 hrs', '100', '25 Qs × 4 marks'],
+    ['', 'TOTAL', '', '3 hrs', '300', '-1 for wrong answer'],
   ];
 }
 
@@ -1254,7 +1263,7 @@ async function saveExamForm() {
         applied: false,
         pinned: false,
         eligibilityInfo: [],
-        pattern: { rows: DEFAULT_PATTERN_ROWS() },
+        pattern: { rows: type === 'entrance' ? DEFAULT_ENTRANCE_PATTERN_ROWS() : DEFAULT_PATTERN_ROWS() },
         syllabus: { link: '', curated: [] },
         createdAt: now()
       };
@@ -1386,7 +1395,7 @@ function openPatternEdit(id) {
   activePanelExamId = id;
   panelMode = 'pattern';
 
-  let rows = (exam.pattern?.rows || [['Stage','Type','Duration','Marks'],['—','—','—','—']])
+  let rows = (exam.pattern?.rows && exam.pattern.rows.length > 0 ? exam.pattern.rows : (exam.examType === 'entrance' ? DEFAULT_ENTRANCE_PATTERN_ROWS() : DEFAULT_PATTERN_ROWS()))
     .map(r => [...r]);
 
   openPanel(container => {
@@ -1451,6 +1460,16 @@ function openPatternEdit(id) {
 
     const cancelBtn = el('button', { className: 'btn btn-ghost', 'data-action': 'close-panel' });
     cancelBtn.textContent = 'Cancel';
+
+    const resetBtn = el('button', { className: 'btn btn-ghost' });
+    resetBtn.textContent = '↺ Reset Default';
+    resetBtn.title = 'Reset to UPSC-style default pattern';
+    resetBtn.addEventListener('click', () => {
+      const isEntrance = exam.examType === 'entrance';
+      rows = isEntrance ? DEFAULT_ENTRANCE_PATTERN_ROWS() : DEFAULT_PATTERN_ROWS();
+      buildGrid();
+    });
+
     const saveBtn = el('button', { className: 'btn btn-accent' });
     saveBtn.textContent = 'Save';
     saveBtn.addEventListener('click', async () => {
@@ -1470,7 +1489,7 @@ function openPatternEdit(id) {
         toast('Save failed. Check connection.', 'err');
       }
     });
-    container.appendChild(makePanelFooter([cancelBtn, 'spacer', saveBtn]));
+    container.appendChild(makePanelFooter([cancelBtn, resetBtn, 'spacer', saveBtn]));
   });
 }
 
