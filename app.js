@@ -432,16 +432,19 @@ window.closeExamModal = () => {
 };
 
 window.toggleResPopover = (id) => {
-  const pop = document.getElementById('res-pop-' + id);
-  if (!pop) return;
+  const pop  = document.getElementById('res-pop-' + id);
+  const wrap = document.getElementById('res-wrap-' + id);
+  if (!pop || !wrap) return;
   const isOpen = pop.style.display !== 'none';
-  // Close all other open popovers first
   document.querySelectorAll('.res-popover').forEach(el => el.style.display = 'none');
   if (!isOpen) {
+    const btn  = wrap.querySelector('.exp-field-btn');
+    const rect = (btn || wrap).getBoundingClientRect();
+    pop.style.top  = (rect.bottom + 6) + 'px';
+    pop.style.left = rect.left + 'px';
     pop.style.display = 'block';
-    // Close when clicking outside
     const handler = (e) => {
-      if (!document.getElementById('res-wrap-' + id)?.contains(e.target)) {
+      if (!wrap.contains(e.target)) {
         pop.style.display = 'none';
         document.removeEventListener('click', handler, true);
       }

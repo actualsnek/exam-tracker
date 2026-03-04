@@ -492,7 +492,7 @@ a:hover { color: var(--accent-h); }
 .empty-title { font-size: 16px; font-weight: 600; color: var(--text2); }
 .empty-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-.table-scroll { overflow-x: auto; }
+.table-scroll { overflow-x: auto; overflow-y: visible; }
 .exam-table {
   width: 100%; border-collapse: collapse;
   font-size: 12px;
@@ -501,6 +501,9 @@ a:hover { color: var(--accent-h); }
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   background: var(--bg2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 .exam-table th {
   padding: 8px 14px;
@@ -1234,10 +1237,8 @@ td.td-eligible { text-align: center; min-width: 70px; }
 /* ── RESOURCES POPOVER (expanded row) ── */
 .res-popover-wrap { position: relative; }
 .res-popover {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  z-index: 200;
+  position: fixed;
+  z-index: 500;
   min-width: 260px;
   max-width: 340px;
   background: var(--surface2);
