@@ -488,36 +488,20 @@ function tableRowHTML(exam, num) {
     <td colspan="11">
       <div class="exp-panel">
 
-        <!-- 3 detail cards -->
-        <div class="exp-cards">
-
-          <div class="exp-card">
-            <div class="exp-card-head">
-              <span class="exp-card-title">ELIGIBILITY</span>
-              <button class="exp-edit-btn" onclick="openMdPanel('${exam.id}','eligibility')">↗ Edit / View</button>
-            </div>
-            <div class="exp-card-body">${exam.eligibility ? renderMdPreviewInline(exam.eligibility) : '<span class="exp-empty">Not added</span>'}</div>
-          </div>
-
-          <div class="exp-card">
-            <div class="exp-card-head">
-              <span class="exp-card-title">SYLLABUS</span>
-              <button class="exp-edit-btn" onclick="openMdPanel('${exam.id}','syllabus')">↗ Edit / View</button>
-            </div>
-            <div class="exp-card-body">
-              ${exam.syllabus ? renderMdPreviewInline(exam.syllabus) : '<span class="exp-empty">Not added</span>'}
-              ${exam.website ? `<div class="exp-file-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><a href="${escHtml(exam.website)}" target="_blank" rel="noopener">${escHtml(exam.name.replace(/ /g,'_'))}_Syllabus.pdf</a></div>` : ''}
-            </div>
-          </div>
-
-          <div class="exp-card">
-            <div class="exp-card-head">
-              <span class="exp-card-title">EXAM PATTERN</span>
-              <button class="exp-edit-btn" onclick="openMdPanel('${exam.id}','pattern')">↗ Edit / View</button>
-            </div>
-            <div class="exp-card-body">${exam.pattern ? renderMdPreviewInline(exam.pattern) : '<span class="exp-empty">Not added</span>'}</div>
-          </div>
-
+        <!-- 3 small field buttons -->
+        <div class="exp-field-btns">
+          <button class="exp-field-btn${exam.eligibility ? '' : ' empty'}" onclick="openFieldView('${exam.id}','eligibility')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Eligibility${exam.eligibility ? '' : ' <span class="fbtn-empty">empty</span>'}
+          </button>
+          <button class="exp-field-btn${exam.syllabus ? '' : ' empty'}" onclick="openFieldView('${exam.id}','syllabus')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Syllabus${exam.syllabus ? '' : ' <span class="fbtn-empty">empty</span>'}
+          </button>
+          <button class="exp-field-btn${exam.pattern ? '' : ' empty'}" onclick="openFieldView('${exam.id}','pattern')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+            Exam Pattern${exam.pattern ? '' : ' <span class="fbtn-empty">empty</span>'}
+          </button>
         </div>
 
         <!-- Bottom bar: tags + actions -->
@@ -922,12 +906,8 @@ function toast(msg, type = '') {
 }
 
 // ════════════════════════════════════════════════════
-//  MARKDOWN EDITOR PANEL
+//  MARKDOWN PANEL — used only from Add/Edit exam modal
 // ════════════════════════════════════════════════════
-
-let mdPanelExamId  = null;
-let mdPanelField   = null;
-let mdPanelContext = null; // 'row' | 'modal'
 
 const fieldLabels = {
   eligibility: 'Eligibility',
@@ -935,33 +915,9 @@ const fieldLabels = {
   pattern:     'Exam Pattern',
 };
 
-// Called from expanded row cards
-window.openMdPanel = (examId, field) => {
-  const exam = allExams.find(e => e.id === examId);
-  if (!exam) return;
-  mdPanelExamId  = examId;
-  mdPanelField   = field;
-  mdPanelContext = 'row';
-
-  const examName = document.getElementById('f-name')?.value.trim() || exam.name;
-  document.getElementById('md-panel-title').textContent = `${fieldLabels[field]} — ${examName}`;
-  const ta = document.getElementById('md-editor-textarea');
-  ta.value = exam[field] || '';
-  mdPreview();
-  document.getElementById('md-save-status').textContent = '';
-  document.getElementById('md-panel').style.display   = 'flex';
-  document.getElementById('md-overlay').style.display = 'block';
-  ta.focus();
-};
-
-// Called from Add/Edit exam modal fields
 window.openMdFromModal = (field) => {
-  mdPanelField   = field;
-  mdPanelContext = 'modal';
-  mdPanelExamId  = null;
-
   const examName = document.getElementById('f-name')?.value.trim() || 'New Exam';
-  document.getElementById('md-panel-title').textContent = `${fieldLabels[field]} — ${examName || 'New Exam'}`;
+  document.getElementById('md-panel-title').textContent = `${fieldLabels[field]} — ${examName}`;
   const ta = document.getElementById('md-editor-textarea');
   ta.value = modalDraft[field] || '';
   mdPreview();
@@ -974,35 +930,106 @@ window.openMdFromModal = (field) => {
 window.closeMdPanel = () => {
   document.getElementById('md-panel').style.display   = 'none';
   document.getElementById('md-overlay').style.display = 'none';
-  mdPanelExamId  = null;
-  mdPanelField   = null;
-  mdPanelContext = null;
 };
 
-window.saveMdPanel = async () => {
-  if (!mdPanelField) return;
-  const value    = document.getElementById('md-editor-textarea').value;
-  const statusEl = document.getElementById('md-save-status');
+window.saveMdPanel = () => {
+  const field    = document.getElementById('md-panel-title').textContent.split(' — ')[0].toLowerCase().replace('exam pattern','pattern').replace('eligibility','eligibility').replace('syllabus','syllabus');
+  // derive field from title
+  const titleMap = { 'Eligibility':'eligibility', 'Syllabus':'syllabus', 'Exam Pattern':'pattern' };
+  const panelTitle = document.getElementById('md-panel-title').textContent;
+  const derivedField = Object.keys(titleMap).find(k => panelTitle.startsWith(k));
+  if (!derivedField) return;
+  const realField = titleMap[derivedField];
+  const value = document.getElementById('md-editor-textarea').value;
+  modalDraft[realField] = value;
+  setModalDraftPreview(realField);
+  document.getElementById('md-save-status').textContent = '✓ Saved to draft';
+  setTimeout(closeMdPanel, 400);
+};
 
-  if (mdPanelContext === 'modal') {
-    // Just store in draft — no Firestore yet
-    modalDraft[mdPanelField] = value;
-    setModalDraftPreview(mdPanelField);
-    statusEl.textContent = '✓ Saved to draft';
-    setTimeout(closeMdPanel, 400);
-    return;
+// ════════════════════════════════════════════════════
+//  FIELD VIEW PANEL (view → edit → save)
+// ════════════════════════════════════════════════════
+
+let fvExamId = null;
+let fvField  = null;
+
+window.openFieldView = (examId, field) => {
+  const exam = allExams.find(e => e.id === examId);
+  if (!exam) return;
+  fvExamId = examId;
+  fvField  = field;
+
+  // Set titles
+  document.getElementById('fv-title').textContent    = fieldLabels[field];
+  document.getElementById('fv-sub').textContent      = exam.name;
+  document.getElementById('fv-edit-title').textContent = `${fieldLabels[field]} — ${exam.name}`;
+
+  // Render content in view mode
+  const content = exam[field] || '';
+  const contentEl = document.getElementById('fv-content');
+  if (content.trim()) {
+    contentEl.innerHTML = parseMd(content);
+  } else {
+    contentEl.innerHTML = `<div class="fv-empty-state">Nothing added yet. Click Edit to add content.</div>`;
   }
 
-  // context === 'row' — save directly to Firestore
+  // Always open in view mode
+  document.getElementById('fv-view-mode').style.display = 'flex';
+  document.getElementById('fv-edit-mode').style.display = 'none';
+  document.getElementById('fv-save-status').textContent = '';
+
+  document.getElementById('fv-panel').style.display   = 'flex';
+  document.getElementById('fv-overlay').style.display = 'block';
+};
+
+window.switchToEditMode = () => {
+  const exam = allExams.find(e => e.id === fvExamId);
+  if (!exam) return;
+  // Load content into editor
+  const ta = document.getElementById('fv-editor-textarea');
+  ta.value = exam[fvField] || '';
+  fvLivePreview();
+  document.getElementById('fv-view-mode').style.display = 'none';
+  document.getElementById('fv-edit-mode').style.display = 'flex';
+  ta.focus();
+};
+
+window.switchToViewMode = () => {
+  document.getElementById('fv-view-mode').style.display = 'flex';
+  document.getElementById('fv-edit-mode').style.display = 'none';
+};
+
+window.closeFieldView = () => {
+  document.getElementById('fv-panel').style.display   = 'none';
+  document.getElementById('fv-overlay').style.display = 'none';
+  fvExamId = null;
+  fvField  = null;
+};
+
+window.fvLivePreview = () => {
+  const raw = document.getElementById('fv-editor-textarea').value;
+  document.getElementById('fv-live-preview').innerHTML = parseMd(raw);
+};
+
+window.saveFvPanel = async () => {
+  if (!fvExamId || !fvField) return;
+  const value    = document.getElementById('fv-editor-textarea').value;
+  const statusEl = document.getElementById('fv-save-status');
   statusEl.textContent = 'Saving…';
   try {
-    await updateDoc(doc(db, 'users', currentUser.uid, 'exams', mdPanelExamId), {
-      [mdPanelField]: value
-    });
-    const exam = allExams.find(e => e.id === mdPanelExamId);
-    if (exam) exam[mdPanelField] = value;
+    await updateDoc(doc(db, 'users', currentUser.uid, 'exams', fvExamId), { [fvField]: value });
+    const exam = allExams.find(e => e.id === fvExamId);
+    if (exam) exam[fvField] = value;
     statusEl.textContent = '✓ Saved';
-    setTimeout(() => { closeMdPanel(); renderTable(); }, 500);
+    // Switch back to view mode with updated content
+    setTimeout(() => {
+      const contentEl = document.getElementById('fv-content');
+      contentEl.innerHTML = value.trim() ? parseMd(value) : `<div class="fv-empty-state">Nothing added yet.</div>`;
+      document.getElementById('fv-view-mode').style.display = 'flex';
+      document.getElementById('fv-edit-mode').style.display = 'none';
+      renderTable();
+    }, 400);
   } catch (e) {
     statusEl.textContent = '✗ Save failed';
     toast('Save failed.', 'error');

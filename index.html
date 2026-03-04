@@ -415,7 +415,73 @@
 
   </div>
 </div>
-<div id="md-overlay" class="md-overlay" style="display:none" onclick="closeMdPanel()"></div>
+<!-- FIELD VIEW PANEL (view rendered → click Edit → split editor) -->
+<div id="fv-panel" class="fv-panel" style="display:none">
+  <div class="fv-inner">
+
+    <!-- VIEW MODE -->
+    <div id="fv-view-mode">
+      <div class="fv-header">
+        <div>
+          <div class="fv-title" id="fv-title">Eligibility</div>
+          <div class="fv-sub" id="fv-sub">SSC CGL 2025</div>
+        </div>
+        <div class="fv-header-actions">
+          <button class="fv-edit-btn" id="fv-edit-btn" onclick="switchToEditMode()">✎ Edit</button>
+          <button class="fv-close-btn" onclick="closeFieldView()">✕</button>
+        </div>
+      </div>
+      <div class="fv-content" id="fv-content"></div>
+    </div>
+
+    <!-- EDIT MODE (hidden by default) -->
+    <div id="fv-edit-mode" style="display:none">
+      <div class="md-panel-header">
+        <button class="md-back-btn" onclick="switchToViewMode()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div>
+          <div class="md-panel-title" id="fv-edit-title">Edit</div>
+          <div class="md-panel-sub">Markdown supported</div>
+        </div>
+        <button class="md-panel-close" onclick="closeFieldView()">✕</button>
+      </div>
+      <div class="md-toolbar">
+        <button class="md-tool" onclick="mdInsert('**','**')"><b>B</b></button>
+        <button class="md-tool" onclick="mdInsert('*','*')"><i>I</i></button>
+        <button class="md-tool" onclick="mdInsert('## ','')">H1</button>
+        <button class="md-tool" onclick="mdInsert('### ','')">H2</button>
+        <button class="md-tool" onclick="mdInsert('- ','')">• List</button>
+        <button class="md-tool" onclick="mdInsert('1. ','')">1. List</button>
+        <button class="md-tool" onclick="mdInsertTable()">⊞ Table</button>
+        <button class="md-tool" onclick="mdInsert('\n---\n','')">— HR</button>
+        <button class="md-tool" onclick="mdInsert('> ','')">&#34; Quote</button>
+        <button class="md-tool" onclick="mdInsert('`','`')">`code`</button>
+        <span class="md-tool-hint">emoji: just type 🎯 ✅ ⚠️</span>
+      </div>
+      <div class="md-split" style="flex:1;min-height:0">
+        <div class="md-pane md-write-pane">
+          <div class="md-pane-label">— WRITE</div>
+          <textarea id="fv-editor-textarea" class="md-textarea" oninput="fvLivePreview()" placeholder="Write in Markdown…"></textarea>
+        </div>
+        <div class="md-divider"></div>
+        <div class="md-pane md-preview-pane">
+          <div class="md-pane-label">→ PREVIEW</div>
+          <div id="fv-live-preview" class="md-preview-content"></div>
+        </div>
+      </div>
+      <div class="md-panel-footer">
+        <span class="md-save-status" id="fv-save-status"></span>
+        <div style="display:flex;gap:8px">
+          <button class="btn-ghost" onclick="switchToViewMode()">Cancel</button>
+          <button class="btn-primary" style="width:auto;padding:9px 20px;margin:0" onclick="saveFvPanel()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="fv-overlay" class="md-overlay" style="display:none" onclick="closeFieldView()"></div>
 
 <!-- TOAST -->
 <div id="toast" class="toast" style="display:none"></div>
