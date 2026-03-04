@@ -772,6 +772,7 @@ img { display: block; max-width: 100%; }
   border-radius: var(--r-lg);
   overflow: hidden;
   display: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
 }
 
 @media (min-width: 768px) {
@@ -824,7 +825,7 @@ img { display: block; max-width: 100%; }
 th.sorted .sort-arrow { opacity: 1; }
 
 #exam-table td {
-  padding: 9px 12px;
+  padding: 11px 14px;
   border-bottom: 1px solid var(--border2);
   vertical-align: middle;
   font-size: 13px;
@@ -841,12 +842,18 @@ th.sorted .sort-arrow { opacity: 1; }
 
 #exam-table tr:not(.applied-row):hover td { background: var(--surface2); }
 
+/* FIX 3: exam type indicator — left border on first td */
+#exam-table tr.type-job td:first-child     { border-left: 3px solid var(--accent); padding-left: 5px !important; }
+#exam-table tr.type-entrance td:first-child { border-left: 3px solid #8b5cf6; padding-left: 5px !important; }
+
 /* col-rank merged into col-rank-expand */
 
 .col-name {
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   color: var(--text);
+  padding-left: 4px !important;
 }
 
 .col-name:hover { color: var(--accent); }
@@ -895,7 +902,7 @@ th.sorted .sort-arrow { opacity: 1; }
 .eligible-badge:hover { opacity: 0.75; }
 .eligible-badge.yes { color: var(--yes); background: var(--yes-bg); }
 .eligible-badge.no  { color: var(--no);  background: var(--no-bg); }
-.eligible-badge.na  { color: var(--na);  background: var(--na-bg); }
+.eligible-badge.na  { color: var(--muted); background: var(--surface2); border: 1px solid var(--border); }
 
 .tag-pill {
   display: inline-flex;
@@ -911,9 +918,8 @@ th.sorted .sort-arrow { opacity: 1; }
 
 /* Merged rank + expand toggle column */
 .col-rank-expand {
-  width: 48px;
+  width: 52px;
   padding: 0 8px !important;
-  text-align: center;
 }
 
 /* th version */
@@ -922,9 +928,21 @@ th.sorted .sort-arrow { opacity: 1; }
   font-size: 9px;
 }
 
+/* inner wrapper: chevron + rank side by side */
+.col-rank-expand td,
+td.col-rank-expand {
+  display: table-cell; /* ensure table layout intact */
+}
+
+.rank-expand-inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .expand-toggle {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -935,7 +953,7 @@ th.sorted .sort-arrow { opacity: 1; }
   cursor: pointer;
   transition: color 0.15s, transform 0.2s;
   padding: 0;
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
 .expand-toggle:hover { color: var(--accent); }
@@ -943,13 +961,11 @@ th.sorted .sort-arrow { opacity: 1; }
 .expand-toggle svg   { width: 11px; height: 11px; }
 
 .rank-num {
-  display: block;
   font-family: var(--mono);
   font-size: 10px;
   color: var(--muted);
-  text-align: center;
-  margin-top: 1px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .exam-tr.row-expanded > td {
