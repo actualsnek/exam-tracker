@@ -558,8 +558,7 @@ function renderTable() {
   const empty  = document.getElementById('list-empty');
   const scroll = document.getElementById('table-scroll');
   const count  = document.getElementById('table-count');
-
-  count.textContent = `${filteredExams.length} exam${filteredExams.length !== 1 ? 's' : ''}`;
+  if (count) count.textContent = `${filteredExams.length} exam${filteredExams.length !== 1 ? 's' : ''}`;
 
   if (filteredExams.length === 0) {
     empty.style.display  = 'block';

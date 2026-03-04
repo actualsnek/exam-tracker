@@ -251,9 +251,6 @@ a:hover { color: var(--accent-h); }
   display: flex;
   align-items: center;
   padding: 0 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
   gap: 8px;
 }
 .topbar-logo {
@@ -362,9 +359,6 @@ a:hover { color: var(--accent-h); }
   align-items: center;
   overflow-x: auto;
   scrollbar-width: none;
-  position: sticky;
-  top: var(--topbar-h);
-  z-index: 95;
 }
 .countdown-strip::-webkit-scrollbar { display: none; }
 .countdown-label {
@@ -400,6 +394,12 @@ a:hover { color: var(--accent-h); }
 /* ════════════════════════════════════════
    FILTER BAR
 ════════════════════════════════════════ */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
 .filter-bar {
   padding: 8px 16px;
   background: var(--surface);
@@ -408,10 +408,11 @@ a:hover { color: var(--accent-h); }
   gap: 6px;
   align-items: center;
   flex-wrap: nowrap;
-  position: sticky;
-  top: calc(var(--topbar-h) + var(--countdown-h));
-  z-index: 90;
   overflow: visible;
+}
+
+.exam-list {
+  padding: 0 0 60px;
 }
 .filter-group { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
 .filter-sep { width: 1px; height: 18px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
@@ -533,15 +534,6 @@ a:hover { color: var(--accent-h); }
 /* ════════════════════════════════════════
    EXAM TABLE
 ════════════════════════════════════════ */
-.exam-list {
-  padding: 0 0 60px;
-}
-.table-meta {
-  padding: 8px 18px 6px;
-  display: flex; align-items: center; justify-content: flex-end;
-}
-.table-count { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-
 .list-empty {
   text-align: center; padding: 60px 20px;
 }
@@ -558,9 +550,6 @@ a:hover { color: var(--accent-h); }
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   background: var(--bg2);
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 .exam-table th {
   padding: 8px 14px;
@@ -1253,7 +1242,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .auth-card { padding: 28px 20px; }
   .form-row { flex-direction: column; }
   .form-row .field-group { margin-bottom: 10px; }
-  .filter-bar { top: var(--topbar-h); flex-wrap: wrap; }
+  .filter-bar { flex-wrap: wrap; }
   .filter-sep { display: none; }
   .filter-right { margin-left: 0; width: 100%; justify-content: flex-end; }
   .inline-search { flex: 1; }
