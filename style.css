@@ -7,10 +7,10 @@
 
 /* ── TOKENS ── */
 :root {
-  --bg:       #141210;
-  --bg2:      #1c1a17;
-  --surface:  #201e1b;
-  --surface2: #2a2723;
+  --bg:       #111009;
+  --bg2:      #1a1814;
+  --surface:  #211f1b;
+  --surface2: #2d2a25;
   --border:   #38342e;
   --border2:  #2e2b25;
   --text:     #f0ece6;
@@ -44,17 +44,22 @@
 [data-theme="light"] {
   --bg:       #f5f2ed;
   --bg2:      #ede9e3;
-  --surface:  #ffffff;
+  --surface:  #faf8f5;
   --surface2: #f0ece6;
   --border:   #ddd8cf;
   --border2:  #e5e0d8;
   --text:     #1a1714;
-  --text2:    #5a524a;
+  --text2:    #6e6259;
   --muted:    #a09890;
-  --accent-bg:   #fff3eb;
-  --accent-soft: #ffdcc4;
+  --accent:        #c96a1a;
+  --accent-h:      #df7a28;
+  --accent-bg:     #fef0e4;
+  --accent-soft:   #f9d4ad;
+  --open:     #166534;
   --open-bg:  #dcfce7;
+  --upcoming: #854d0e;
   --upcoming-bg: #fef3c7;
+  --closed:   #475569;
   --closed-bg: #f1f5f9;
   --no-bg:    #fee2e2;
   --shadow: 0 4px 24px rgba(0,0,0,.08);
