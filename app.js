@@ -31,6 +31,7 @@ import {
   orderBy,
   serverTimestamp,
   writeBatch,
+  onSnapshot,
   where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -57,16 +58,20 @@ let activeStatus = 'all';
 let activeTags   = new Set();
 let searchQuery  = '';
 let expandedCards = new Set();
+let examsUnsubscribe = null; // holds the onSnapshot detach function
 
 // ── Auth State Listener ──────────────────────────────
 onAuthStateChanged(auth, user => {
+  // Detach any existing Firestore listener before switching users
+  if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
   if (user) {
     currentUser = user;
     showApp();
-    loadExams();
+    subscribeExams();
     updateUserUI();
   } else {
     currentUser = null;
+    allExams = [];
     showAuthScreen();
   }
 });
@@ -205,16 +210,19 @@ function examsRef() {
   return collection(db, 'users', currentUser.uid, 'exams');
 }
 
-async function loadExams() {
-  try {
-    const q = query(examsRef(), orderBy('createdAt', 'desc'));
-    const snap = await getDocs(q);
-    allExams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderAll();
-  } catch (e) {
-    console.error('loadExams error:', e);
-    toast('Failed to load exams.', 'error');
-  }
+function subscribeExams() {
+  const q = query(examsRef(), orderBy('createdAt', 'desc'));
+  examsUnsubscribe = onSnapshot(q,
+    (snap) => {
+      allExams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      updateUserUI();
+      renderAll();
+    },
+    (e) => {
+      console.error('subscribeExams error:', e);
+      toast('Failed to sync exams.', 'error');
+    }
+  );
 }
 
 window.saveExam = async () => {
@@ -264,7 +272,6 @@ window.saveExam = async () => {
       toast('Exam added!', 'success');
     }
     closeExamModal();
-    await loadExams();
   } catch (e) {
     console.error(e);
     toast('Save failed. Try again.', 'error');
@@ -284,7 +291,6 @@ window.deleteExam = async (id) => {
         await deleteDoc(doc(db, 'users', currentUser.uid, 'exams', id));
         toast('Exam deleted.', 'success');
         closeConfirmModal();
-        await loadExams();
       } catch (e) {
         toast('Delete failed.', 'error');
       }
@@ -917,10 +923,10 @@ window.importJSON = async (event) => {
     const data = JSON.parse(text);
     if (!Array.isArray(data)) return toast('Invalid JSON format.', 'error');
 
-    let count = 0;
-    for (const exam of data) {
-      if (!exam.name) continue;
-      const clean = {
+    // Build the cleaned list first
+    const toImport = data
+      .filter(exam => exam.name)
+      .map(exam => ({
         name:        String(exam.name || ''),
         agency:      String(exam.agency || ''),
         status:      ['open','upcoming','closed'].includes(exam.status) ? exam.status : 'open',
@@ -938,12 +944,20 @@ window.importJSON = async (event) => {
                            .map(r => ({ type: String(r.type), label: String(r.label), url: String(r.url) }))
                        : [],
         createdAt:   serverTimestamp(),
-      };
-      await addDoc(examsRef(), clean);
-      count++;
+      }));
+
+    if (toImport.length === 0) return toast('No valid exams found in file.', 'error');
+
+    // Firestore batch limit is 500 — chunk to be safe
+    const CHUNK = 400;
+    for (let i = 0; i < toImport.length; i += CHUNK) {
+      const batch = writeBatch(db);
+      toImport.slice(i, i + CHUNK).forEach(clean => {
+        batch.set(doc(examsRef()), clean);
+      });
+      await batch.commit();
     }
-    toast(`Imported ${count} exam${count !== 1 ? 's' : ''}!`, 'success');
-    await loadExams();
+    toast(`Imported ${toImport.length} exam${toImport.length !== 1 ? 's' : ''}!`, 'success');
   } catch (e) {
     toast('Import failed. Check JSON format.', 'error');
   }
