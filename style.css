@@ -264,10 +264,10 @@ a:hover { color: var(--accent-h); }
 }
 .topbar-logo-text { font-size: 16px; white-space: nowrap; }
 .logo-exam { color: var(--text); font-weight: 700; }
-.logo-tracker { color: var(--accent); }
+.logo-tracker { color: var(--accent); font-weight: 400; }
 .topbar-logo-text span { color: var(--accent); }
 .topbar-logo span { color: var(--accent); }
-.topbar-tagline { font-family: var(--font); font-size: 9px; color: var(--accent); letter-spacing: .8px; font-weight: 500; opacity: .6; margin-top: 3px; white-space: nowrap; font-style: italic; }
+.topbar-tagline { font-family: var(--font); font-size: 8px; color: var(--muted); letter-spacing: 1.5px; font-weight: 400; margin-top: 4px; white-space: nowrap; text-transform: uppercase; }
 .topbar-right { display: flex; align-items: center; gap: 6px; }
 
 .icon-btn {
