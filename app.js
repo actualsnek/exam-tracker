@@ -55,6 +55,26 @@ const DEFAULT_EXAMS = [
 const LS_THEME   = 'gjtTh';
 const LS_OFFLINE = 'et_offline';
 
+// Default pattern rows — UPSC-style: Stage | Paper | Type | Duration | Marks | Remarks
+function DEFAULT_PATTERN_ROWS() {
+  return [
+    ['Stage', 'Paper', 'Type', 'Duration', 'Marks', 'Remarks'],
+    ['Prelims', 'GS Paper I', 'Objective (MCQ)', '2 hrs', '200', 'Counts for merit'],
+    ['Prelims', 'GS Paper II (CSAT)', 'Objective (MCQ)', '2 hrs', '200', 'Qualifying — min 33%'],
+    ['Mains', 'Paper A — Indian Language', 'Descriptive', '3 hrs', '300', 'Qualifying only'],
+    ['Mains', 'Paper B — English', 'Descriptive', '3 hrs', '300', 'Qualifying only'],
+    ['Mains', 'Essay (Paper I)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'GS I (Paper II)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'GS II (Paper III)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'GS III (Paper IV)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'GS IV — Ethics (Paper V)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'Optional Paper I (Paper VI)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Mains', 'Optional Paper II (Paper VII)', 'Descriptive', '3 hrs', '250', 'Counts for merit'],
+    ['Interview', 'Personality Test', 'Interview', '30–40 min', '275', 'Final stage'],
+    ['', 'TOTAL (Merit)', '', '', '2025', 'Mains 1750 + Interview 275'],
+  ];
+}
+
 // ── SECTION 4: Utility Functions ─────────────────────────────────
 function uid() { return crypto.randomUUID(); }
 function now() { return Date.now(); }
@@ -159,12 +179,11 @@ async function fetchAll() {
   exams = [];
   examsSnap.forEach(doc => {
     const data = doc.data();
-    // Deserialize pattern rows from JSON string
     if (data.pattern && data.pattern.rowsJson) {
       try { data.pattern = { rows: JSON.parse(data.pattern.rowsJson) }; } catch(e) {}
     }
     if (!data.pattern || !data.pattern.rows) {
-      data.pattern = { rows: [['Stage','Type','Duration','Marks'],['—','—','—','—']] };
+      data.pattern = { rows: DEFAULT_PATTERN_ROWS() };
     }
     exams.push(data);
   });
@@ -209,7 +228,7 @@ async function seedDefaults() {
       applied: false,
       pinned: false,
       eligibilityInfo: [],
-      pattern: { rowsJson: JSON.stringify([['Stage','Type','Duration','Marks'],['—','—','—','—']]) },
+      pattern: { rows: DEFAULT_PATTERN_ROWS() },
       syllabus: { link: '', curated: [] },
       createdAt: now(),
       updatedAt: now()
@@ -231,7 +250,6 @@ async function seedDefaults() {
 
 async function saveExamDoc(exam) {
   exam.updatedAt = now();
-  // Firestore doesn't support nested arrays - serialize pattern rows as JSON string
   const toSave = { ...exam };
   if (toSave.pattern && toSave.pattern.rows) {
     toSave.pattern = { rowsJson: JSON.stringify(toSave.pattern.rows) };
@@ -1236,7 +1254,7 @@ async function saveExamForm() {
         applied: false,
         pinned: false,
         eligibilityInfo: [],
-        pattern: { rowsJson: JSON.stringify([['Stage','Type','Duration','Marks'],['—','—','—','—']]) },
+        pattern: { rows: DEFAULT_PATTERN_ROWS() },
         syllabus: { link: '', curated: [] },
         createdAt: now()
       };
