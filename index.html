@@ -99,16 +99,26 @@
 
   <!-- FILTER BAR -->
   <div class="filter-bar">
-    <!-- Status pills -->
-    <div class="filter-group" id="status-filters">
-      <button class="chip active" data-status="all"      onclick="setStatusFilter('all',this)">All</button>
-      <button class="chip"        data-status="open"     onclick="setStatusFilter('open',this)">Open</button>
-      <button class="chip"        data-status="upcoming" onclick="setStatusFilter('upcoming',this)">Upcoming</button>
-      <button class="chip"        data-status="closed"   onclick="setStatusFilter('closed',this)">Closed</button>
-      <button class="chip"        data-status="applied"  onclick="setStatusFilter('applied',this)">Applied</button>
+
+    <!-- Status dropdown -->
+    <div class="tag-dd-wrap" id="status-dd-wrap">
+      <button class="tag-dd-btn" id="status-dd-btn" onclick="toggleStatusDropdown()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        <span id="status-dd-label">Status</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="tag-dd-menu" id="status-dd-menu" style="display:none">
+        <div id="status-dd-list">
+          <div class="tag-dd-item active" data-status="all"      onclick="setStatusFilter('all')">      <div class="tag-dd-checkbox"></div><span>All</span></div>
+          <div class="tag-dd-item"        data-status="open"     onclick="setStatusFilter('open')">     <div class="tag-dd-checkbox"></div><span>Open</span></div>
+          <div class="tag-dd-item"        data-status="upcoming" onclick="setStatusFilter('upcoming')"> <div class="tag-dd-checkbox"></div><span>Upcoming</span></div>
+          <div class="tag-dd-item"        data-status="closed"   onclick="setStatusFilter('closed')">   <div class="tag-dd-checkbox"></div><span>Closed</span></div>
+          <div class="tag-dd-item"        data-status="applied"  onclick="setStatusFilter('applied')">  <div class="tag-dd-checkbox"></div><span>Applied</span></div>
+        </div>
+      </div>
     </div>
 
-    <!-- Tag dropdown -->
+    <!-- Tag dropdown (unchanged) -->
     <div class="tag-dd-wrap" id="tag-dd-wrap">
       <button class="tag-dd-btn" onclick="toggleTagDropdown()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
@@ -121,27 +131,30 @@
       </div>
     </div>
 
-    <div class="filter-sep"></div>
-
     <!-- Sort dropdown -->
-    <div class="sort-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;color:var(--muted)"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
-      <select id="sort-select" class="sort-select" onchange="setSortOrder(this.value)">
-        <option value="createdAt_desc">Added ↓</option>
-        <option value="createdAt_asc">Added ↑</option>
-        <option value="deadline_asc">Deadline ↑</option>
-        <option value="deadline_desc">Deadline ↓</option>
-        <option value="name_asc">Name A–Z</option>
-        <option value="name_desc">Name Z–A</option>
-        <option value="status_asc">Status</option>
-      </select>
+    <div class="tag-dd-wrap" id="sort-dd-wrap">
+      <button class="tag-dd-btn" id="sort-dd-btn" onclick="toggleSortDropdown()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><line x1="3" y1="6" x2="21" y2="6"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+        <span id="sort-dd-label">Sort</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="tag-dd-menu" id="sort-dd-menu" style="display:none">
+        <div id="sort-dd-list">
+          <div class="tag-dd-item active" data-sort="createdAt_desc" onclick="setSortOrder('createdAt_desc')"><div class="tag-dd-checkbox"></div><span>Added ↓</span></div>
+          <div class="tag-dd-item"        data-sort="createdAt_asc"  onclick="setSortOrder('createdAt_asc')"> <div class="tag-dd-checkbox"></div><span>Added ↑</span></div>
+          <div class="tag-dd-item"        data-sort="deadline_asc"   onclick="setSortOrder('deadline_asc')">  <div class="tag-dd-checkbox"></div><span>Deadline ↑</span></div>
+          <div class="tag-dd-item"        data-sort="deadline_desc"  onclick="setSortOrder('deadline_desc')"> <div class="tag-dd-checkbox"></div><span>Deadline ↓</span></div>
+          <div class="tag-dd-item"        data-sort="name_asc"       onclick="setSortOrder('name_asc')">      <div class="tag-dd-checkbox"></div><span>A-Z</span></div>
+          <div class="tag-dd-item"        data-sort="name_desc"      onclick="setSortOrder('name_desc')">     <div class="tag-dd-checkbox"></div><span>Z-A</span></div>
+        </div>
+      </div>
     </div>
 
     <div class="filter-sep"></div>
 
-    <!-- Right side: search + add -->
+    <!-- Right side: clear all + search + add -->
     <div class="filter-right">
-      <!-- Inline search box -->
+      <button class="btn-clear-all" id="btn-clear-all" onclick="clearAllFilters()" style="display:none">✕ Clear</button>
       <div class="inline-search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="inline-search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="search-input" class="inline-search-input" placeholder="Search…" oninput="handleSearch(this.value)"/>

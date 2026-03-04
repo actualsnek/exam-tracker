@@ -536,6 +536,23 @@ function applyFilters() {
 
 window.setSortOrder = (val) => {
   activeSort = val;
+  // Update active state in sort dropdown
+  document.querySelectorAll('#sort-dd-list .tag-dd-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.sort === val);
+  });
+  // Update label
+  const sortLabels = {
+    'createdAt_desc': 'Added ↓', 'createdAt_asc': 'Added ↑',
+    'deadline_asc': 'Deadline ↑', 'deadline_desc': 'Deadline ↓',
+    'name_asc': 'A-Z', 'name_desc': 'Z-A'
+  };
+  const labelEl = document.getElementById('sort-dd-label');
+  if (labelEl) labelEl.textContent = val === 'createdAt_desc' ? 'Sort' : (sortLabels[val] || 'Sort');
+  // Highlight when not default
+  const btn = document.getElementById('sort-dd-btn');
+  if (btn) btn.classList.toggle('has-active', val !== 'createdAt_desc');
+  // Close dropdown
+  document.getElementById('sort-dd-menu').style.display = 'none';
   applyFilters();
 };
 
@@ -686,6 +703,7 @@ window.toggleTagFilter = (tag) => {
   if (activeTags.has(tag)) activeTags.delete(tag);
   else activeTags.add(tag);
   renderTagDropdown();
+  updateClearAll();
   applyFilters();
 };
 
@@ -721,6 +739,9 @@ function renderTagDropdown() {
 window.toggleTagDropdown = () => {
   const menu = document.getElementById('tag-dd-menu');
   const open = menu.style.display === 'none' || !menu.style.display;
+  // Close other dropdowns
+  document.getElementById('status-dd-menu').style.display = 'none';
+  document.getElementById('sort-dd-menu').style.display = 'none';
   menu.style.display = open ? 'block' : 'none';
   if (open) {
     // Close on outside click
@@ -741,10 +762,94 @@ function closeTagDdOutside(e) {
 }
 
 
-window.setStatusFilter = (status, btn) => {
+window.setStatusFilter = (status) => {
   activeStatus = status;
-  document.querySelectorAll('#status-filters .chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  // Update active state in status dropdown list
+  document.querySelectorAll('#status-dd-list .tag-dd-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.status === status);
+  });
+  // Update button label
+  const labels = { all: 'Status', open: 'Open', upcoming: 'Upcoming', closed: 'Closed', applied: 'Applied' };
+  const labelEl = document.getElementById('status-dd-label');
+  if (labelEl) labelEl.textContent = labels[status] || 'Status';
+  // Highlight button when not default
+  const btn = document.getElementById('status-dd-btn');
+  if (btn) btn.classList.toggle('has-active', status !== 'all');
+  // Close dropdown
+  document.getElementById('status-dd-menu').style.display = 'none';
+  updateClearAll();
+  applyFilters();
+};
+
+window.toggleStatusDropdown = () => {
+  const menu = document.getElementById('status-dd-menu');
+  const open = menu.style.display === 'none' || !menu.style.display;
+  // Close all other dropdowns
+  document.getElementById('sort-dd-menu').style.display = 'none';
+  document.getElementById('tag-dd-menu').style.display = 'none';
+  menu.style.display = open ? 'block' : 'none';
+  if (open) {
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        if (!document.getElementById('status-dd-wrap').contains(e.target)) {
+          menu.style.display = 'none';
+        } else {
+          setTimeout(() => document.addEventListener('click', handler, { once: true }), 10);
+          return;
+        }
+        document.removeEventListener('click', handler);
+      }, { once: true });
+    }, 10);
+  }
+};
+
+window.toggleSortDropdown = () => {
+  const menu = document.getElementById('sort-dd-menu');
+  const open = menu.style.display === 'none' || !menu.style.display;
+  // Close all other dropdowns
+  document.getElementById('status-dd-menu').style.display = 'none';
+  document.getElementById('tag-dd-menu').style.display = 'none';
+  menu.style.display = open ? 'block' : 'none';
+  if (open) {
+    setTimeout(() => {
+      document.addEventListener('click', function handler(e) {
+        if (!document.getElementById('sort-dd-wrap').contains(e.target)) {
+          menu.style.display = 'none';
+        } else {
+          setTimeout(() => document.addEventListener('click', handler, { once: true }), 10);
+          return;
+        }
+        document.removeEventListener('click', handler);
+      }, { once: true });
+    }, 10);
+  }
+};
+
+function updateClearAll() {
+  const btn = document.getElementById('btn-clear-all');
+  if (!btn) return;
+  const active = activeStatus !== 'all' || activeTags.size > 0 || searchQuery !== '';
+  btn.style.display = active ? '' : 'none';
+}
+
+window.clearAllFilters = () => {
+  // Reset status
+  activeStatus = 'all';
+  document.querySelectorAll('#status-dd-list .tag-dd-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.status === 'all');
+  });
+  const labelEl = document.getElementById('status-dd-label');
+  if (labelEl) labelEl.textContent = 'Status';
+  const statusBtn = document.getElementById('status-dd-btn');
+  if (statusBtn) statusBtn.classList.remove('has-active');
+  // Reset tags
+  activeTags.clear();
+  renderTagDropdown();
+  // Reset search
+  searchQuery = '';
+  const inp = document.getElementById('search-input');
+  if (inp) inp.value = '';
+  updateClearAll();
   applyFilters();
 };
 
@@ -794,6 +899,7 @@ function renderCountdowns() {
 
 window.handleSearch = (val) => {
   searchQuery = val.trim();
+  updateClearAll();
   applyFilters();
 };
 

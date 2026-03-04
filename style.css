@@ -390,22 +390,16 @@ a:hover { color: var(--accent-h); }
 .filter-sep { width: 1px; height: 18px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
 .filter-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-.sort-wrap {
-  display: flex; align-items: center; gap: 5px; flex-shrink: 0;
-}
-.sort-select {
-  appearance: none; -webkit-appearance: none;
-  padding: 5px 10px;
+.btn-clear-all {
+  padding: 5px 12px;
   border-radius: 100px;
-  border: 1px solid var(--border);
-  background: var(--bg2); color: var(--text2);
+  border: 1px solid var(--no-border);
+  background: transparent; color: var(--no);
   font-size: 11px; font-weight: 500; cursor: pointer;
-  font-family: var(--font);
   white-space: nowrap; transition: all .15s;
-  outline: none;
+  font-family: var(--font);
 }
-.sort-select:hover { border-color: var(--muted); color: var(--text); }
-.sort-select:focus { border-color: var(--accent); color: var(--text); }
+.btn-clear-all:hover { background: var(--no-bg); }
 
 .chip {
   padding: 5px 13px;
