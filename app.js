@@ -57,6 +57,7 @@ let filteredExams = [];
 let activeStatus = 'all';
 let activeTags   = new Set();
 let searchQuery  = '';
+let activeSort   = 'createdAt_desc';
 let expandedCards = new Set();
 let examsUnsubscribe = null; // holds the onSnapshot detach function
 
@@ -500,8 +501,43 @@ function applyFilters() {
     );
   }
   filteredExams = exams;
+
+  // ── Sort ──────────────────────────────────────────
+  const [sortKey, sortDir] = activeSort.split('_');
+  const asc = sortDir === 'asc';
+  const statusOrder = { open: 0, upcoming: 1, closed: 2 };
+
+  filteredExams.sort((a, b) => {
+    if (sortKey === 'deadline') {
+      const ad = a.lastDate || a.examDate || '';
+      const bd = b.lastDate || b.examDate || '';
+      if (!ad && !bd) return 0;
+      if (!ad) return 1;
+      if (!bd) return -1;
+      return asc ? ad.localeCompare(bd) : bd.localeCompare(ad);
+    } else if (sortKey === 'name') {
+      const av = (a.name || '').toLowerCase();
+      const bv = (b.name || '').toLowerCase();
+      return asc ? av.localeCompare(bv) : bv.localeCompare(av);
+    } else if (sortKey === 'status') {
+      const av = statusOrder[a.status] ?? 99;
+      const bv = statusOrder[b.status] ?? 99;
+      return asc ? av - bv : bv - av;
+    } else {
+      // createdAt
+      const at = a.createdAt?.seconds ?? 0;
+      const bt = b.createdAt?.seconds ?? 0;
+      return asc ? at - bt : bt - at;
+    }
+  });
+
   renderTable();
 }
+
+window.setSortOrder = (val) => {
+  activeSort = val;
+  applyFilters();
+};
 
 function renderTable() {
   const tbody  = document.getElementById('exam-tbody');
