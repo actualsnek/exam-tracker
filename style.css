@@ -408,8 +408,9 @@ a:hover { color: var(--accent-h); }
   gap: 6px;
   align-items: center;
   flex-wrap: nowrap;
-  position: sticky;
+  position: fixed;
   top: calc(var(--topbar-h) + var(--countdown-h));
+  left: 0; right: 0;
   z-index: 90;
   overflow: visible;
 }
@@ -534,7 +535,7 @@ a:hover { color: var(--accent-h); }
    EXAM TABLE
 ════════════════════════════════════════ */
 .exam-list {
-  padding: 0 0 60px;
+  padding: 49px 0 60px;
 }
 
 .list-empty {
@@ -1248,7 +1249,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .auth-card { padding: 28px 20px; }
   .form-row { flex-direction: column; }
   .form-row .field-group { margin-bottom: 10px; }
-  .filter-bar { top: var(--topbar-h); flex-wrap: wrap; }
+  .filter-bar { top: var(--topbar-h); left: 0; right: 0; flex-wrap: wrap; }
   .filter-sep { display: none; }
   .filter-right { margin-left: 0; width: 100%; justify-content: flex-end; }
   .inline-search { flex: 1; }
