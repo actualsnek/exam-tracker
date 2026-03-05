@@ -251,7 +251,6 @@ window.saveExam = async () => {
     tags:        document.getElementById('f-tags').value.split(',').map(t => t.trim()).filter(Boolean),
     applied:     document.getElementById('f-applied').checked,
     year:        document.getElementById('f-year').value.trim(),
-    cycle:       document.getElementById('f-cycle').value.trim(),
     pinned,
     resources:   modalResources.slice(),
   };
@@ -388,7 +387,7 @@ function setModalDraftPreview(field) {
 window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
-  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags','f-year','f-cycle'].forEach(id => {
+  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags','f-year'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('f-status').value = 'open';
@@ -416,7 +415,7 @@ window.openEditExam = (id) => {
   document.getElementById('f-tags').value       = (exam.tags || []).join(', ');
   document.getElementById('f-applied').checked  = !!exam.applied;
   document.getElementById('f-year').value        = exam.year  || '';
-  document.getElementById('f-cycle').value       = exam.cycle || '';
+  document.getElementById('f-year').value        = exam.year  || '';
   document.getElementById('f-pinned').checked   = !!exam.pinned;
   // Load draft from exam data
   modalDraft = {
@@ -584,10 +583,10 @@ function tableRowHTML(exam, num) {
     else                   deadlineHTML = `<span class="deadline-normal">${formatDate(dateStr)}</span>`;
   }
 
-  // Year / Cycle
+  // Year
   let cycleHTML = '<span style="color:var(--muted)">—</span>';
-  if (exam.year || exam.cycle) {
-    cycleHTML = escHtml([exam.year, exam.cycle].filter(Boolean).join(' / '));
+  if (exam.year) {
+    cycleHTML = escHtml(exam.year);
   }
   const tags = exam.tags || [];
   let tagsHTML = '<span style="color:var(--muted)">—</span>';
@@ -1067,11 +1066,15 @@ window.exportJSON = () => {
   const data = allExams.map(e => ({
     name:        e.name        || '',
     agency:      e.agency      || '',
-    tags:        Array.isArray(e.tags) ? e.tags : [],
-    syllabus:    e.syllabus    || '',
+    status:      e.status      || 'open',
+    lastDate:    e.lastDate    || '',
+    examDate:    e.examDate    || '',
+    website:     e.website     || '',
     eligibility: e.eligibility || '',
     pattern:     e.pattern     || '',
-    website:     e.website     || '',
+    syllabus:    e.syllabus    || '',
+    tags:        Array.isArray(e.tags) ? e.tags : [],
+    year:        e.year        || '',
     resources:   Array.isArray(e.resources) ? e.resources : [],
   }));
   downloadFile(JSON.stringify(data, null, 2), 'exams.json', 'application/json');
@@ -1105,28 +1108,46 @@ window.importJSON = async (event) => {
     const data = JSON.parse(text);
     if (!Array.isArray(data)) return toast('Invalid JSON format.', 'error');
 
+    const today = new Date(); today.setHours(0,0,0,0);
+
     // Build the cleaned list first
     const toImport = data
       .filter(exam => exam.name)
-      .map(exam => ({
-        name:        String(exam.name || ''),
-        agency:      String(exam.agency || ''),
-        status:      'open',
-        lastDate:    '',
-        examDate:    '',
-        website:     exam.website || '',
-        eligibility: exam.eligibility || '',
-        syllabus:    exam.syllabus || '',
-        pattern:     exam.pattern || '',
-        tags:        Array.isArray(exam.tags) ? exam.tags : [],
-        applied:     false,
-        pinned:      false,
-        resources:   Array.isArray(exam.resources)
-                       ? exam.resources.filter(r => r.type && r.label && r.url)
-                           .map(r => ({ type: String(r.type), label: String(r.label), url: String(r.url) }))
-                       : [],
-        createdAt:   serverTimestamp(),
-      }));
+      .map(exam => {
+        const lastDate  = exam.lastDate  || '';
+        const examDate  = exam.examDate  || '';
+
+        // Auto-derive status from lastDate if present, else keep exported value
+        let status = exam.status || 'open';
+        if (lastDate) {
+          const d = new Date(lastDate); d.setHours(0,0,0,0);
+          if (d < today) status = 'closed';
+          else if (d.getTime() === today.getTime()) status = 'open';
+          else status = 'open';
+        }
+
+        return {
+          name:        String(exam.name   || ''),
+          agency:      String(exam.agency || ''),
+          status,
+          lastDate,
+          examDate,
+          website:     exam.website     || '',
+          eligibility: exam.eligibility || '',
+          pattern:     exam.pattern     || '',
+          syllabus:    exam.syllabus    || '',
+          tags:        Array.isArray(exam.tags) ? exam.tags.map(String) : [],
+          year:        String(exam.year  || ''),
+          applied:     false,
+          pinned:      false,
+          resources:   Array.isArray(exam.resources)
+                         ? exam.resources
+                             .filter(r => r.type && r.title)
+                             .map(r => ({ type: String(r.type), title: String(r.title) }))
+                         : [],
+          createdAt:   serverTimestamp(),
+        };
+      });
 
     if (toImport.length === 0) return toast('No valid exams found in file.', 'error');
     if (toImport.length > 60) return toast('Import limit is 60 exams per file.', 'error');
