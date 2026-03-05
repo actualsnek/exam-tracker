@@ -230,10 +230,10 @@ window.saveExam = async () => {
   const id = document.getElementById('exam-id').value;
   const pinned  = document.getElementById('f-pinned').checked;
 
-  // Enforce max 3 pinned
+  // Enforce max 5 pinned
   const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
-  if (pinned && pinnedCount >= 3) {
-    toast('Max 3 exams can be pinned. Unpin one first.', 'error');
+  if (pinned && pinnedCount >= 5) {
+    toast('Max 5 exams can be pinned. Unpin one first.', 'error');
     document.getElementById('f-pinned').checked = false;
     return;
   }
@@ -314,7 +314,7 @@ window.togglePin = async (id) => {
   const newVal = !exam.pinned;
   if (newVal) {
     const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
-    if (pinnedCount >= 3) return toast('Max 3 pinned exams. Unpin one first.', 'error');
+    if (pinnedCount >= 5) return toast('Max 5 pinned exams. Unpin one first.', 'error');
   }
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { pinned: newVal });
@@ -459,8 +459,8 @@ window.toggleResPopover = (id) => {
 window.checkPinLimit = (checkbox) => {
   const id = document.getElementById('exam-id').value;
   const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
-  if (checkbox.checked && pinnedCount >= 3) {
-    toast('Max 3 pinned exams. Unpin one first.', 'error');
+  if (checkbox.checked && pinnedCount >= 5) {
+    toast('Max 5 pinned exams. Unpin one first.', 'error');
     checkbox.checked = false;
   }
 };
@@ -854,7 +854,7 @@ function renderCountdowns() {
   const CIRCUMF = 2 * Math.PI * 28;  // r=28
 
   if (pinned.length === 0) {
-    strip.innerHTML = '<div class="countdown-empty">Pin up to 3 exams to track here</div>';
+    strip.innerHTML = '<div class="countdown-empty">Pin up to 5 exams to track here</div>';
     return;
   }
 
