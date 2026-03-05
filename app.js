@@ -248,7 +248,7 @@ window.saveExam = async () => {
     examDate:    document.getElementById('f-exam-date').value,
     website:     document.getElementById('f-website').value.trim(),
     notification: {
-      label: document.getElementById('f-notif-label').value.trim(),
+      label: 'Notification',
       url:   document.getElementById('f-notif-url').value.trim(),
     },
     vacancies:   document.getElementById('f-vacancies').value.trim(),
@@ -379,15 +379,10 @@ function setModalDraftPreview(field) {
   const btn = span.closest('button');
   const val = modalDraft[field];
   if (val && val.trim()) {
-    const firstLine = val.split('\n').find(l => l.trim()) || '';
-    const plain = firstLine
-      .replace(/#{1,6} /g, '').replace(/\*\*(.+?)\*\*/g, '$1')
-      .replace(/\*(.+?)\*/g, '$1').replace(/`(.+?)`/g, '$1').trim();
-    span.textContent = plain ? (plain.length > 55 ? plain.substring(0,55)+'…' : plain) : 'Content added ✓';
+    span.textContent = 'Edit';
     if (btn) btn.classList.add('has-content');
   } else {
-    const labels = { eligibility: 'Not added', syllabus: 'Not added', pattern: 'Not added' };
-    span.textContent = labels[field];
+    span.textContent = 'Add';
     if (btn) btn.classList.remove('has-content');
   }
 }
@@ -395,7 +390,7 @@ function setModalDraftPreview(field) {
 window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
-  ['f-name','f-agency','f-subtitle','f-last-date','f-exam-date','f-website','f-tags','f-year','f-vacancies','f-pay','f-notif-label','f-notif-url'].forEach(id => {
+  ['f-name','f-agency','f-subtitle','f-last-date','f-exam-date','f-website','f-tags','f-year','f-vacancies','f-pay','f-notif-url'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('f-status').value    = 'open';
@@ -424,7 +419,6 @@ window.openEditExam = (id) => {
   document.getElementById('f-last-date').value  = exam.lastDate || '';
   document.getElementById('f-exam-date').value  = exam.examDate || '';
   document.getElementById('f-website').value    = exam.website || '';
-  document.getElementById('f-notif-label').value = (exam.notification && exam.notification.label) || '';
   document.getElementById('f-notif-url').value   = (exam.notification && exam.notification.url)   || '';
   document.getElementById('f-vacancies').value  = exam.vacancies || '';
   document.getElementById('f-pay').value        = exam.pay || '';

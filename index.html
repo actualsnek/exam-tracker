@@ -264,16 +264,15 @@
         </div>
         <div class="field-group field-group--flex-1">
           <label class="field-label">Pay Scale</label>
-          <input type="text" id="f-pay" class="field-input" placeholder="e.g. ₹25,500 – ₹81,100"/>
+          <div class="field-prefix-wrap">
+            <span class="field-prefix">₹</span>
+            <input type="text" id="f-pay" class="field-input field-input--prefixed" placeholder="25,500 – 81,100"/>
+          </div>
         </div>
       </div>
 
       <!-- Notification -->
       <div class="form-row">
-        <div class="field-group field-group--flex-1">
-          <label class="field-label">Notification Label</label>
-          <input type="text" id="f-notif-label" class="field-input" placeholder="e.g. Official Notification PDF"/>
-        </div>
         <div class="field-group field-group--flex-15">
           <label class="field-label">Notification URL</label>
           <input type="url" id="f-notif-url" class="field-input" placeholder="https://…"/>

@@ -1390,6 +1390,9 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
 /* field-input flex variants */
 .field-input--flex-1  { flex: 1; }
+.field-prefix-wrap { position: relative; display: flex; align-items: center; }
+.field-prefix { position: absolute; left: 10px; font-size: 13px; color: var(--text2); pointer-events: none; z-index: 1; }
+.field-input--prefixed { padding-left: 22px; }
 .field-input--flex-15 { flex: 1.5; }
 
 /* form-row variants */
