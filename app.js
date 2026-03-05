@@ -670,10 +670,10 @@ function tableRowHTML(exam, num) {
 
   return `
   <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}" id="row-${exam.id}">
-    <td class="td-expand">
-      <button class="expand-btn${isExpanded ? ' open' : ''}" onclick="toggleExpand('${exam.id}')">${isExpanded ? '▼' : '▶'}</button>
+    <td class="td-expand-num" onclick="toggleExpand('${exam.id}')">
+      <button class="expand-btn${isExpanded ? ' open' : ''}">${isExpanded ? '▼' : '▶'}</button>
+      <span class="row-num">${num}</span>
     </td>
-    <td class="td-num">${num}</td>
     <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
     <td class="td-cycle">${cycleHTML}</td>
     <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.agency || '—')}</td>

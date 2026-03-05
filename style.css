@@ -565,14 +565,13 @@ a:hover { color: var(--accent-h); }
   letter-spacing: .7px; color: var(--muted);
   text-transform: uppercase; white-space: nowrap;
 }
-.th-expand  { width: 32px; padding: 0; }
-.th-num     { width: 36px; }
-.th-name    { min-width: 180px; }
-.th-agency  { min-width: 120px; }
-.th-tag     { min-width: 100px; }
-.th-deadline{ min-width: 90px; }
-.th-status  { min-width: 80px; }
-.th-applied { width: 56px; min-width: 56px; text-align: center; }
+.th-expand-num { width: 48px; padding: 0; }
+.th-name    { min-width: 200px; }
+.th-agency  { min-width: 90px; }
+.th-tag     { min-width: 90px; }
+.th-deadline{ min-width: 80px; }
+.th-status  { min-width: 75px; }
+.th-applied { width: 48px; min-width: 48px; text-align: center; }
 .th-pin     { width: 40px; min-width: 40px; text-align: center; }
 
 /* Body rows */
@@ -591,18 +590,22 @@ a:hover { color: var(--accent-h); }
 }
 
 /* expand col */
-td.td-expand {
-  padding: 0; text-align: center; width: 32px;
+td.td-expand-num {
+  width: 48px; padding: 0; text-align: left;
+  cursor: pointer; white-space: nowrap;
+  padding-left: 8px;
 }
+td.td-expand-num:hover .expand-btn { color: var(--text); }
 .expand-btn {
   background: none; border: none; color: var(--muted);
-  font-size: 10px; padding: 10px 8px; cursor: pointer;
-  transition: color var(--transition);
+  font-size: 10px; padding: 10px 4px 10px 0; cursor: pointer;
+  transition: color var(--transition); vertical-align: middle;
 }
 .expand-btn:hover { color: var(--text); }
-
-/* num col */
-td.td-num { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.row-num {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  margin-left: 3px; vertical-align: middle;
+}
 
 /* name col */
 td.td-name { color: var(--text); font-weight: 500; font-size: 13px; }
@@ -828,7 +831,7 @@ tr.exam-row.expanded { background: var(--bg2); }
 tr.exam-row.expanded td { border-bottom: none; }
 
 /* Year/Cycle column */
-.th-cycle { min-width: 90px; }
+.th-cycle { min-width: 80px; }
 td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
 @media (max-width: 900px) {
