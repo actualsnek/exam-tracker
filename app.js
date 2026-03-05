@@ -652,7 +652,7 @@ function tableRowHTML(exam, num) {
 
           ${isJob && (exam.vacancies || exam.pay) ? `<div class="exp-job-row">
             ${exam.vacancies ? `<div class="exp-job-chip"><span class="chip-label">Vacancies</span><span class="chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
-            ${exam.pay ? `<div class="exp-job-chip"><span class="chip-label">Pay Scale</span><span class="chip-val">${escHtml(exam.pay)}</span></div>` : ''}
+            ${exam.pay ? `<div class="exp-job-chip"><span class="chip-label">Pay Scale</span><span class="chip-val">₹${escHtml(exam.pay)}</span></div>` : ''}
           </div>` : ''}
         </div>
 
