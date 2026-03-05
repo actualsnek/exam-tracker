@@ -241,10 +241,18 @@ window.saveExam = async () => {
   const data = {
     name,
     agency,
+    subtitle:    document.getElementById('f-subtitle').value.trim(),
+    examType:    document.getElementById('f-exam-type').value,
     status:      document.getElementById('f-status').value,
     lastDate:    document.getElementById('f-last-date').value,
     examDate:    document.getElementById('f-exam-date').value,
     website:     document.getElementById('f-website').value.trim(),
+    notification: {
+      label: document.getElementById('f-notif-label').value.trim(),
+      url:   document.getElementById('f-notif-url').value.trim(),
+    },
+    vacancies:   document.getElementById('f-vacancies').value.trim(),
+    pay:         document.getElementById('f-pay').value.trim(),
     eligibility: modalDraft.eligibility,
     syllabus:    modalDraft.syllabus,
     pattern:     modalDraft.pattern,
@@ -387,12 +395,14 @@ function setModalDraftPreview(field) {
 window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
-  ['f-name','f-agency','f-last-date','f-exam-date','f-website','f-tags','f-year'].forEach(id => {
+  ['f-name','f-agency','f-subtitle','f-last-date','f-exam-date','f-website','f-tags','f-year','f-vacancies','f-pay','f-notif-label','f-notif-url'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('f-status').value = 'open';
+  document.getElementById('f-status').value    = 'open';
+  document.getElementById('f-exam-type').value = 'job';
+  document.getElementById('job-fields-row').style.display = '';
   document.getElementById('f-applied').checked = false;
-  document.getElementById('f-pinned').checked = false;
+  document.getElementById('f-pinned').checked  = false;
   // Reset draft
   modalDraft = { eligibility: '', syllabus: '', pattern: '' };
   modalResources = [];
@@ -408,15 +418,21 @@ window.openEditExam = (id) => {
   document.getElementById('exam-id').value      = id;
   document.getElementById('f-name').value       = exam.name || '';
   document.getElementById('f-agency').value     = exam.agency || '';
+  document.getElementById('f-subtitle').value   = exam.subtitle || '';
+  document.getElementById('f-exam-type').value  = exam.examType || 'job';
   document.getElementById('f-status').value     = exam.status || 'open';
   document.getElementById('f-last-date').value  = exam.lastDate || '';
   document.getElementById('f-exam-date').value  = exam.examDate || '';
   document.getElementById('f-website').value    = exam.website || '';
+  document.getElementById('f-notif-label').value = (exam.notification && exam.notification.label) || '';
+  document.getElementById('f-notif-url').value   = (exam.notification && exam.notification.url)   || '';
+  document.getElementById('f-vacancies').value  = exam.vacancies || '';
+  document.getElementById('f-pay').value        = exam.pay || '';
   document.getElementById('f-tags').value       = (exam.tags || []).join(', ');
   document.getElementById('f-applied').checked  = !!exam.applied;
-  document.getElementById('f-year').value        = exam.year  || '';
-  document.getElementById('f-year').value        = exam.year  || '';
+  document.getElementById('f-year').value       = exam.year || '';
   document.getElementById('f-pinned').checked   = !!exam.pinned;
+  document.getElementById('job-fields-row').style.display = (exam.examType === 'entrance') ? 'none' : '';
   // Load draft from exam data
   modalDraft = {
     eligibility: exam.eligibility || '',
@@ -431,6 +447,11 @@ window.openEditExam = (id) => {
 
 window.closeExamModal = () => {
   document.getElementById('exam-modal').style.display = 'none';
+};
+
+window.toggleJobFields = () => {
+  const type = document.getElementById('f-exam-type').value;
+  document.getElementById('job-fields-row').style.display = type === 'entrance' ? 'none' : '';
 };
 
 window.toggleResPopover = (id) => {
@@ -601,13 +622,49 @@ function tableRowHTML(exam, num) {
   // ── EXPANDED PANEL ──────────────────────────────
   const resItems = (exam.resources || []);
   const websiteHostname = exam.website ? (() => { try { return new URL(exam.website.startsWith('http') ? exam.website : 'https://'+exam.website).hostname; } catch(e) { return exam.website; } })() : '';
+  const notif = exam.notification || {};
+  const isJob = !exam.examType || exam.examType === 'job';
 
   const detailRow = isExpanded ? `
   <tr class="detail-row">
-    <td colspan="10">
+    <td colspan="9">
       <div class="exp-panel">
 
-        <!-- Top row: Eligibility · Exam Pattern · Syllabus | Website · Resources -->
+        <!-- BLOCK 1: Info -->
+        <div class="exp-info">
+          <div class="exp-name">${escHtml(exam.name)}</div>
+          ${exam.subtitle ? `<div class="exp-subtitle">${escHtml(exam.subtitle)}</div>` : ''}
+
+          <div class="exp-meta-row">
+            ${exam.lastDate ? `<div class="exp-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span class="exp-meta-label">Apply by</span>
+              <span class="exp-meta-val">${escHtml(exam.lastDate)}</span>
+            </div>` : ''}
+            ${exam.examDate ? `<div class="exp-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span class="exp-meta-label">Exam</span>
+              <span class="exp-meta-val">${escHtml(exam.examDate)}</span>
+            </div>` : ''}
+            ${notif.label && notif.url ? `<a href="${notif.url.startsWith('http') ? notif.url : 'https://'+notif.url}" target="_blank" rel="noopener" class="exp-notif-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              ${escHtml(notif.label)}
+            </a>` : ''}
+            ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="exp-website-link">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              ${escHtml(websiteHostname)}
+            </a>` : ''}
+          </div>
+
+          ${isJob && (exam.vacancies || exam.pay) ? `<div class="exp-job-row">
+            ${exam.vacancies ? `<div class="exp-job-chip"><span class="chip-label">Vacancies</span><span class="chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
+            ${exam.pay ? `<div class="exp-job-chip"><span class="chip-label">Pay Scale</span><span class="chip-val">${escHtml(exam.pay)}</span></div>` : ''}
+          </div>` : ''}
+        </div>
+
+        <div class="exp-divider"></div>
+
+        <!-- BLOCK 2: Content buttons -->
         <div class="exp-field-btns">
           <button class="exp-field-btn${exam.eligibility ? '' : ' empty'}" onclick="openFieldView('${exam.id}','eligibility')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -621,35 +678,25 @@ function tableRowHTML(exam, num) {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Syllabus${exam.syllabus ? '' : ' <span class="fbtn-empty">empty</span>'}
           </button>
-
-          ${exam.website || resItems.length > 0 ? '<div class="exp-field-sep"></div>' : ''}
-
-          ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="exp-field-btn exp-field-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            ${escHtml(websiteHostname)}
-          </a>` : ''}
-
-          <div class="res-popover-wrap" id="res-wrap-${exam.id}">
+          ${resItems.length > 0 ? `<div class="res-popover-wrap" id="res-wrap-${exam.id}">
             <button class="exp-field-btn exp-field-res" onclick="toggleResPopover('${exam.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-              Resources${resItems.length > 0 ? ` <span class="res-count">${resItems.length}</span>` : ''}
+              Resources <span class="res-count">${resItems.length}</span>
             </button>
             <div class="res-popover" id="res-pop-${exam.id}" style="display:none">
               <div class="res-pop-list">
-                ${resItems.length === 0
-                  ? '<div class="res-pop-empty">No resources yet. Add via Edit.</div>'
-                  : resItems.map(r => `<div class="res-pop-item">
-                      ${r.type === 'PDF'
-                        ? `<svg class="res-pop-icon res-pop-icon-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
-                        : `<svg class="res-pop-icon res-pop-icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`}
-                      <a href="${r.url.startsWith('http') ? r.url : 'https://'+r.url}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.label)}</a>
-                    </div>`).join('')}
+                ${resItems.map(r => `<div class="res-pop-item">
+                  ${r.type === 'PDF'
+                    ? `<svg class="res-pop-icon res-pop-icon-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+                    : `<svg class="res-pop-icon res-pop-icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`}
+                  <a href="${r.url ? (r.url.startsWith('http') ? r.url : 'https://'+r.url) : '#'}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.label || r.title || '')}</a>
+                </div>`).join('')}
               </div>
             </div>
-          </div>
+          </div>` : ''}
         </div>
 
-        <!-- Bottom bar: Tags | Edit · Delete -->
+        <!-- BLOCK 3: Tags + Edit · Delete -->
         <div class="exp-bar">
           <div class="exp-tags-row">
             <span class="exp-tags-label">Tags:</span>
@@ -1064,18 +1111,23 @@ window.confirmDeleteAccount = () => {
 
 window.exportJSON = () => {
   const data = allExams.map(e => ({
-    name:        e.name        || '',
-    agency:      e.agency      || '',
-    status:      e.status      || 'open',
-    lastDate:    e.lastDate    || '',
-    examDate:    e.examDate    || '',
-    website:     e.website     || '',
-    eligibility: e.eligibility || '',
-    pattern:     e.pattern     || '',
-    syllabus:    e.syllabus    || '',
-    tags:        Array.isArray(e.tags) ? e.tags : [],
-    year:        e.year        || '',
-    resources:   Array.isArray(e.resources) ? e.resources : [],
+    name:         e.name         || '',
+    agency:       e.agency       || '',
+    subtitle:     e.subtitle     || '',
+    examType:     e.examType     || 'job',
+    status:       e.status       || 'open',
+    lastDate:     e.lastDate     || '',
+    examDate:     e.examDate     || '',
+    website:      e.website      || '',
+    notification: e.notification || { label: '', url: '' },
+    vacancies:    e.vacancies    || '',
+    pay:          e.pay          || '',
+    eligibility:  e.eligibility  || '',
+    pattern:      e.pattern      || '',
+    syllabus:     e.syllabus     || '',
+    tags:         Array.isArray(e.tags) ? e.tags : [],
+    year:         e.year         || '',
+    resources:    Array.isArray(e.resources) ? e.resources : [],
   }));
   downloadFile(JSON.stringify(data, null, 2), 'exams.json', 'application/json');
   toast('Exported JSON!', 'success');
@@ -1127,25 +1179,32 @@ window.importJSON = async (event) => {
         }
 
         return {
-          name:        String(exam.name   || ''),
-          agency:      String(exam.agency || ''),
+          name:         String(exam.name   || ''),
+          agency:       String(exam.agency || ''),
+          subtitle:     String(exam.subtitle || ''),
+          examType:     exam.examType === 'entrance' ? 'entrance' : 'job',
           status,
           lastDate,
           examDate,
-          website:     exam.website     || '',
-          eligibility: exam.eligibility || '',
-          pattern:     exam.pattern     || '',
-          syllabus:    exam.syllabus    || '',
-          tags:        Array.isArray(exam.tags) ? exam.tags.map(String) : [],
-          year:        String(exam.year  || ''),
-          applied:     false,
-          pinned:      false,
-          resources:   Array.isArray(exam.resources)
-                         ? exam.resources
-                             .filter(r => r.type && r.title)
-                             .map(r => ({ type: String(r.type), title: String(r.title) }))
-                         : [],
-          createdAt:   serverTimestamp(),
+          website:      exam.website      || '',
+          notification: (exam.notification && exam.notification.label && exam.notification.url)
+                          ? { label: String(exam.notification.label), url: String(exam.notification.url) }
+                          : { label: '', url: '' },
+          vacancies:    String(exam.vacancies || ''),
+          pay:          String(exam.pay       || ''),
+          eligibility:  exam.eligibility  || '',
+          pattern:      exam.pattern      || '',
+          syllabus:     exam.syllabus     || '',
+          tags:         Array.isArray(exam.tags) ? exam.tags.map(String) : [],
+          year:         String(exam.year  || ''),
+          applied:      false,
+          pinned:       false,
+          resources:    Array.isArray(exam.resources)
+                          ? exam.resources
+                              .filter(r => r.type && (r.label || r.title))
+                              .map(r => ({ type: String(r.type), label: String(r.label || r.title || ''), url: String(r.url || '') }))
+                          : [],
+          createdAt:    serverTimestamp(),
         };
       });
 

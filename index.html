@@ -237,10 +237,46 @@
         </div>
       </div>
 
+      <div class="field-group">
+        <label class="field-label">Subtitle <span class="label-hint">(optional — shown italic under name)</span></label>
+        <input type="text" id="f-subtitle" class="field-input" placeholder="e.g. Tier I · Tier II · Document Verification"/>
+      </div>
+
       <div class="form-row">
+        <div class="field-group field-group--flex-1">
+          <label class="field-label">Exam Type</label>
+          <select id="f-exam-type" class="field-input field-select" onchange="toggleJobFields()">
+            <option value="job">Job</option>
+            <option value="entrance">Entrance / Education</option>
+          </select>
+        </div>
         <div class="field-group field-group--flex-1">
           <label class="field-label">Year <span class="label-hint">(optional)</span></label>
           <input type="text" id="f-year" class="field-input" placeholder="e.g. 2026"/>
+        </div>
+      </div>
+
+      <!-- Job-only fields -->
+      <div class="form-row" id="job-fields-row">
+        <div class="field-group field-group--flex-1">
+          <label class="field-label">Vacancies <span class="label-hint">(optional)</span></label>
+          <input type="text" id="f-vacancies" class="field-input" placeholder="e.g. 17,727"/>
+        </div>
+        <div class="field-group field-group--flex-1">
+          <label class="field-label">Pay Scale <span class="label-hint">(optional)</span></label>
+          <input type="text" id="f-pay" class="field-input" placeholder="e.g. ₹25,500 – ₹81,100"/>
+        </div>
+      </div>
+
+      <!-- Notification -->
+      <div class="form-row">
+        <div class="field-group field-group--flex-1">
+          <label class="field-label">Notification Label <span class="label-hint">(optional)</span></label>
+          <input type="text" id="f-notif-label" class="field-input" placeholder="e.g. Official Notification PDF"/>
+        </div>
+        <div class="field-group field-group--flex-15">
+          <label class="field-label">Notification URL <span class="label-hint">(optional)</span></label>
+          <input type="url" id="f-notif-url" class="field-input" placeholder="https://…"/>
         </div>
       </div>
 
