@@ -536,11 +536,6 @@ a:hover { color: var(--accent-h); }
 .exam-list {
   padding: 0 0 60px;
 }
-.table-meta {
-  padding: 8px 18px 6px;
-  display: flex; align-items: center; justify-content: flex-end;
-}
-.table-count { font-size: 11px; color: var(--muted); font-family: var(--mono); }
 
 .list-empty {
   text-align: center; padding: 60px 20px;
