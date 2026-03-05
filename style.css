@@ -641,6 +641,7 @@ td.td-status {}
 .status-pill.open     { background: var(--open-bg);     color: var(--open);    border: 1px solid var(--open-border); }
 .status-pill.upcoming { background: var(--upcoming-bg); color: var(--upcoming); border: 1px solid var(--upcoming-border); }
 .status-pill.closed   { background: var(--closed-bg);   color: var(--closed);  border: 1px solid var(--closed-border); }
+.status-pill.na       { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
 /* applied / pin — centered */
 td.td-applied, td.td-pin { text-align: center; }

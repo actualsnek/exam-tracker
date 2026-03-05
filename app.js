@@ -243,7 +243,6 @@ window.saveExam = async () => {
     agency,
     subtitle:    document.getElementById('f-subtitle').value.trim(),
     examType:    document.getElementById('f-exam-type').value,
-    status:      document.getElementById('f-status').value,
     lastDate:    document.getElementById('f-last-date').value,
     examDate:    document.getElementById('f-exam-date').value,
     website:     document.getElementById('f-website').value.trim(),
@@ -393,7 +392,6 @@ window.openAddExam = () => {
   ['f-name','f-agency','f-subtitle','f-last-date','f-exam-date','f-website','f-tags','f-year','f-vacancies','f-pay','f-notif-url'].forEach(id => {
     document.getElementById(id).value = '';
   });
-  document.getElementById('f-status').value    = 'open';
   document.getElementById('f-exam-type').value = 'job';
   document.getElementById('job-fields-row').style.display = '';
   document.getElementById('f-applied').checked = false;
@@ -415,7 +413,6 @@ window.openEditExam = (id) => {
   document.getElementById('f-agency').value     = exam.agency || '';
   document.getElementById('f-subtitle').value   = exam.subtitle || '';
   document.getElementById('f-exam-type').value  = exam.examType || 'job';
-  document.getElementById('f-status').value     = exam.status || 'open';
   document.getElementById('f-last-date').value  = exam.lastDate || '';
   document.getElementById('f-exam-date').value  = exam.examDate || '';
   document.getElementById('f-website').value    = exam.website || '';
@@ -495,7 +492,12 @@ function applyFilters() {
   if (activeStatus === 'applied') {
     exams = exams.filter(e => e.applied);
   } else if (activeStatus !== 'all') {
-    exams = exams.filter(e => e.status === activeStatus);
+    exams = exams.filter(e => {
+      if (!e.lastDate) return activeStatus === 'na';
+      const d = daysUntil(e.lastDate);
+      const derived = d < 0 ? 'closed' : 'open';
+      return derived === activeStatus;
+    });
   }
 
   // active tags = multi-select
@@ -610,8 +612,16 @@ function tableRowHTML(exam, num) {
     if (tags.length > 1) tagsHTML += `<span class="tag-more">+${tags.length - 1}</span>`;
   }
 
-  const statusCls   = exam.status || 'open';
-  const statusLabel = capitalize(statusCls);
+  // Auto-derive status from lastDate
+  let statusCls, statusLabel;
+  if (!exam.lastDate) {
+    statusCls   = 'na';
+    statusLabel = '—';
+  } else {
+    const days = daysUntil(exam.lastDate);
+    if (days < 0) { statusCls = 'closed'; statusLabel = 'Closed'; }
+    else          { statusCls = 'open';   statusLabel = 'Open';   }
+  }
 
   // ── EXPANDED PANEL ──────────────────────────────
   const resItems = (exam.resources || []);
@@ -1109,7 +1119,6 @@ window.exportJSON = () => {
     agency:       e.agency       || '',
     subtitle:     e.subtitle     || '',
     examType:     e.examType     || 'job',
-    status:       e.status       || 'open',
     lastDate:     e.lastDate     || '',
     examDate:     e.examDate     || '',
     website:      e.website      || '',
@@ -1154,8 +1163,6 @@ window.importJSON = async (event) => {
     const data = JSON.parse(text);
     if (!Array.isArray(data)) return toast('Invalid JSON format.', 'error');
 
-    const today = new Date(); today.setHours(0,0,0,0);
-
     // Build the cleaned list first
     const toImport = data
       .filter(exam => exam.name)
@@ -1163,21 +1170,11 @@ window.importJSON = async (event) => {
         const lastDate  = exam.lastDate  || '';
         const examDate  = exam.examDate  || '';
 
-        // Auto-derive status from lastDate if present, else keep exported value
-        let status = exam.status || 'open';
-        if (lastDate) {
-          const d = new Date(lastDate); d.setHours(0,0,0,0);
-          if (d < today) status = 'closed';
-          else if (d.getTime() === today.getTime()) status = 'open';
-          else status = 'open';
-        }
-
         return {
           name:         String(exam.name   || ''),
           agency:       String(exam.agency || ''),
           subtitle:     String(exam.subtitle || ''),
           examType:     exam.examType === 'entrance' ? 'entrance' : 'job',
-          status,
           lastDate,
           examDate,
           website:      exam.website      || '',
