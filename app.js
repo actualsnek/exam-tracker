@@ -1122,7 +1122,7 @@ window.exportJSON = () => {
     lastDate:     e.lastDate     || '',
     examDate:     e.examDate     || '',
     website:      e.website      || '',
-    notification: e.notification || { label: '', url: '' },
+    notification: { url: (e.notification && e.notification.url) || '' },
     vacancies:    e.vacancies    || '',
     pay:          e.pay          || '',
     eligibility:  e.eligibility  || '',
@@ -1178,8 +1178,8 @@ window.importJSON = async (event) => {
           lastDate,
           examDate,
           website:      exam.website      || '',
-          notification: (exam.notification && exam.notification.label && exam.notification.url)
-                          ? { label: String(exam.notification.label), url: String(exam.notification.url) }
+          notification: (exam.notification && exam.notification.url)
+                          ? { label: 'Notification', url: String(exam.notification.url) }
                           : { label: '', url: '' },
           vacancies:    String(exam.vacancies || ''),
           pay:          String(exam.pay       || ''),
@@ -1192,8 +1192,8 @@ window.importJSON = async (event) => {
           pinned:       false,
           resources:    Array.isArray(exam.resources)
                           ? exam.resources
-                              .filter(r => r.type && (r.label || r.title))
-                              .map(r => ({ type: String(r.type), label: String(r.label || r.title || ''), url: String(r.url || '') }))
+                              .filter(r => r.type && r.label && r.url)
+                              .map(r => ({ type: String(r.type), label: String(r.label), url: String(r.url) }))
                           : [],
           createdAt:    serverTimestamp(),
         };
