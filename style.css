@@ -44,7 +44,7 @@
   --shadow: 0 4px 24px rgba(0,0,0,.4);
   --shadow-lg: 0 8px 48px rgba(0,0,0,.6);
   --topbar-h: 50px;
-  --countdown-h: 110px;
+  --countdown-h: 84px;
   --transition: .18s ease;
 }
 
@@ -356,7 +356,7 @@ a:hover { color: var(--accent-h); }
 .countdown-strip {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
-  padding: 14px 16px;
+  padding: 10px 16px;
   display: flex;
   gap: 16px;
   align-items: center;
@@ -371,30 +371,31 @@ a:hover { color: var(--accent-h); }
   font-size: 9px; letter-spacing: 1.5px; color: var(--muted);
   text-transform: uppercase; font-weight: 600; white-space: nowrap; flex-shrink: 0;
 }
-.countdown-rings { display: flex; gap: 20px; align-items: center; flex: 1; }
+.countdown-rings { display: flex; gap: 14px; align-items: center; flex: 1; }
 .countdown-empty {
-  font-size: 11px; color: var(--muted); font-style: italic; padding: 12px 0;
+  font-size: 11px; color: var(--muted); font-style: italic;
+  height: 64px; display: flex; align-items: center;
 }
 
 .ring-wrap {
-  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
   flex-shrink: 0; cursor: default;
 }
 .ring {
-  position: relative; width: 64px; height: 64px;
+  position: relative; width: 48px; height: 48px;
 }
-.ring svg { width: 64px; height: 64px; transform: rotate(-90deg); }
-.ring-bg { fill: none; stroke: var(--border); stroke-width: 4; }
-.ring-fg { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.ring svg { width: 48px; height: 48px; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: var(--border); stroke-width: 3.5; }
+.ring-fg { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
 .ring-inner {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.ring-days { font-size: 15px; font-weight: 700; line-height: 1; color: var(--text); }
-.ring-unit { font-size: 8px; color: var(--muted); margin-top: 1px; font-family: var(--mono); }
+.ring-days { font-size: 12px; font-weight: 700; line-height: 1; color: var(--text); }
+.ring-unit { font-size: 7px; color: var(--muted); margin-top: 1px; font-family: var(--mono); }
 .ring-name {
   font-size: 9px; color: var(--text2); text-align: center;
-  max-width: 70px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 56px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 /* ════════════════════════════════════════

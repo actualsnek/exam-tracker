@@ -860,12 +860,14 @@ function renderCountdowns() {
 
   strip.innerHTML = pinned.map(exam => {
     const targetDate = exam.examDate || exam.lastDate;
+    const isExamDate = !!exam.examDate;
     const days  = targetDate ? Math.max(0, daysUntil(targetDate)) : null;
     const total = 365;
     const pct   = days !== null ? Math.min(1, days / total) : 1;
     const offset = CIRCUMF * (1 - pct);
     const color  = days === null ? '#6b6560' : days <= 7 ? '#f87171' : days <= 30 ? '#fcd34d' : '#e07b2a';
     const label  = days === null ? '—' : days > 999 ? '999+' : String(days);
+    const unit   = isExamDate ? 'days' : 'apply';
 
     return `
       <div class="ring-wrap" title="${escHtml(exam.name)}">
@@ -879,7 +881,7 @@ function renderCountdowns() {
           </svg>
           <div class="ring-inner">
             <div class="ring-days">${label}</div>
-            <div class="ring-unit">days</div>
+            <div class="ring-unit">${unit}</div>
           </div>
         </div>
         <div class="ring-name">${escHtml(exam.name)}</div>
