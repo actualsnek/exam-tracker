@@ -7,79 +7,85 @@
 
 /* ── TOKENS ── */
 :root {
-  --bg:       #111009;
-  --bg2:      #1a1814;
-  --surface:  #211f1b;
-  --surface2: #2d2a25;
-  --border:   #38342e;
-  --border2:  #2e2b25;
-  --text:     #f0ece6;
-  --text2:    #c4bdb4;
-  --muted:    #6b6560;
-  --accent:        #e07b2a;
-  --accent-h:      #f08e40;
-  --accent-bg:     #2a1f13;
-  --accent-soft:   #4a2e10;
-  --open:        #86efac;
-  --open-bg:     #052e16;
-  --open-border: rgba(134,239,172,.22);
-  --upcoming:        #fcd34d;
-  --upcoming-bg:     #2d1f00;
-  --upcoming-border: rgba(252,211,77,.18);
-  --closed:        #9ca3af;
-  --closed-bg:     #1f2937;
-  --closed-border: rgba(156,163,175,.18);
-  --yes:      #4ade80;
-  --yes-check: #052e16;
+  --bg:       #0f1117;
+  --bg2:      #171b24;
+  --surface:  #1e2330;
+  --surface2: #252c3a;
+  --border:   #2e3748;
+  --border2:  #263040;
+  --text:     #e8edf5;
+  --text2:    #99a8bf;
+  --muted:    #4f5f78;
+  --accent:        #f97316;
+  --accent-h:      #fb923c;
+  --accent-bg:     #1e1509;
+  --accent-soft:   #7c2d12;
+  --open:        #34d399;
+  --open-bg:     #022c22;
+  --open-border: rgba(52,211,153,.25);
+  --upcoming:        #fbbf24;
+  --upcoming-bg:     #1c1400;
+  --upcoming-border: rgba(251,191,36,.22);
+  --closed:        #94a3b8;
+  --closed-bg:     #151d2b;
+  --closed-border: rgba(148,163,184,.2);
+  --yes:      #34d399;
+  --yes-check: #022c22;
   --no:       #f87171;
   --no-border: #7f1d1d;
-  --no-hover:  #5a0a0a;
-  --no-bg:    #450a0a;
+  --no-hover:  #4c0a0a;
+  --no-bg:    #3b0808;
   --r: 6px;
   --r-lg: 12px;
   --r-xl: 16px;
   --font: 'DM Sans', sans-serif;
   --mono: 'DM Mono', monospace;
   --serif: 'DM Serif Display', serif;
-  --shadow: 0 4px 24px rgba(0,0,0,.4);
-  --shadow-lg: 0 8px 48px rgba(0,0,0,.6);
+  --shadow: 0 4px 24px rgba(0,0,0,.5);
+  --shadow-lg: 0 8px 48px rgba(0,0,0,.7);
   --topbar-h: 50px;
   --countdown-h: 84px;
   --filter-bar-h: 47px;
   --transition: .18s ease;
+  /* Row distinction stripes */
+  --row-alt: #181e2b;
+  --row-base: #0f1117;
 }
 
 [data-theme="light"] {
-  --bg:       #f5f2ed;
-  --bg2:      #ede9e3;
-  --surface:  #faf8f5;
-  --surface2: #f0ece6;
-  --border:   #ddd8cf;
-  --border2:  #e5e0d8;
-  --text:     #1a1714;
-  --text2:    #6e6259;
-  --muted:    #a09890;
-  --accent:        #c96a1a;
-  --accent-h:      #df7a28;
-  --accent-bg:     #fef0e4;
-  --accent-soft:   #f9d4ad;
-  --open:        #166534;
-  --open-bg:     #dcfce7;
-  --open-border: #86efac;
-  --upcoming:        #854d0e;
-  --upcoming-bg:     #fef3c7;
+  --bg:       #f0f4fa;
+  --bg2:      #e4eaf5;
+  --surface:  #ffffff;
+  --surface2: #f5f8ff;
+  --border:   #c9d4e8;
+  --border2:  #d8e2f0;
+  --text:     #0f1825;
+  --text2:    #4a5d7a;
+  --muted:    #8a9bb8;
+  --accent:        #ea6c0a;
+  --accent-h:      #f97316;
+  --accent-bg:     #fff4ec;
+  --accent-soft:   #fbd0b0;
+  --open:        #0f7a4a;
+  --open-bg:     #dcfff0;
+  --open-border: #6ee7b7;
+  --upcoming:        #92400e;
+  --upcoming-bg:     #fffbeb;
   --upcoming-border: #fcd34d;
-  --closed:        #475569;
-  --closed-bg:     #f1f5f9;
-  --closed-border: #cbd5e1;
-  --yes:      #16a34a;
+  --closed:        #4a5568;
+  --closed-bg:     #eef2f9;
+  --closed-border: #a0aec0;
+  --yes:      #0a8f4f;
   --yes-check: #ffffff;
-  --no:       #dc2626;
+  --no:       #c8131b;
   --no-border: #fca5a5;
   --no-hover:  #fee2e2;
-  --no-bg:    #fee2e2;
-  --shadow: 0 4px 24px rgba(0,0,0,.08);
-  --shadow-lg: 0 8px 48px rgba(0,0,0,.14);
+  --no-bg:    #fff0f0;
+  --shadow: 0 4px 24px rgba(15,24,37,.09);
+  --shadow-lg: 0 8px 48px rgba(15,24,37,.15);
+  /* Row distinction stripes */
+  --row-alt: #f7faff;
+  --row-base: #ffffff;
 }
 
 /* ── BASE ── */
@@ -611,11 +617,24 @@ a:hover { color: var(--accent-h); }
   transition: background var(--transition);
   cursor: default;
 }
+
+/* Alternating row backgrounds for visual separation */
+.exam-table tbody tr.exam-row:nth-child(odd)  { background: var(--row-base); }
+.exam-table tbody tr.exam-row:nth-child(even) { background: var(--row-alt); }
+
+/* Status-colored left border stripe via td-expand-num */
+.exam-table tbody tr.exam-row td.td-expand-num {
+  border-left: 3px solid transparent;
+}
+.exam-table tbody tr.exam-row[data-status="open"]     td.td-expand-num { border-left-color: var(--open); }
+.exam-table tbody tr.exam-row[data-status="upcoming"] td.td-expand-num { border-left-color: var(--upcoming); }
+.exam-table tbody tr.exam-row[data-status="closed"]   td.td-expand-num { border-left-color: var(--muted); }
+
 .exam-table tbody tr.exam-row:hover { background: var(--bg2); }
 .exam-table tbody tr.exam-row.pinned-row { background: var(--accent-bg); }
 .exam-table tbody tr.exam-row.pinned-row:hover { background: var(--accent-soft); }
 .exam-table tbody tr.exam-row.pinned-row td.td-expand-num {
-  border-left: 2px solid var(--accent);
+  border-left: 3px solid var(--accent) !important;
   padding-left: 6px;
 }
 

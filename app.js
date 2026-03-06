@@ -841,7 +841,7 @@ function tableRowHTML(exam, num) {
   const detailRow = isExpanded ? detailRowHTML(exam) : '';
 
   return `
-  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}${isSelected ? ' selected-row' : ''}" id="row-${exam.id}">
+  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}${isSelected ? ' selected-row' : ''}" id="row-${exam.id}" data-status="${statusCls}">
     <td class="td-expand-num" onclick="${selectionMode ? `toggleSelectRow('${exam.id}')` : `toggleExpand('${exam.id}')`}">
       ${selectionMode
         ? `<div class="row-select-cb${isSelected ? ' checked' : ''}"></div>`
