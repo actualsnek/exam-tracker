@@ -1681,23 +1681,11 @@ document.getElementById('confirm-action-btn').addEventListener('click', async ()
 // ════════════════════════════════════════════════════
 
 window.toggleTheme = () => {
-  const html  = document.documentElement;
+  const html   = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('theme-icon-moon').style.display = isDark ? 'none'  : '';
-  document.getElementById('theme-icon-sun').style.display  = isDark ? ''      : 'none';
   localStorage.setItem('theme', isDark ? 'light' : 'dark');
 };
-
-// Load saved theme
-(function initTheme() {
-  const saved = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', saved);
-  if (saved === 'light') {
-    document.getElementById('theme-icon-moon').style.display = 'none';
-    document.getElementById('theme-icon-sun').style.display  = '';
-  }
-})();
 
 // ── Scroll lock helpers ──────────────────────────────
 // lockScroll / unlockScroll — only unlock when no overlay/panel is open
