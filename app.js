@@ -117,12 +117,10 @@ function updateUserUI() {
   if (!currentUser) return;
   document.getElementById('profile-name-display').textContent = currentUser.displayName || '(no name)';
   document.getElementById('profile-email-display').textContent = currentUser.email || '';
-  // Stat cards
-  if (document.getElementById('stat-exams')) {
-    document.getElementById('stat-exams').textContent   = allExams.length;
-    document.getElementById('stat-applied').textContent = allExams.filter(e => e.applied).length;
-    document.getElementById('stat-pinned').textContent  = allExams.filter(e => e.pinned).length;
-  }
+  // Stat cards — always update so they stay live if profile modal is already open
+  document.getElementById('stat-exams').textContent   = allExams.length;
+  document.getElementById('stat-applied').textContent = allExams.filter(e => e.applied).length;
+  document.getElementById('stat-pinned').textContent  = allExams.filter(e => e.pinned).length;
 }
 
 // ════════════════════════════════════════════════════
@@ -1188,25 +1186,44 @@ window.handleEditDisplayName = () => {
 };
 
 window.handleChangePassword = () => {
+  // Step 1: ask current password to reauthenticate proactively
   openInputModal(
     'Change Password',
-    'New Password',
+    'Current Password',
     'password',
     '',
-    'min 6 characters',
-    async (value) => {
-      if (!value || value.length < 6) { toast('Enter a new password (min 6 chars).', 'error'); throw new Error(); }
+    'Enter your current password',
+    async (currentPassword) => {
+      if (!currentPassword) { toast('Enter your current password.', 'error'); throw new Error(); }
       try {
-        await updatePassword(currentUser, value);
-        toast('Password updated!', 'success');
+        const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+        await reauthenticateWithCredential(currentUser, credential);
       } catch (e) {
-        if (e.code === 'auth/requires-recent-login') {
-          toast('Please sign out and sign back in, then try again.', 'error');
+        if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+          toast('Current password is incorrect.', 'error');
         } else {
-          toast('Failed to update password.', 'error');
+          toast('Reauthentication failed. Try again.', 'error');
         }
         throw e;
       }
+      // Step 2: reauthenticated — now ask for new password
+      openInputModal(
+        'Change Password',
+        'New Password',
+        'password',
+        '',
+        'min 6 characters',
+        async (newPassword) => {
+          if (!newPassword || newPassword.length < 6) { toast('Enter a new password (min 6 chars).', 'error'); throw new Error(); }
+          try {
+            await updatePassword(currentUser, newPassword);
+            toast('Password updated!', 'success');
+          } catch (e) {
+            toast('Failed to update password.', 'error');
+            throw e;
+          }
+        }
+      );
     }
   );
 };
@@ -1533,6 +1550,10 @@ window.closeModalOnOverlay = (event, modalId) => {
     document.getElementById(modalId).style.display = 'none';
     if (modalId === 'confirm-modal') confirmCallback = null;
     if (modalId === 'input-modal')   inputModalCallback = null;
+    if (modalId === 'exam-modal') {
+      modalDraft     = { eligibility: '', syllabus: '', pattern: '' };
+      modalResources = [];
+    }
   }
 };
 
