@@ -227,7 +227,7 @@ function subscribeExams() {
 window.saveExam = async () => {
   const name    = document.getElementById('f-name').value.trim();
   const agency  = document.getElementById('f-agency').value.trim();
-  if (!name || !agency) return toast('Exam name and agency are required.', 'error');
+  if (!name) return toast('Exam name is required.', 'error');
 
   const id = document.getElementById('exam-id').value;
   const pinned  = document.getElementById('f-pinned').checked;
@@ -835,7 +835,7 @@ function tableRowHTML(exam, num) {
     </td>
     <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
     <td class="td-cycle">${cycleHTML}</td>
-    <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.agency || '—')}</td>
+    <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${exam.agency ? escHtml(exam.agency) : '<span style="color:var(--muted)">—</span>'}</td>
     <td class="td-tag">${tagsHTML}</td>
     <td class="td-deadline">${deadlineHTML}</td>
     <td class="td-status"><span class="status-pill ${statusCls}">${statusLabel}</span></td>
