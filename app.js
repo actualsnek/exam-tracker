@@ -73,8 +73,20 @@ onAuthStateChanged(auth, user => {
     subscribeExams();
     updateUserUI();
   } else {
-    currentUser = null;
-    allExams = [];
+    currentUser    = null;
+    allExams       = [];
+    filteredExams  = [];
+    activeStatus   = 'all';
+    activeTags     = new Set();
+    searchQuery    = '';
+    activeSort     = 'createdAt_desc';
+    expandedCards  = new Set();
+    selectionMode  = false;
+    selectedIds    = new Set();
+    confirmCallback    = null;
+    inputModalCallback = null;
+    fvExamId = null;
+    fvField  = null;
     showAuthScreen();
   }
 });
@@ -151,11 +163,13 @@ window.handleLogin = async () => {
   if (!email || !password) return showAuthError('Please fill in all fields.');
   const btn = document.getElementById('login-btn-text');
   btn.innerHTML = '<span class="loading-spinner"></span>Signing in…';
+  btn.closest('button').disabled = true;
   clearAuthMessages();
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
     btn.textContent = 'Sign In';
+    btn.closest('button').disabled = false;
     showAuthError(friendlyAuthError(e.code));
   }
 };
@@ -168,22 +182,28 @@ window.handleRegister = async () => {
   if (password.length < 6) return showAuthError('Password must be at least 6 characters.');
   const btn = document.getElementById('register-btn-text');
   btn.innerHTML = '<span class="loading-spinner"></span>Creating…';
+  btn.closest('button').disabled = true;
   clearAuthMessages();
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
   } catch (e) {
     btn.textContent = 'Create Account';
+    btn.closest('button').disabled = false;
     showAuthError(friendlyAuthError(e.code));
   }
 };
 
 window.handleGoogleLogin = async () => {
   clearAuthMessages();
+  const btn = document.querySelector('.btn-google');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
   try {
     await signInWithPopup(auth, gProvider);
   } catch (e) {
     showAuthError(friendlyAuthError(e.code));
+  } finally {
+    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
   }
 };
 
@@ -452,6 +472,8 @@ window.openEditExam = (id) => {
 
 window.closeExamModal = () => {
   document.getElementById('exam-modal').style.display = 'none';
+  const btn = document.getElementById('save-exam-btn');
+  if (btn) { btn.textContent = 'Save Exam'; btn.disabled = false; }
 };
 
 window.toggleJobFields = () => {
@@ -1134,13 +1156,14 @@ window.handleEditDisplayName = () => {
     currentUser.displayName || '',
     'Your name',
     async (value) => {
-      if (!value.trim()) return toast('Name cannot be empty.', 'error');
+      if (!value.trim()) { toast('Name cannot be empty.', 'error'); throw new Error(); }
       try {
         await updateProfile(currentUser, { displayName: value.trim() });
         updateUserUI();
         toast('Display name updated!', 'success');
       } catch (e) {
         toast('Failed to update name.', 'error');
+        throw e;
       }
     }
   );
@@ -1154,7 +1177,7 @@ window.handleChangePassword = () => {
     '',
     'min 6 characters',
     async (value) => {
-      if (!value || value.length < 6) return toast('Enter a new password (min 6 chars).', 'error');
+      if (!value || value.length < 6) { toast('Enter a new password (min 6 chars).', 'error'); throw new Error(); }
       try {
         await updatePassword(currentUser, value);
         toast('Password updated!', 'success');
@@ -1164,6 +1187,7 @@ window.handleChangePassword = () => {
         } else {
           toast('Failed to update password.', 'error');
         }
+        throw e;
       }
     }
   );
@@ -1182,8 +1206,19 @@ function openInputModal(title, label, type, defaultValue, placeholder, callback)
   inputModalCallback = callback;
   const confirmBtn = document.getElementById('input-modal-confirm-btn');
   confirmBtn.onclick = async () => {
-    if (inputModalCallback) await inputModalCallback(field.value);
-    closeInputModal();
+    if (!inputModalCallback) return;
+    const origText = confirmBtn.textContent;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="loading-spinner"></span>';
+    try {
+      await inputModalCallback(field.value);
+      closeInputModal();
+    } catch (e) {
+      // callback handles its own error toast; keep modal open so user can retry
+    } finally {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = origText;
+    }
   };
   // Allow Enter key to submit
   field.onkeydown = (e) => { if (e.key === 'Enter') confirmBtn.click(); };
