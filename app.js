@@ -647,7 +647,7 @@ function applyFilters() {
     exams = exams.filter(e => e.applied);
   } else if (activeStatus !== 'all') {
     exams = exams.filter(e => {
-      if (!e.lastDate) return activeStatus === 'na';
+      if (!e.lastDate) return false;
       const d = daysUntil(e.lastDate);
       const derived = d < 0 ? 'closed' : 'open';
       return derived === activeStatus;
@@ -672,7 +672,7 @@ function applyFilters() {
   // ── Sort ──────────────────────────────────────────
   const [sortKey, sortDir] = activeSort.split('_');
   const asc = sortDir === 'asc';
-  const statusOrder = { open: 0, upcoming: 1, closed: 2 };
+  const statusOrder = { open: 0, closed: 1 };
 
   filteredExams.sort((a, b) => {
     if (sortKey === 'deadline') {
@@ -1024,7 +1024,7 @@ window.setStatusFilter = (status) => {
     el.classList.toggle('active', el.dataset.status === status);
   });
   // Update button label
-  const labels = { all: 'Status', open: 'Open', upcoming: 'Upcoming', closed: 'Closed', applied: 'Applied' };
+  const labels = { all: 'Status', open: 'Open', closed: 'Closed', applied: 'Applied' };
   const labelEl = document.getElementById('status-dd-label');
   if (labelEl) labelEl.textContent = labels[status] || 'Status';
   // Highlight button when not default
@@ -1595,6 +1595,27 @@ window.closeConfirmModal = () => {
   confirmCallback = null;
 };
 
+// ── Discard-changes modal (replaces window.confirm for unsaved-changes checks) ──
+let discardCallback = null;
+
+function openDiscardModal(onDiscard) {
+  discardCallback = onDiscard;
+  document.getElementById('discard-modal').style.display = 'flex';
+  // no lockScroll — a panel is already locking scroll underneath
+}
+
+document.getElementById('discard-keep-btn').addEventListener('click', () => {
+  document.getElementById('discard-modal').style.display = 'none';
+  discardCallback = null;
+});
+
+document.getElementById('discard-confirm-btn').addEventListener('click', () => {
+  document.getElementById('discard-modal').style.display = 'none';
+  const cb = discardCallback;
+  discardCallback = null;
+  if (cb) cb();
+});
+
 document.getElementById('confirm-action-btn').addEventListener('click', async () => {
   if (!confirmCallback) return;
   const btn = document.getElementById('confirm-action-btn');
@@ -1731,7 +1752,13 @@ window.closeMdPanel = () => {
     const current = document.getElementById('md-editor-textarea').value;
     const saved   = modalDraft[mdCurrentField] || '';
     if (current !== saved) {
-      if (!confirm('You have unsaved changes. Discard them?')) return;
+      openDiscardModal(() => {
+        document.getElementById('md-panel').style.display   = 'none';
+        document.getElementById('md-overlay').style.display = 'none';
+        mdCurrentField = null;
+        unlockScroll();
+      });
+      return;
     }
   }
   document.getElementById('md-panel').style.display   = 'none';
@@ -1816,7 +1843,11 @@ window.switchToViewMode = () => {
     const exam    = allExams.find(e => e.id === fvExamId);
     const saved   = (exam && exam[fvField]) || '';
     if (current !== saved) {
-      if (!confirm('You have unsaved changes. Discard them?')) return;
+      openDiscardModal(() => {
+        document.getElementById('fv-view-mode').style.display = 'flex';
+        document.getElementById('fv-edit-mode').style.display = 'none';
+      });
+      return;
     }
   }
   document.getElementById('fv-view-mode').style.display = 'flex';
@@ -1831,7 +1862,14 @@ window.closeFieldView = () => {
     const exam    = allExams.find(e => e.id === fvExamId);
     const saved   = (exam && exam[fvField]) || '';
     if (current !== saved) {
-      if (!confirm('You have unsaved changes. Discard them?')) return;
+      openDiscardModal(() => {
+        document.getElementById('fv-panel').style.display   = 'none';
+        document.getElementById('fv-overlay').style.display = 'none';
+        fvExamId = null;
+        fvField  = null;
+        unlockScroll();
+      });
+      return;
     }
   }
   document.getElementById('fv-panel').style.display   = 'none';

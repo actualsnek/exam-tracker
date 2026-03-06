@@ -126,7 +126,6 @@
         <div id="status-dd-list">
           <div class="tag-dd-item active" data-status="all"      onclick="setStatusFilter('all')">      <div class="tag-dd-checkbox"></div><span>All</span></div>
           <div class="tag-dd-item"        data-status="open"     onclick="setStatusFilter('open')">     <div class="tag-dd-checkbox"></div><span>Open</span></div>
-          <div class="tag-dd-item"        data-status="upcoming" onclick="setStatusFilter('upcoming')"> <div class="tag-dd-checkbox"></div><span>Upcoming</span></div>
           <div class="tag-dd-item"        data-status="closed"   onclick="setStatusFilter('closed')">   <div class="tag-dd-checkbox"></div><span>Closed</span></div>
           <div class="tag-dd-item"        data-status="applied"  onclick="setStatusFilter('applied')">  <div class="tag-dd-checkbox"></div><span>Applied</span></div>
         </div>
@@ -426,6 +425,22 @@
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- DISCARD CHANGES MODAL -->
+<div id="discard-modal" class="modal-overlay" style="display:none">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div class="modal-title">Unsaved Changes</div>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-message">You have unsaved changes. Discard them?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="discard-keep-btn">Keep Editing</button>
+      <button class="btn-danger" id="discard-confirm-btn">Discard</button>
     </div>
   </div>
 </div>
