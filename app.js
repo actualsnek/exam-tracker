@@ -60,6 +60,8 @@ let searchQuery  = '';
 let activeSort   = 'createdAt_desc';
 let expandedCards = new Set();
 let examsUnsubscribe = null; // holds the onSnapshot detach function
+let selectionMode = false;
+let selectedIds   = new Set();
 
 // ── Auth State Listener ──────────────────────────────
 onAuthStateChanged(auth, user => {
@@ -477,8 +479,83 @@ window.checkPinLimit = (checkbox) => {
 };
 
 // ════════════════════════════════════════════════════
-//  RENDERING
+//  SELECTION & BATCH DELETE
 // ════════════════════════════════════════════════════
+
+window.toggleSelectionMode = () => {
+  selectionMode = !selectionMode;
+  selectedIds.clear();
+  const btn = document.getElementById('btn-select-mode');
+  if (btn) btn.classList.toggle('active', selectionMode);
+  updateBatchDeleteBtn();
+  renderTable();
+};
+
+window.toggleSelectRow = (id) => {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  // sync row class
+  const row = document.getElementById('row-' + id);
+  if (row) row.classList.toggle('selected-row', selectedIds.has(id));
+  // sync header checkbox
+  const allVisible = filteredExams.map(e => e.id);
+  const allChecked = allVisible.length > 0 && allVisible.every(id => selectedIds.has(id));
+  const hdrCb = document.getElementById('select-all-cb');
+  if (hdrCb) hdrCb.classList.toggle('checked', allChecked);
+  updateBatchDeleteBtn();
+};
+
+window.toggleSelectAll = () => {
+  const allVisible = filteredExams.map(e => e.id);
+  const allChecked = allVisible.every(id => selectedIds.has(id));
+  if (allChecked) {
+    allVisible.forEach(id => selectedIds.delete(id));
+  } else {
+    allVisible.forEach(id => selectedIds.add(id));
+  }
+  renderTable();
+  updateBatchDeleteBtn();
+};
+
+function updateBatchDeleteBtn() {
+  const btn = document.getElementById('btn-delete-selected');
+  if (!btn) return;
+  if (selectionMode && selectedIds.size > 0) {
+    btn.style.display = '';
+    btn.textContent   = `Delete (${selectedIds.size})`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+window.deleteSelected = () => {
+  if (selectedIds.size === 0) return;
+  openConfirm(
+    'Delete Selected',
+    `Are you sure you want to delete ${selectedIds.size} exam${selectedIds.size > 1 ? 's' : ''}? This cannot be undone.`,
+    false,
+    async () => {
+      try {
+        const batch = writeBatch(db);
+        selectedIds.forEach(id => {
+          batch.delete(doc(db, 'users', currentUser.uid, 'exams', id));
+        });
+        await batch.commit();
+        selectedIds.clear();
+        selectionMode = false;
+        const btn = document.getElementById('btn-select-mode');
+        if (btn) btn.classList.remove('active');
+        updateBatchDeleteBtn();
+        toast('Deleted successfully.', 'success');
+        closeConfirmModal();
+      } catch (e) {
+        toast('Delete failed.', 'error');
+      }
+    }
+  );
+};
+
+
 
 function renderAll() {
   renderTagDropdown();
@@ -573,6 +650,7 @@ function renderTable() {
   const tbody  = document.getElementById('exam-tbody');
   const empty  = document.getElementById('list-empty');
   const scroll = document.getElementById('table-scroll');
+  const table  = scroll ? scroll.querySelector('.exam-table') : null;
 
   if (filteredExams.length === 0) {
     empty.style.display  = 'block';
@@ -581,6 +659,16 @@ function renderTable() {
   }
   empty.style.display  = 'none';
   scroll.style.display = '';
+
+  if (table) table.classList.toggle('selection-mode', selectionMode);
+
+  // Header checkbox
+  const hdrCb = document.getElementById('select-all-cb');
+  if (hdrCb) {
+    const allChecked = filteredExams.length > 0 && filteredExams.every(e => selectedIds.has(e.id));
+    hdrCb.classList.toggle('checked', allChecked);
+    hdrCb.style.display = selectionMode ? '' : 'none';
+  }
 
   tbody.innerHTML = filteredExams.map((exam, i) => tableRowHTML(exam, i + 1)).join('');
 }
@@ -622,6 +710,8 @@ function tableRowHTML(exam, num) {
     if (days < 0) { statusCls = 'closed'; statusLabel = 'Closed'; }
     else          { statusCls = 'open';   statusLabel = 'Open';   }
   }
+
+  const isSelected = selectionMode && selectedIds.has(exam.id);
 
   // ── EXPANDED PANEL ──────────────────────────────
   const resItems = (exam.resources || []);
@@ -719,10 +809,13 @@ function tableRowHTML(exam, num) {
   </tr>` : '';
 
   return `
-  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}" id="row-${exam.id}">
-    <td class="td-expand-num" onclick="toggleExpand('${exam.id}')">
-      <button class="expand-btn${isExpanded ? ' open' : ''}">${isExpanded ? '▼' : '▶'}</button>
-      <span class="row-num">${num}</span>
+  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}${isSelected ? ' selected-row' : ''}" id="row-${exam.id}">
+    <td class="td-expand-num" onclick="${selectionMode ? `toggleSelectRow('${exam.id}')` : `toggleExpand('${exam.id}')`}">
+      ${selectionMode
+        ? `<div class="row-select-cb${isSelected ? ' checked' : ''}"></div>`
+        : `<button class="expand-btn${isExpanded ? ' open' : ''}">${isExpanded ? '▼' : '▶'}</button>
+           <span class="row-num">${num}</span>`
+      }
     </td>
     <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
     <td class="td-cycle">${cycleHTML}</td>
