@@ -87,6 +87,7 @@ onAuthStateChanged(auth, user => {
     inputModalCallback = null;
     fvExamId = null;
     fvField  = null;
+    mdCurrentField = null;
     showAuthScreen();
   }
 });
@@ -1156,6 +1157,7 @@ window.handleSignOut = async () => {
   inputModalCallback = null;
   fvExamId = null;
   fvField  = null;
+  mdCurrentField = null;
 
   // Brief feedback then sign out
   toast('Signed out successfully.', 'success');
@@ -1566,6 +1568,7 @@ const fieldLabels = {
 };
 
 window.openMdFromModal = (field) => {
+  mdCurrentField = field;
   const examName = document.getElementById('f-name')?.value.trim() || 'New Exam';
   document.getElementById('md-panel-title').textContent = `${fieldLabels[field]} — ${examName}`;
   const ta = document.getElementById('md-editor-textarea');
@@ -1580,31 +1583,24 @@ window.openMdFromModal = (field) => {
 window.closeMdPanel = () => {
   document.getElementById('md-panel').style.display   = 'none';
   document.getElementById('md-overlay').style.display = 'none';
+  mdCurrentField = null;
 };
 
 // Called only when clicking the overlay — auto-saves draft so work is never lost
 window.closeMdPanelFromOverlay = () => {
-  const titleMap = { 'Eligibility':'eligibility', 'Syllabus':'syllabus', 'Exam Pattern':'pattern' };
-  const panelTitle = document.getElementById('md-panel-title').textContent;
-  const derivedField = Object.keys(titleMap).find(k => panelTitle.startsWith(k));
-  if (derivedField) {
-    const realField = titleMap[derivedField];
+  if (mdCurrentField) {
     const value = document.getElementById('md-editor-textarea').value;
-    modalDraft[realField] = value;
-    setModalDraftPreview(realField);
+    modalDraft[mdCurrentField] = value;
+    setModalDraftPreview(mdCurrentField);
   }
   closeMdPanel();
 };
 
 window.saveMdPanel = () => {
-  const titleMap = { 'Eligibility':'eligibility', 'Syllabus':'syllabus', 'Exam Pattern':'pattern' };
-  const panelTitle = document.getElementById('md-panel-title').textContent;
-  const derivedField = Object.keys(titleMap).find(k => panelTitle.startsWith(k));
-  if (!derivedField) return;
-  const realField = titleMap[derivedField];
+  if (!mdCurrentField) return;
   const value = document.getElementById('md-editor-textarea').value;
-  modalDraft[realField] = value;
-  setModalDraftPreview(realField);
+  modalDraft[mdCurrentField] = value;
+  setModalDraftPreview(mdCurrentField);
   document.getElementById('md-save-status').textContent = '✓ Saved to draft';
   setTimeout(closeMdPanel, 400);
 };
@@ -1613,8 +1609,9 @@ window.saveMdPanel = () => {
 //  FIELD VIEW PANEL (view → edit → save)
 // ════════════════════════════════════════════════════
 
-let fvExamId = null;
-let fvField  = null;
+let fvExamId       = null;
+let fvField        = null;
+let mdCurrentField = null; // tracks which field (eligibility/syllabus/pattern) md-panel is editing
 
 window.openFieldView = (examId, field) => {
   const exam = allExams.find(e => e.id === examId);
