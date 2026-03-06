@@ -1523,9 +1523,10 @@ window.toggleTheme = () => {
 // ════════════════════════════════════════════════════
 
 window.closeModalOnOverlay = (event, modalId) => {
-  if (event.target.id === modalId) {
+  if (event.target === event.currentTarget) {
     document.getElementById(modalId).style.display = 'none';
     if (modalId === 'confirm-modal') confirmCallback = null;
+    if (modalId === 'input-modal')   inputModalCallback = null;
   }
 };
 
@@ -1579,6 +1580,20 @@ window.openMdFromModal = (field) => {
 window.closeMdPanel = () => {
   document.getElementById('md-panel').style.display   = 'none';
   document.getElementById('md-overlay').style.display = 'none';
+};
+
+// Called only when clicking the overlay — auto-saves draft so work is never lost
+window.closeMdPanelFromOverlay = () => {
+  const titleMap = { 'Eligibility':'eligibility', 'Syllabus':'syllabus', 'Exam Pattern':'pattern' };
+  const panelTitle = document.getElementById('md-panel-title').textContent;
+  const derivedField = Object.keys(titleMap).find(k => panelTitle.startsWith(k));
+  if (derivedField) {
+    const realField = titleMap[derivedField];
+    const value = document.getElementById('md-editor-textarea').value;
+    modalDraft[realField] = value;
+    setModalDraftPreview(realField);
+  }
+  closeMdPanel();
 };
 
 window.saveMdPanel = () => {
