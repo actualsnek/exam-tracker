@@ -790,13 +790,81 @@ function tableRowHTML(exam, num) {
 
   const isSelected = selectionMode && selectedIds.has(exam.id);
 
-  // ── EXPANDED PANEL ──────────────────────────────
-  const resItems = (exam.resources || []);
-  const websiteHostname = exam.website ? (() => { try { return new URL(exam.website.startsWith('http') ? exam.website : 'https://'+exam.website).hostname; } catch(e) { return exam.website; } })() : '';
+  const detailRow = isExpanded ? detailRowHTML(exam) : '';
+
+  return `
+  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}${isSelected ? ' selected-row' : ''}" id="row-${exam.id}">
+    <td class="td-expand-num" onclick="${selectionMode ? `toggleSelectRow('${exam.id}')` : `toggleExpand('${exam.id}')`}">
+      ${selectionMode
+        ? `<div class="row-select-cb${isSelected ? ' checked' : ''}"></div>`
+        : `<button class="expand-btn${isExpanded ? ' open' : ''}">${isExpanded ? '▼' : '▶'}</button>
+           <span class="row-num">${num}</span>`
+      }
+    </td>
+    <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
+    <td class="td-cycle">${cycleHTML}</td>
+    <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${exam.agency ? escHtml(exam.agency) : '<span style="color:var(--muted)">—</span>'}</td>
+    <td class="td-tag">${tagsHTML}</td>
+    <td class="td-deadline">${deadlineHTML}</td>
+    <td class="td-status">${statusCls === 'na' ? '<span style="color:var(--muted)">—</span>' : `<span class="status-pill ${statusCls}">${statusLabel}</span>`}</td>
+    <td class="td-applied">
+      <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
+    </td>
+    <td class="td-pin">
+      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
+    </td>
+  </tr>${detailRow}`;
+}
+
+window.toggleExpand = (id) => {
+  const isNowExpanded = !expandedCards.has(id);
+  if (isNowExpanded) expandedCards.add(id);
+  else expandedCards.delete(id);
+
+  // ── Surgical update: only touch the two rows for this exam ──
+  const examRow = document.getElementById('row-' + id);
+  if (!examRow) { renderTable(); return; }
+
+  // Toggle classes on the main exam-row
+  examRow.classList.toggle('expanded', isNowExpanded);
+
+  // Update the expand button arrow
+  const expandBtn = examRow.querySelector('.expand-btn');
+  if (expandBtn) {
+    expandBtn.textContent = isNowExpanded ? '▼' : '▶';
+    expandBtn.classList.toggle('open', isNowExpanded);
+  }
+
+  // Insert or remove the detail-row that follows
+  const existingDetailRow = examRow.nextElementSibling;
+  const hasDetailRow = existingDetailRow && existingDetailRow.classList.contains('detail-row');
+
+  if (isNowExpanded && !hasDetailRow) {
+    // Build and insert the detail row
+    const exam = filteredExams.find(e => e.id === id);
+    if (!exam) { renderTable(); return; }
+    const tmp = document.createElement('tbody');
+    tmp.innerHTML = detailRowHTML(exam);
+    const newDetailRow = tmp.firstElementChild;
+    if (newDetailRow) examRow.insertAdjacentElement('afterend', newDetailRow);
+  } else if (!isNowExpanded && hasDetailRow) {
+    // Remove the detail row
+    existingDetailRow.remove();
+  }
+};
+
+// Builds only the <tr class="detail-row"> HTML for one exam
+function detailRowHTML(exam) {
+  const tags = exam.tags || [];
+  const resItems = exam.resources || [];
+  const websiteHostname = exam.website ? (() => {
+    try { return new URL(exam.website.startsWith('http') ? exam.website : 'https://' + exam.website).hostname; }
+    catch(e) { return exam.website; }
+  })() : '';
   const notif = exam.notification || {};
   const isJob = !exam.examType || exam.examType === 'job';
 
-  const detailRow = isExpanded ? `
+  return `
   <tr class="detail-row">
     <td colspan="9">
       <div class="exp-panel">
@@ -883,37 +951,8 @@ function tableRowHTML(exam, num) {
 
       </div>
     </td>
-  </tr>` : '';
-
-  return `
-  <tr class="exam-row${exam.pinned ? ' pinned-row' : ''}${isExpanded ? ' expanded' : ''}${isSelected ? ' selected-row' : ''}" id="row-${exam.id}">
-    <td class="td-expand-num" onclick="${selectionMode ? `toggleSelectRow('${exam.id}')` : `toggleExpand('${exam.id}')`}">
-      ${selectionMode
-        ? `<div class="row-select-cb${isSelected ? ' checked' : ''}"></div>`
-        : `<button class="expand-btn${isExpanded ? ' open' : ''}">${isExpanded ? '▼' : '▶'}</button>
-           <span class="row-num">${num}</span>`
-      }
-    </td>
-    <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
-    <td class="td-cycle">${cycleHTML}</td>
-    <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${exam.agency ? escHtml(exam.agency) : '<span style="color:var(--muted)">—</span>'}</td>
-    <td class="td-tag">${tagsHTML}</td>
-    <td class="td-deadline">${deadlineHTML}</td>
-    <td class="td-status">${statusCls === 'na' ? '<span style="color:var(--muted)">—</span>' : `<span class="status-pill ${statusCls}">${statusLabel}</span>`}</td>
-    <td class="td-applied">
-      <div class="row-checkbox${exam.applied ? ' checked' : ''}" onclick="toggleApplied('${exam.id}')" title="Toggle applied"></div>
-    </td>
-    <td class="td-pin">
-      <button class="pin-btn${exam.pinned ? ' pinned' : ''}" onclick="togglePin('${exam.id}')" title="${exam.pinned ? 'Unpin' : 'Pin'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></button>
-    </td>
-  </tr>${detailRow}`;
+  </tr>`;
 }
-
-window.toggleExpand = (id) => {
-  if (expandedCards.has(id)) expandedCards.delete(id);
-  else expandedCards.add(id);
-  renderTable();
-};
 
 window.toggleTagFilter = (tag) => {
   if (activeTags.has(tag)) activeTags.delete(tag);
@@ -1824,9 +1863,19 @@ window.saveFvPanel = async () => {
       contentEl.innerHTML = value.trim() ? parseMd(value) : `<div class="fv-empty-state">Nothing added yet.</div>`;
       document.getElementById('fv-view-mode').style.display = 'flex';
       document.getElementById('fv-edit-mode').style.display = 'none';
-      renderTable();
-    }, 400);
-  } catch (e) {
+      // Surgical: refresh only the field buttons in the open detail-row
+      const examRow = document.getElementById('row-' + fvExamId);
+      const detailTr = examRow && examRow.nextElementSibling;
+      if (detailTr && detailTr.classList.contains('detail-row')) {
+        const exam = allExams.find(e => e.id === fvExamId);
+        if (exam) {
+          const tmp = document.createElement('tbody');
+          tmp.innerHTML = detailRowHTML(exam);
+          const newDetailTr = tmp.firstElementChild;
+          if (newDetailTr) detailTr.replaceWith(newDetailTr);
+        }
+      }
+    }, 400);  } catch (e) {
     statusEl.textContent = '✗ Save failed';
     toast('Save failed.', 'error');
   } finally {
