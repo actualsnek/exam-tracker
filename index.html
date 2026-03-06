@@ -32,11 +32,11 @@
     <div id="login-form">
       <div class="field-group">
         <label class="field-label">Email</label>
-        <input type="email" id="login-email" class="field-input" placeholder="you@email.com"/>
+        <input type="email" id="login-email" class="field-input" placeholder="you@email.com" onkeydown="if(event.key==='Enter')handleLogin()"/>
       </div>
       <div class="field-group">
         <label class="field-label">Password</label>
-        <input type="password" id="login-password" class="field-input" placeholder="••••••••"/>
+        <input type="password" id="login-password" class="field-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"/>
       </div>
       <button class="btn-primary" onclick="handleLogin()">
         <span id="login-btn-text">Sign In</span>
@@ -48,15 +48,15 @@
     <div id="register-form" style="display:none">
       <div class="field-group">
         <label class="field-label">Display Name</label>
-        <input type="text" id="reg-name" class="field-input" placeholder="Your name"/>
+        <input type="text" id="reg-name" class="field-input" placeholder="Your name" onkeydown="if(event.key==='Enter')handleRegister()"/>
       </div>
       <div class="field-group">
         <label class="field-label">Email</label>
-        <input type="email" id="reg-email" class="field-input" placeholder="you@email.com"/>
+        <input type="email" id="reg-email" class="field-input" placeholder="you@email.com" onkeydown="if(event.key==='Enter')handleRegister()"/>
       </div>
       <div class="field-group">
         <label class="field-label">Password</label>
-        <input type="password" id="reg-password" class="field-input" placeholder="min 6 characters"/>
+        <input type="password" id="reg-password" class="field-input" placeholder="min 6 characters" onkeydown="if(event.key==='Enter')handleRegister()"/>
       </div>
       <button class="btn-primary" onclick="handleRegister()">
         <span id="register-btn-text">Create Account</span>

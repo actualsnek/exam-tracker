@@ -332,7 +332,8 @@ window.deleteExam = async (id) => {
       } catch (e) {
         toast('Delete failed.', 'error');
       }
-    }
+    },
+    'Delete Exam'
   );
 };
 
@@ -340,10 +341,16 @@ window.toggleApplied = async (id) => {
   const exam = allExams.find(e => e.id === id);
   if (!exam) return;
   const newVal = !exam.applied;
+  // Optimistic update
+  exam.applied = newVal;
+  const cb = document.querySelector(`#row-${id} .row-checkbox`);
+  if (cb) cb.classList.toggle('checked', newVal);
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { applied: newVal });
-    // onSnapshot will update allExams and re-render
   } catch (e) {
+    // Revert on failure
+    exam.applied = !newVal;
+    if (cb) cb.classList.toggle('checked', !newVal);
     toast('Update failed.', 'error');
   }
 };
@@ -356,10 +363,18 @@ window.togglePin = async (id) => {
     const pinnedCount = allExams.filter(e => e.pinned && e.id !== id).length;
     if (pinnedCount >= 5) return toast('Max 5 pinned exams. Unpin one first.', 'error');
   }
+  // Optimistic update
+  exam.pinned = newVal;
+  const pinBtn = document.querySelector(`#row-${id} .pin-btn`);
+  if (pinBtn) pinBtn.classList.toggle('pinned', newVal);
+  renderCountdowns();
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { pinned: newVal });
-    // onSnapshot will update allExams and re-render
   } catch (e) {
+    // Revert on failure
+    exam.pinned = !newVal;
+    if (pinBtn) pinBtn.classList.toggle('pinned', !newVal);
+    renderCountdowns();
     toast('Update failed.', 'error');
   }
 };
@@ -601,7 +616,8 @@ window.deleteSelected = () => {
       } catch (e) {
         toast('Delete failed.', 'error');
       }
-    }
+    },
+    `Delete ${selectedIds.size} Exam${selectedIds.size > 1 ? 's' : ''}`
   );
 };
 
@@ -1249,7 +1265,7 @@ window.confirmDeleteAccount = () => {
   openConfirm(
     'Delete Account',
     'This will permanently delete your account and ALL exam data. This action cannot be undone.',
-    !isGoogle, // only show password field for email/password users
+    !isGoogle,
     async () => {
       try {
         // Re-authenticate
@@ -1319,7 +1335,8 @@ window.confirmDeleteAccount = () => {
           toast('Delete failed: ' + (e.message || e.code), 'error');
         }
       }
-    }
+    },
+    'Delete My Account'
   );
 };
 
@@ -1448,9 +1465,10 @@ function downloadFile(content, filename, type) {
 
 let confirmCallback = null;
 
-function openConfirm(title, message, needsPassword, callback) {
+function openConfirm(title, message, needsPassword, callback, btnLabel = 'Delete') {
   document.getElementById('confirm-title').textContent   = title;
   document.getElementById('confirm-message').textContent = message;
+  document.getElementById('confirm-action-btn').textContent = btnLabel;
   const pg = document.getElementById('confirm-password-group');
   pg.style.display = needsPassword ? 'block' : 'none';
   if (needsPassword) document.getElementById('confirm-password-input').value = '';
@@ -1464,7 +1482,17 @@ window.closeConfirmModal = () => {
 };
 
 document.getElementById('confirm-action-btn').addEventListener('click', async () => {
-  if (confirmCallback) await confirmCallback();
+  if (!confirmCallback) return;
+  const btn = document.getElementById('confirm-action-btn');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>';
+  try {
+    await confirmCallback();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
 });
 
 // ════════════════════════════════════════════════════
@@ -1500,6 +1528,17 @@ window.closeModalOnOverlay = (event, modalId) => {
     if (modalId === 'confirm-modal') confirmCallback = null;
   }
 };
+
+// Global Escape key to close topmost open UI
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('fv-panel')?.style.display !== 'none') { closeFieldView(); return; }
+  if (document.getElementById('md-panel')?.style.display !== 'none') { closeMdPanel(); return; }
+  if (document.getElementById('input-modal')?.style.display !== 'none') { closeInputModal(); return; }
+  if (document.getElementById('confirm-modal')?.style.display !== 'none') { closeConfirmModal(); return; }
+  if (document.getElementById('exam-modal')?.style.display !== 'none') { closeExamModal(); return; }
+  if (document.getElementById('profile-modal')?.style.display !== 'none') { closeProfile(); return; }
+});
 
 // ════════════════════════════════════════════════════
 //  TOAST
@@ -1624,13 +1663,14 @@ window.saveFvPanel = async () => {
   if (!fvExamId || !fvField) return;
   const value    = document.getElementById('fv-editor-textarea').value;
   const statusEl = document.getElementById('fv-save-status');
+  const saveBtn  = document.querySelector('#fv-edit-mode .btn-primary');
   statusEl.textContent = 'Saving…';
+  if (saveBtn) { saveBtn.disabled = true; }
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', fvExamId), { [fvField]: value });
     const exam = allExams.find(e => e.id === fvExamId);
     if (exam) exam[fvField] = value;
     statusEl.textContent = '✓ Saved';
-    // Switch back to view mode with updated content
     setTimeout(() => {
       const contentEl = document.getElementById('fv-content');
       contentEl.innerHTML = value.trim() ? parseMd(value) : `<div class="fv-empty-state">Nothing added yet.</div>`;
@@ -1641,6 +1681,8 @@ window.saveFvPanel = async () => {
   } catch (e) {
     statusEl.textContent = '✗ Save failed';
     toast('Save failed.', 'error');
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; }
   }
 };
 
