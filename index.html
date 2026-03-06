@@ -236,17 +236,17 @@
       <div class="form-row">
         <div class="field-group field-group--flex-2">
           <label class="field-label">Exam Name *</label>
-          <input type="text" id="f-name" class="field-input" placeholder="e.g. SSC CGL 2025"/>
+          <input type="text" id="f-name" class="field-input" placeholder="e.g. SSC CGL 2025" onkeydown="if(event.key==='Enter')saveExam()"/>
         </div>
         <div class="field-group field-group--flex-1">
           <label class="field-label">Agency</label>
-          <input type="text" id="f-agency" class="field-input" placeholder="e.g. SSC"/>
+          <input type="text" id="f-agency" class="field-input" placeholder="e.g. SSC" onkeydown="if(event.key==='Enter')saveExam()"/>
         </div>
       </div>
 
       <div class="field-group">
         <label class="field-label">Subtitle</label>
-        <input type="text" id="f-subtitle" class="field-input" placeholder="e.g. Tier I · Tier II · Document Verification"/>
+        <input type="text" id="f-subtitle" class="field-input" placeholder="e.g. Tier I · Tier II · Document Verification" onkeydown="if(event.key==='Enter')saveExam()"/>
       </div>
 
       <div class="form-row">
@@ -259,7 +259,7 @@
         </div>
         <div class="field-group field-group--flex-1">
           <label class="field-label">Year</label>
-          <input type="text" id="f-year" class="field-input" placeholder="e.g. 2026"/>
+          <input type="text" id="f-year" class="field-input" placeholder="e.g. 2026" onkeydown="if(event.key==='Enter')saveExam()"/>
         </div>
       </div>
 
@@ -267,13 +267,13 @@
       <div class="form-row" id="job-fields-row">
         <div class="field-group field-group--flex-1">
           <label class="field-label">Vacancies</label>
-          <input type="text" id="f-vacancies" class="field-input" placeholder="e.g. 17,727"/>
+          <input type="text" id="f-vacancies" class="field-input" placeholder="e.g. 17,727" onkeydown="if(event.key==='Enter')saveExam()"/>
         </div>
         <div class="field-group field-group--flex-1">
           <label class="field-label">Pay Scale</label>
           <div class="field-prefix-wrap">
             <span class="field-prefix">₹</span>
-            <input type="text" id="f-pay" class="field-input field-input--prefixed" placeholder="25,500 – 81,100"/>
+            <input type="text" id="f-pay" class="field-input field-input--prefixed" placeholder="25,500 – 81,100" onkeydown="if(event.key==='Enter')saveExam()"/>
           </div>
         </div>
       </div>
@@ -282,7 +282,7 @@
       <div class="form-row">
         <div class="field-group field-group--flex-15">
           <label class="field-label">Notification URL</label>
-          <input type="url" id="f-notif-url" class="field-input" placeholder="https://…"/>
+          <input type="url" id="f-notif-url" class="field-input" placeholder="https://…" onkeydown="if(event.key==='Enter')saveExam()"/>
         </div>
       </div>
 
@@ -299,7 +299,7 @@
 
       <div class="field-group">
         <label class="field-label">Website URL</label>
-        <input type="url" id="f-website" class="field-input" placeholder="https://ssc.nic.in"/>
+        <input type="url" id="f-website" class="field-input" placeholder="https://ssc.nic.in" onkeydown="if(event.key==='Enter')saveExam()"/>
       </div>
 
       <div class="md-fields-row">
@@ -328,7 +328,7 @@
 
       <div class="field-group">
         <label class="field-label">Tags <span class="label-hint">(comma separated)</span></label>
-        <input type="text" id="f-tags" class="field-input" placeholder="Banking, Central Govt, State…"/>
+        <input type="text" id="f-tags" class="field-input" placeholder="Banking, Central Govt, State…" onkeydown="if(event.key==='Enter')saveExam()"/>
       </div>
 
       <!-- Resources -->

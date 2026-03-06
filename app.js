@@ -577,7 +577,7 @@ window.toggleSelectAll = () => {
     if (cb) cb.classList.toggle('checked', checked);
   });
   const hdrCb = document.getElementById('select-all-cb');
-  if (hdrCb) hdrCb.classList.toggle('checked', !allChecked && allVisible.length > 0);
+  if (hdrCb) hdrCb.classList.toggle('checked', allVisible.length > 0 && allVisible.every(id => selectedIds.has(id)));
   updateBatchDeleteBtn();
 };
 
