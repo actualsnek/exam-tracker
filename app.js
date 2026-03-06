@@ -62,6 +62,7 @@ let expandedCards = new Set();
 let examsUnsubscribe = null; // holds the onSnapshot detach function
 let selectionMode = false;
 let selectedIds   = new Set();
+let dataLoaded    = false;  // true after first onSnapshot fires
 
 // ── Auth State Listener ──────────────────────────────
 onAuthStateChanged(auth, user => {
@@ -88,6 +89,7 @@ onAuthStateChanged(auth, user => {
     fvExamId = null;
     fvField  = null;
     mdCurrentField = null;
+    dataLoaded = false;
     showAuthScreen();
   }
 });
@@ -95,6 +97,9 @@ onAuthStateChanged(auth, user => {
 function showApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app').style.display = 'block';
+  // Show skeleton until first Firestore snapshot arrives
+  const sk = document.getElementById('skeleton-loader');
+  if (sk) sk.style.display = '';
 }
 function showAuthScreen() {
   document.getElementById('auth-screen').style.display = 'flex';
@@ -245,11 +250,21 @@ function subscribeExams() {
   examsUnsubscribe = onSnapshot(q,
     (snap) => {
       allExams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      // Hide skeleton on first data arrival
+      if (!dataLoaded) {
+        dataLoaded = true;
+        const sk = document.getElementById('skeleton-loader');
+        if (sk) sk.style.display = 'none';
+      }
       updateUserUI();
       renderAll();
     },
     (e) => {
       console.error('subscribeExams error:', e);
+      // Hide skeleton even on error so UI isn't stuck
+      dataLoaded = true;
+      const sk = document.getElementById('skeleton-loader');
+      if (sk) sk.style.display = 'none';
       toast('Failed to sync exams.', 'error');
     }
   );
@@ -730,6 +745,11 @@ function renderTable() {
   const empty  = document.getElementById('list-empty');
   const scroll = document.getElementById('table-scroll');
   const table  = scroll ? scroll.querySelector('.exam-table') : null;
+  // Safety: ensure skeleton is gone once we're rendering real content
+  if (dataLoaded) {
+    const sk = document.getElementById('skeleton-loader');
+    if (sk && sk.style.display !== 'none') sk.style.display = 'none';
+  }
 
   const emptyFiltered = document.getElementById('list-empty-filtered');
   if (filteredExams.length === 0) {

@@ -1509,8 +1509,55 @@ tr.exam-row.selected-row { background: var(--accent-bg) !important; }
 tr.exam-row.selected-row td { color: var(--text); }
 
 /* ════════════════════════════════════════
-   EXIT ANIMATIONS
+   SKELETON LOADER
 ════════════════════════════════════════ */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.sk {
+  border-radius: 4px;
+  height: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--surface2) 25%,
+    var(--border)   50%,
+    var(--surface2) 75%
+  );
+  background-size: 600px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Width variants */
+.sk-icon  { width: 16px; height: 16px; border-radius: 3px; margin: 0 auto; }
+.sk-name  { width: 72%; }
+.sk-short { width: 38px; }
+.sk-med   { width: 80px; }
+.sk-tag   { width: 56px; height: 18px; border-radius: 100px; }
+.sk-pill  { width: 48px; height: 18px; border-radius: 100px; }
+
+/* Width jitter — applied via class on individual rows */
+.sk-w60 { width: 60%; }
+.sk-w70 { width: 70%; }
+.sk-w75 { width: 75%; }
+.sk-w80 { width: 80%; }
+.sk-w90 { width: 90%; }
+
+/* Skeleton table rows */
+.skeleton-table tbody tr.skeleton-row {
+  border-bottom: 1px solid var(--border2);
+}
+.skeleton-table tbody tr.skeleton-row td {
+  padding: 13px 14px;
+  vertical-align: middle;
+}
+/* Stagger shimmer start per row so they don't pulse in sync */
+.skeleton-row:nth-child(1) .sk { animation-delay: 0s;     }
+.skeleton-row:nth-child(2) .sk { animation-delay: 0.15s;  }
+.skeleton-row:nth-child(3) .sk { animation-delay: 0.3s;   }
+.skeleton-row:nth-child(4) .sk { animation-delay: 0.45s;  }
+.skeleton-row:nth-child(5) .sk { animation-delay: 0.6s;   }
 /* Modal overlay closing */
 .modal-overlay.is-closing {
   animation: overlayOut .18s ease forwards;
