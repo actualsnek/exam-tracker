@@ -866,6 +866,22 @@ function tableRowHTML(exam, num) {
 
 window.toggleExpand = (id) => {
   const isNowExpanded = !expandedCards.has(id);
+
+  // ── Accordion: collapse any other open row first ──
+  if (isNowExpanded) {
+    expandedCards.forEach(openId => {
+      if (openId === id) return;
+      expandedCards.delete(openId);
+      const openRow = document.getElementById('row-' + openId);
+      if (!openRow) return;
+      openRow.classList.remove('expanded');
+      const openBtn = openRow.querySelector('.expand-btn');
+      if (openBtn) openBtn.classList.remove('open');
+      const openDetail = openRow.nextElementSibling;
+      if (openDetail && openDetail.classList.contains('detail-row')) openDetail.remove();
+    });
+  }
+
   if (isNowExpanded) expandedCards.add(id);
   else expandedCards.delete(id);
 
