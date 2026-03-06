@@ -494,12 +494,18 @@ window.toggleSelectionMode = () => {
 window.toggleSelectRow = (id) => {
   if (selectedIds.has(id)) selectedIds.delete(id);
   else selectedIds.add(id);
-  // sync row class
+  const checked = selectedIds.has(id);
+  // update row highlight
   const row = document.getElementById('row-' + id);
-  if (row) row.classList.toggle('selected-row', selectedIds.has(id));
+  if (row) {
+    row.classList.toggle('selected-row', checked);
+    // update the checkbox div inside the first td directly
+    const cb = row.querySelector('.row-select-cb');
+    if (cb) cb.classList.toggle('checked', checked);
+  }
   // sync header checkbox
   const allVisible = filteredExams.map(e => e.id);
-  const allChecked = allVisible.length > 0 && allVisible.every(id => selectedIds.has(id));
+  const allChecked = allVisible.length > 0 && allVisible.every(i => selectedIds.has(i));
   const hdrCb = document.getElementById('select-all-cb');
   if (hdrCb) hdrCb.classList.toggle('checked', allChecked);
   updateBatchDeleteBtn();
@@ -513,7 +519,17 @@ window.toggleSelectAll = () => {
   } else {
     allVisible.forEach(id => selectedIds.add(id));
   }
-  renderTable();
+  // update all rows directly without full re-render
+  allVisible.forEach(id => {
+    const row = document.getElementById('row-' + id);
+    if (!row) return;
+    const checked = selectedIds.has(id);
+    row.classList.toggle('selected-row', checked);
+    const cb = row.querySelector('.row-select-cb');
+    if (cb) cb.classList.toggle('checked', checked);
+  });
+  const hdrCb = document.getElementById('select-all-cb');
+  if (hdrCb) hdrCb.classList.toggle('checked', !allChecked && allVisible.length > 0);
   updateBatchDeleteBtn();
 };
 
