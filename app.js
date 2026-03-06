@@ -1206,8 +1206,8 @@ window.handleChangePassword = () => {
         }
         throw e;
       }
-      // Step 2: reauthenticated — now ask for new password
-      openInputModal(
+      // Step 2: reauthenticated — open new password modal after current one closes
+      setTimeout(() => openInputModal(
         'Change Password',
         'New Password',
         'password',
@@ -1223,7 +1223,7 @@ window.handleChangePassword = () => {
             throw e;
           }
         }
-      );
+      ), 0);
     }
   );
 };
