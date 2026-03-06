@@ -450,6 +450,7 @@ window.openAddExam = () => {
   renderModalResList();
   ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
   document.getElementById('exam-modal').style.display = 'flex';
+  lockScroll();
 };
 
 window.openEditExam = (id) => {
@@ -482,10 +483,12 @@ window.openEditExam = (id) => {
   renderModalResList();
   ['eligibility','syllabus','pattern'].forEach(setModalDraftPreview);
   document.getElementById('exam-modal').style.display = 'flex';
+  lockScroll();
 };
 
 window.closeExamModal = () => {
   document.getElementById('exam-modal').style.display = 'none';
+  unlockScroll();
   const btn = document.getElementById('save-exam-btn');
   if (btn) { btn.textContent = 'Save Exam'; btn.disabled = false; }
 };
@@ -1130,9 +1133,11 @@ window.clearSearch = () => {
 window.showProfile = () => {
   updateUserUI();
   document.getElementById('profile-modal').style.display = 'flex';
+  lockScroll();
 };
 window.closeProfile = () => {
   document.getElementById('profile-modal').style.display = 'none';
+  unlockScroll();
 };
 
 window.handleSignOut = async () => {
@@ -1258,6 +1263,7 @@ window.handleChangePassword = () => {
   field2.onkeydown = (e) => { if (e.key === 'Enter') confirmBtn.click(); };
 
   document.getElementById('input-modal').style.display = 'flex';
+  lockScroll();
   setTimeout(() => field1.focus(), 50);
 };
 
@@ -1291,11 +1297,13 @@ function openInputModal(title, label, type, defaultValue, placeholder, callback)
   // Allow Enter key to submit
   field.onkeydown = (e) => { if (e.key === 'Enter') confirmBtn.click(); };
   document.getElementById('input-modal').style.display = 'flex';
+  lockScroll();
   setTimeout(() => field.focus(), 50);
 }
 
 window.closeInputModal = () => {
   document.getElementById('input-modal').style.display = 'none';
+  unlockScroll();
   inputModalCallback = null;
   // Reset second field in case Change Password used it
   const g = document.getElementById('input-modal-field2-group');
@@ -1539,10 +1547,12 @@ function openConfirm(title, message, needsPassword, callback, btnLabel = 'Delete
   if (needsPassword) document.getElementById('confirm-password-input').value = '';
   confirmCallback = callback;
   document.getElementById('confirm-modal').style.display = 'flex';
+  lockScroll();
 }
 
 window.closeConfirmModal = () => {
   document.getElementById('confirm-modal').style.display = 'none';
+  unlockScroll();
   confirmCallback = null;
 };
 
@@ -1582,6 +1592,22 @@ window.toggleTheme = () => {
     document.getElementById('theme-icon-sun').style.display  = '';
   }
 })();
+
+// ── Scroll lock helpers ──────────────────────────────
+// lockScroll / unlockScroll — only unlock when no overlay/panel is open
+function lockScroll() {
+  document.body.classList.add('modal-open');
+}
+function unlockScroll() {
+  const anyOpen =
+    document.getElementById('exam-modal')?.style.display    === 'flex' ||
+    document.getElementById('profile-modal')?.style.display === 'flex' ||
+    document.getElementById('confirm-modal')?.style.display === 'flex' ||
+    document.getElementById('input-modal')?.style.display   === 'flex' ||
+    document.getElementById('md-panel')?.style.display      === 'flex' ||
+    document.getElementById('fv-panel')?.style.display      === 'flex';
+  if (!anyOpen) document.body.classList.remove('modal-open');
+}
 
 // ════════════════════════════════════════════════════
 //  MODAL OVERLAY CLICK TO CLOSE
@@ -1656,6 +1682,7 @@ window.openMdFromModal = (field) => {
   document.getElementById('md-save-status').textContent = '';
   document.getElementById('md-panel').style.display   = 'flex';
   document.getElementById('md-overlay').style.display = 'block';
+  lockScroll();
   ta.focus();
 };
 
@@ -1671,6 +1698,7 @@ window.closeMdPanel = () => {
   document.getElementById('md-panel').style.display   = 'none';
   document.getElementById('md-overlay').style.display = 'none';
   mdCurrentField = null;
+  unlockScroll();
 };
 
 // Called only when clicking the overlay — auto-saves draft so work is never lost
@@ -1727,6 +1755,7 @@ window.openFieldView = (examId, field) => {
 
   document.getElementById('fv-panel').style.display   = 'flex';
   document.getElementById('fv-overlay').style.display = 'block';
+  lockScroll();
 };
 
 window.switchToEditMode = () => {
@@ -1770,6 +1799,7 @@ window.closeFieldView = () => {
   document.getElementById('fv-overlay').style.display = 'none';
   fvExamId = null;
   fvField  = null;
+  unlockScroll();
 };
 
 window.fvLivePreview = () => {

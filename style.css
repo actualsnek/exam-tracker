@@ -92,6 +92,8 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body.modal-open { overflow: hidden; }
+
 button { font-family: var(--font); cursor: pointer; }
 input, textarea, select { font-family: var(--font); }
 a { color: var(--accent); text-decoration: none; }
