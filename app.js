@@ -73,20 +73,8 @@ onAuthStateChanged(auth, user => {
     subscribeExams();
     updateUserUI();
   } else {
-    currentUser    = null;
-    allExams       = [];
-    filteredExams  = [];
-    activeStatus   = 'all';
-    activeTags     = new Set();
-    searchQuery    = '';
-    activeSort     = 'createdAt_desc';
-    expandedCards  = new Set();
-    selectionMode  = false;
-    selectedIds    = new Set();
-    confirmCallback    = null;
-    inputModalCallback = null;
-    fvExamId = null;
-    fvField  = null;
+    currentUser = null;
+    allExams = [];
     showAuthScreen();
   }
 });
@@ -98,6 +86,18 @@ function showApp() {
 function showAuthScreen() {
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
+  // Reset login button state
+  const loginBtn = document.getElementById('login-btn-text');
+  if (loginBtn) loginBtn.textContent = 'Sign In';
+  const regBtn = document.getElementById('register-btn-text');
+  if (regBtn) regBtn.textContent = 'Create Account';
+  // Clear input fields
+  ['login-email','login-password','reg-name','reg-email','reg-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Clear any auth messages
+  clearAuthMessages();
 }
 
 function updateUserUI() {
@@ -151,13 +151,11 @@ window.handleLogin = async () => {
   if (!email || !password) return showAuthError('Please fill in all fields.');
   const btn = document.getElementById('login-btn-text');
   btn.innerHTML = '<span class="loading-spinner"></span>Signing in…';
-  btn.closest('button').disabled = true;
   clearAuthMessages();
   try {
     await signInWithEmailAndPassword(auth, email, password);
   } catch (e) {
     btn.textContent = 'Sign In';
-    btn.closest('button').disabled = false;
     showAuthError(friendlyAuthError(e.code));
   }
 };
@@ -170,28 +168,22 @@ window.handleRegister = async () => {
   if (password.length < 6) return showAuthError('Password must be at least 6 characters.');
   const btn = document.getElementById('register-btn-text');
   btn.innerHTML = '<span class="loading-spinner"></span>Creating…';
-  btn.closest('button').disabled = true;
   clearAuthMessages();
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(cred.user, { displayName: name });
   } catch (e) {
     btn.textContent = 'Create Account';
-    btn.closest('button').disabled = false;
     showAuthError(friendlyAuthError(e.code));
   }
 };
 
 window.handleGoogleLogin = async () => {
   clearAuthMessages();
-  const btn = document.querySelector('.btn-google');
-  if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
   try {
     await signInWithPopup(auth, gProvider);
   } catch (e) {
     showAuthError(friendlyAuthError(e.code));
-  } finally {
-    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
   }
 };
 
@@ -460,8 +452,6 @@ window.openEditExam = (id) => {
 
 window.closeExamModal = () => {
   document.getElementById('exam-modal').style.display = 'none';
-  const btn = document.getElementById('save-exam-btn');
-  if (btn) { btn.textContent = 'Save Exam'; btn.disabled = false; }
 };
 
 window.toggleJobFields = () => {
@@ -1100,7 +1090,40 @@ window.closeProfile = () => {
 };
 
 window.handleSignOut = async () => {
-  await signOut(auth);
+  // Close all open UI
+  document.getElementById('profile-modal').style.display  = 'none';
+  document.getElementById('exam-modal').style.display     = 'none';
+  document.getElementById('confirm-modal').style.display  = 'none';
+  document.getElementById('input-modal').style.display    = 'none';
+  document.getElementById('md-panel').style.display       = 'none';
+  document.getElementById('md-overlay').style.display     = 'none';
+  document.getElementById('fv-panel').style.display       = 'none';
+  document.getElementById('fv-overlay').style.display     = 'none';
+  document.getElementById('status-dd-menu').style.display = 'none';
+  document.getElementById('tag-dd-menu').style.display    = 'none';
+  document.getElementById('sort-dd-menu').style.display   = 'none';
+  document.getElementById('data-dd-menu').style.display   = 'none';
+
+  // Clear local state
+  allExams      = [];
+  filteredExams = [];
+  activeStatus  = 'all';
+  activeTags    = new Set();
+  searchQuery   = '';
+  activeSort    = 'createdAt_desc';
+  expandedCards = new Set();
+  selectionMode = false;
+  selectedIds   = new Set();
+  confirmCallback    = null;
+  inputModalCallback = null;
+  fvExamId = null;
+  fvField  = null;
+
+  // Brief feedback then sign out
+  toast('Signed out successfully.', 'success');
+  setTimeout(async () => {
+    await signOut(auth);
+  }, 600);
 };
 
 window.handleEditDisplayName = () => {
@@ -1111,14 +1134,13 @@ window.handleEditDisplayName = () => {
     currentUser.displayName || '',
     'Your name',
     async (value) => {
-      if (!value.trim()) { toast('Name cannot be empty.', 'error'); throw new Error(); }
+      if (!value.trim()) return toast('Name cannot be empty.', 'error');
       try {
         await updateProfile(currentUser, { displayName: value.trim() });
         updateUserUI();
         toast('Display name updated!', 'success');
       } catch (e) {
         toast('Failed to update name.', 'error');
-        throw e;
       }
     }
   );
@@ -1132,7 +1154,7 @@ window.handleChangePassword = () => {
     '',
     'min 6 characters',
     async (value) => {
-      if (!value || value.length < 6) { toast('Enter a new password (min 6 chars).', 'error'); throw new Error(); }
+      if (!value || value.length < 6) return toast('Enter a new password (min 6 chars).', 'error');
       try {
         await updatePassword(currentUser, value);
         toast('Password updated!', 'success');
@@ -1142,7 +1164,6 @@ window.handleChangePassword = () => {
         } else {
           toast('Failed to update password.', 'error');
         }
-        throw e;
       }
     }
   );
@@ -1161,19 +1182,8 @@ function openInputModal(title, label, type, defaultValue, placeholder, callback)
   inputModalCallback = callback;
   const confirmBtn = document.getElementById('input-modal-confirm-btn');
   confirmBtn.onclick = async () => {
-    if (!inputModalCallback) return;
-    confirmBtn.disabled = true;
-    const origText = confirmBtn.textContent;
-    confirmBtn.innerHTML = '<span class="loading-spinner"></span>';
-    try {
-      await inputModalCallback(field.value);
-      closeInputModal();
-    } catch (e) {
-      // callback handles its own error toast; keep modal open so user can retry
-    } finally {
-      confirmBtn.disabled = false;
-      confirmBtn.textContent = origText;
-    }
+    if (inputModalCallback) await inputModalCallback(field.value);
+    closeInputModal();
   };
   // Allow Enter key to submit
   field.onkeydown = (e) => { if (e.key === 'Enter') confirmBtn.click(); };
@@ -1231,15 +1241,40 @@ window.confirmDeleteAccount = () => {
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
 
-        // Clear local state immediately
-        allExams = [];
+        // Close all open UI
+        document.getElementById('profile-modal').style.display  = 'none';
+        document.getElementById('exam-modal').style.display     = 'none';
+        document.getElementById('confirm-modal').style.display  = 'none';
+        document.getElementById('input-modal').style.display    = 'none';
+        document.getElementById('md-panel').style.display       = 'none';
+        document.getElementById('md-overlay').style.display     = 'none';
+        document.getElementById('fv-panel').style.display       = 'none';
+        document.getElementById('fv-overlay').style.display     = 'none';
+        document.getElementById('status-dd-menu').style.display = 'none';
+        document.getElementById('tag-dd-menu').style.display    = 'none';
+        document.getElementById('sort-dd-menu').style.display   = 'none';
+        document.getElementById('data-dd-menu').style.display   = 'none';
+
+        // Clear all local state
+        allExams      = [];
+        filteredExams = [];
+        activeStatus  = 'all';
+        activeTags    = new Set();
+        searchQuery   = '';
+        activeSort    = 'createdAt_desc';
+        expandedCards = new Set();
+        selectionMode = false;
+        selectedIds   = new Set();
+        confirmCallback    = null;
+        inputModalCallback = null;
+        fvExamId = null;
+        fvField  = null;
 
         // Delete Firebase Auth user
         await deleteUser(currentUser);
 
         // onAuthStateChanged will fire and call showAuthScreen()
         toast('Account deleted.', 'success');
-        closeConfirmModal();
       } catch (e) {
         if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
           toast('Wrong password. Account not deleted.', 'error');
