@@ -890,7 +890,8 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   padding: 16px;
   animation: overlayIn .2s ease;
 }
-@keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
 
 .modal {
   background: var(--surface);
@@ -909,6 +910,10 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 @keyframes modalIn {
   from { opacity: 0; transform: scale(.96) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes modalOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(.96) translateY(10px); }
 }
 
 .modal-header {
@@ -1150,6 +1155,10 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 @keyframes slideInRight {
   from { transform: translateX(60px); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes slideOutRight {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(60px); opacity: 0; }
 }
 .md-panel-inner { display: flex; flex-direction: column; height: 100%; }
 
@@ -1498,3 +1507,27 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 /* Selected row highlight */
 tr.exam-row.selected-row { background: var(--accent-bg) !important; }
 tr.exam-row.selected-row td { color: var(--text); }
+
+/* ════════════════════════════════════════
+   EXIT ANIMATIONS
+════════════════════════════════════════ */
+/* Modal overlay closing */
+.modal-overlay.is-closing {
+  animation: overlayOut .18s ease forwards;
+  pointer-events: none;
+}
+/* Modal box closing */
+.modal-overlay.is-closing .modal {
+  animation: modalOut .18s ease forwards;
+}
+/* Slide panel closing */
+.md-panel.is-closing,
+.fv-panel.is-closing {
+  animation: slideOutRight .2s ease forwards;
+}
+/* Overlay fade when panel closes */
+.md-overlay.is-closing,
+.fv-overlay.is-closing {
+  animation: overlayOut .2s ease forwards;
+  pointer-events: none;
+}

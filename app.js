@@ -487,10 +487,12 @@ window.openEditExam = (id) => {
 };
 
 window.closeExamModal = () => {
-  document.getElementById('exam-modal').style.display = 'none';
-  unlockScroll();
-  const btn = document.getElementById('save-exam-btn');
-  if (btn) { btn.textContent = 'Save Exam'; btn.disabled = false; }
+  const overlay = document.getElementById('exam-modal');
+  animateOut(overlay, () => {
+    unlockScroll();
+    const btn = document.getElementById('save-exam-btn');
+    if (btn) { btn.textContent = 'Save Exam'; btn.disabled = false; }
+  });
 };
 
 window.toggleJobFields = () => {
@@ -1182,8 +1184,7 @@ window.showProfile = () => {
   lockScroll();
 };
 window.closeProfile = () => {
-  document.getElementById('profile-modal').style.display = 'none';
-  unlockScroll();
+  animateOut(document.getElementById('profile-modal'), () => unlockScroll());
 };
 
 window.handleSignOut = async () => {
@@ -1348,18 +1349,19 @@ function openInputModal(title, label, type, defaultValue, placeholder, callback)
 }
 
 window.closeInputModal = () => {
-  document.getElementById('input-modal').style.display = 'none';
-  unlockScroll();
-  inputModalCallback = null;
-  // Reset second field in case Change Password used it
-  const g = document.getElementById('input-modal-field2-group');
-  if (g) g.style.display = 'none';
-  const f2 = document.getElementById('input-modal-field2');
-  if (f2) { f2.value = ''; f2.onkeydown = null; }
-  const f1 = document.getElementById('input-modal-field');
-  if (f1) f1.onkeydown = null;
-  const btn = document.getElementById('input-modal-confirm-btn');
-  if (btn) { btn.textContent = 'Save'; btn.onclick = null; }
+  animateOut(document.getElementById('input-modal'), () => {
+    unlockScroll();
+    inputModalCallback = null;
+    // Reset second field in case Change Password used it
+    const g = document.getElementById('input-modal-field2-group');
+    if (g) g.style.display = 'none';
+    const f2 = document.getElementById('input-modal-field2');
+    if (f2) { f2.value = ''; f2.onkeydown = null; }
+    const f1 = document.getElementById('input-modal-field');
+    if (f1) f1.onkeydown = null;
+    const btn = document.getElementById('input-modal-confirm-btn');
+    if (btn) { btn.textContent = 'Save'; btn.onclick = null; }
+  });
 };
 
 window.handleForgotPasswordFromProfile = async () => {
@@ -1597,9 +1599,10 @@ function openConfirm(title, message, needsPassword, callback, btnLabel = 'Delete
 }
 
 window.closeConfirmModal = () => {
-  document.getElementById('confirm-modal').style.display = 'none';
-  unlockScroll();
-  confirmCallback = null;
+  animateOut(document.getElementById('confirm-modal'), () => {
+    unlockScroll();
+    confirmCallback = null;
+  });
 };
 
 // ── Discard-changes modal (replaces window.confirm for unsaved-changes checks) ──
@@ -1612,15 +1615,13 @@ function openDiscardModal(onDiscard) {
 }
 
 document.getElementById('discard-keep-btn').addEventListener('click', () => {
-  document.getElementById('discard-modal').style.display = 'none';
-  discardCallback = null;
+  animateOut(document.getElementById('discard-modal'), () => { discardCallback = null; });
 });
 
 document.getElementById('discard-confirm-btn').addEventListener('click', () => {
-  document.getElementById('discard-modal').style.display = 'none';
   const cb = discardCallback;
   discardCallback = null;
-  if (cb) cb();
+  animateOut(document.getElementById('discard-modal'), () => { if (cb) cb(); });
 });
 
 document.getElementById('confirm-action-btn').addEventListener('click', async () => {
@@ -1682,13 +1683,12 @@ function unlockScroll() {
 
 window.closeModalOnOverlay = (event, modalId) => {
   if (event.target === event.currentTarget) {
-    document.getElementById(modalId).style.display = 'none';
-    if (modalId === 'confirm-modal') confirmCallback = null;
-    if (modalId === 'input-modal')   inputModalCallback = null;
-    if (modalId === 'exam-modal') {
-      modalDraft     = { eligibility: '', syllabus: '', pattern: '' };
-      modalResources = [];
-    }
+    if (modalId === 'confirm-modal') { closeConfirmModal(); return; }
+    if (modalId === 'input-modal')   { closeInputModal();   return; }
+    if (modalId === 'exam-modal')    { closeExamModal();    return; }
+    if (modalId === 'profile-modal') { closeProfile();      return; }
+    // fallback
+    animateOut(document.getElementById(modalId));
   }
 };
 
@@ -1729,6 +1729,21 @@ function toast(msg, type = '') {
   toastTimer = setTimeout(() => { el.style.display = 'none'; }, 2800);
 }
 
+// ── Exit animation helper ─────────────────────────
+// Adds `is-closing` class, waits for animation to finish, then hides + runs cb.
+function animateOut(el, cb) {
+  if (!el) { if (cb) cb(); return; }
+  el.classList.add('is-closing');
+  const onEnd = () => {
+    el.classList.remove('is-closing');
+    el.style.display = 'none';
+    if (cb) cb();
+  };
+  // Use animationend; fall back after 250ms in case animation is absent
+  const timer = setTimeout(onEnd, 250);
+  el.addEventListener('animationend', () => { clearTimeout(timer); onEnd(); }, { once: true });
+}
+
 // ════════════════════════════════════════════════════
 //  MARKDOWN PANEL — used only from Add/Edit exam modal
 // ════════════════════════════════════════════════════
@@ -1760,18 +1775,20 @@ window.closeMdPanel = () => {
     const saved   = modalDraft[mdCurrentField] || '';
     if (current !== saved) {
       openDiscardModal(() => {
-        document.getElementById('md-panel').style.display   = 'none';
-        document.getElementById('md-overlay').style.display = 'none';
-        mdCurrentField = null;
-        unlockScroll();
+        animateOut(document.getElementById('md-panel'));
+        animateOut(document.getElementById('md-overlay'), () => {
+          mdCurrentField = null;
+          unlockScroll();
+        });
       });
       return;
     }
   }
-  document.getElementById('md-panel').style.display   = 'none';
-  document.getElementById('md-overlay').style.display = 'none';
-  mdCurrentField = null;
-  unlockScroll();
+  animateOut(document.getElementById('md-panel'));
+  animateOut(document.getElementById('md-overlay'), () => {
+    mdCurrentField = null;
+    unlockScroll();
+  });
 };
 
 // Called only when clicking the overlay — auto-saves draft so work is never lost
@@ -1870,20 +1887,22 @@ window.closeFieldView = () => {
     const saved   = (exam && exam[fvField]) || '';
     if (current !== saved) {
       openDiscardModal(() => {
-        document.getElementById('fv-panel').style.display   = 'none';
-        document.getElementById('fv-overlay').style.display = 'none';
-        fvExamId = null;
-        fvField  = null;
-        unlockScroll();
+        animateOut(document.getElementById('fv-panel'));
+        animateOut(document.getElementById('fv-overlay'), () => {
+          fvExamId = null;
+          fvField  = null;
+          unlockScroll();
+        });
       });
       return;
     }
   }
-  document.getElementById('fv-panel').style.display   = 'none';
-  document.getElementById('fv-overlay').style.display = 'none';
-  fvExamId = null;
-  fvField  = null;
-  unlockScroll();
+  animateOut(document.getElementById('fv-panel'));
+  animateOut(document.getElementById('fv-overlay'), () => {
+    fvExamId = null;
+    fvField  = null;
+    unlockScroll();
+  });
 };
 
 window.fvLivePreview = () => {
