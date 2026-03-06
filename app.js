@@ -86,6 +86,16 @@ function showApp() {
 function showAuthScreen() {
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
+  // Reset login button state
+  const loginBtn = document.getElementById('login-btn-text');
+  if (loginBtn) loginBtn.textContent = 'Sign In';
+  // Clear input fields
+  ['login-email','login-password','reg-name','reg-email','reg-password'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Clear any auth messages
+  clearAuthMessages();
 }
 
 function updateUserUI() {
