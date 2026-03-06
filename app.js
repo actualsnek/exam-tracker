@@ -1372,6 +1372,10 @@ window.exportJSON = () => {
 window.toggleDataDropdown = () => {
   const menu = document.getElementById('data-dd-menu');
   const open = menu.style.display === 'none' || !menu.style.display;
+  // Close all other dropdowns
+  document.getElementById('status-dd-menu').style.display = 'none';
+  document.getElementById('tag-dd-menu').style.display    = 'none';
+  document.getElementById('sort-dd-menu').style.display   = 'none';
   menu.style.display = open ? 'block' : 'none';
   if (open) {
     setTimeout(() => document.addEventListener('click', closeDataDdOutside, { once: true }), 10);
@@ -1541,6 +1545,18 @@ document.addEventListener('keydown', (e) => {
   if (document.getElementById('confirm-modal')?.style.display !== 'none') { closeConfirmModal(); return; }
   if (document.getElementById('exam-modal')?.style.display !== 'none') { closeExamModal(); return; }
   if (document.getElementById('profile-modal')?.style.display !== 'none') { closeProfile(); return; }
+  // Close any open dropdown
+  const anyDdOpen =
+    document.getElementById('status-dd-menu')?.style.display === 'block' ||
+    document.getElementById('tag-dd-menu')?.style.display    === 'block' ||
+    document.getElementById('sort-dd-menu')?.style.display   === 'block' ||
+    document.getElementById('data-dd-menu')?.style.display   === 'block';
+  if (anyDdOpen) {
+    document.getElementById('status-dd-menu').style.display = 'none';
+    document.getElementById('tag-dd-menu').style.display    = 'none';
+    document.getElementById('sort-dd-menu').style.display   = 'none';
+    document.getElementById('data-dd-menu').style.display   = 'none';
+  }
 });
 
 // ════════════════════════════════════════════════════
@@ -1611,7 +1627,7 @@ window.saveMdPanel = () => {
 
 let fvExamId       = null;
 let fvField        = null;
-let mdCurrentField = null; // tracks which field (eligibility/syllabus/pattern) md-panel is editing
+let mdCurrentField = null; // tracks which field md-panel is editing — never parse the title
 
 window.openFieldView = (examId, field) => {
   const exam = allExams.find(e => e.id === examId);
