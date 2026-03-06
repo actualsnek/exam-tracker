@@ -141,6 +141,27 @@ a:hover { color: var(--accent-h); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* Auth screen fading out before display:none */
+.auth-screen.is-fading-out {
+  animation: fadeOut .25s ease forwards;
+  pointer-events: none;
+}
+
+/* App fading in on first show */
+#app.is-fading-in {
+  animation: fadeIn .3s ease forwards;
+}
+
 .auth-logo {
   font-family: var(--serif);
   font-size: 22px;

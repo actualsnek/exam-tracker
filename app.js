@@ -95,15 +95,33 @@ onAuthStateChanged(auth, user => {
 });
 
 function showApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  // Show skeleton until first Firestore snapshot arrives
-  const sk = document.getElementById('skeleton-loader');
-  if (sk) sk.style.display = '';
+  const authEl = document.getElementById('auth-screen');
+  const appEl  = document.getElementById('app');
+
+  // Fade auth screen out, then hide it and reveal app
+  authEl.classList.add('is-fading-out');
+  const onAuthGone = () => {
+    authEl.classList.remove('is-fading-out');
+    authEl.style.display = 'none';
+    appEl.style.display  = 'block';
+    appEl.classList.add('is-fading-in');
+    appEl.addEventListener('animationend', () => {
+      appEl.classList.remove('is-fading-in');
+    }, { once: true });
+    // Show skeleton until first Firestore snapshot arrives
+    const sk = document.getElementById('skeleton-loader');
+    if (sk) sk.style.display = '';
+  };
+  const timer = setTimeout(onAuthGone, 270);
+  authEl.addEventListener('animationend', () => { clearTimeout(timer); onAuthGone(); }, { once: true });
 }
+
 function showAuthScreen() {
-  document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
+  const appEl  = document.getElementById('app');
+  const authEl = document.getElementById('auth-screen');
+  appEl.style.display   = 'none';
+  authEl.style.display  = 'flex';
+  authEl.classList.remove('is-fading-out');
   // Reset login button state
   const loginBtn = document.getElementById('login-btn-text');
   if (loginBtn) loginBtn.textContent = 'Sign In';
