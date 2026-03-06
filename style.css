@@ -584,7 +584,12 @@ a:hover { color: var(--accent-h); }
   cursor: default;
 }
 .exam-table tbody tr.exam-row:hover { background: var(--bg2); }
-.exam-table tbody tr.exam-row.pinned-row {  }
+.exam-table tbody tr.exam-row.pinned-row { background: var(--accent-bg); }
+.exam-table tbody tr.exam-row.pinned-row:hover { background: var(--accent-soft); }
+.exam-table tbody tr.exam-row.pinned-row td.td-expand-num {
+  border-left: 2px solid var(--accent);
+  padding-left: 6px;
+}
 
 .exam-table td {
   padding: 10px 14px;
