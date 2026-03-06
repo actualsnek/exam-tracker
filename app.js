@@ -89,6 +89,8 @@ function showAuthScreen() {
   // Reset login button state
   const loginBtn = document.getElementById('login-btn-text');
   if (loginBtn) loginBtn.textContent = 'Sign In';
+  const regBtn = document.getElementById('register-btn-text');
+  if (regBtn) regBtn.textContent = 'Create Account';
   // Clear input fields
   ['login-email','login-password','reg-name','reg-email','reg-password'].forEach(id => {
     const el = document.getElementById(id);
@@ -1239,15 +1241,40 @@ window.confirmDeleteAccount = () => {
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
 
-        // Clear local state immediately
-        allExams = [];
+        // Close all open UI
+        document.getElementById('profile-modal').style.display  = 'none';
+        document.getElementById('exam-modal').style.display     = 'none';
+        document.getElementById('confirm-modal').style.display  = 'none';
+        document.getElementById('input-modal').style.display    = 'none';
+        document.getElementById('md-panel').style.display       = 'none';
+        document.getElementById('md-overlay').style.display     = 'none';
+        document.getElementById('fv-panel').style.display       = 'none';
+        document.getElementById('fv-overlay').style.display     = 'none';
+        document.getElementById('status-dd-menu').style.display = 'none';
+        document.getElementById('tag-dd-menu').style.display    = 'none';
+        document.getElementById('sort-dd-menu').style.display   = 'none';
+        document.getElementById('data-dd-menu').style.display   = 'none';
+
+        // Clear all local state
+        allExams      = [];
+        filteredExams = [];
+        activeStatus  = 'all';
+        activeTags    = new Set();
+        searchQuery   = '';
+        activeSort    = 'createdAt_desc';
+        expandedCards = new Set();
+        selectionMode = false;
+        selectedIds   = new Set();
+        confirmCallback    = null;
+        inputModalCallback = null;
+        fvExamId = null;
+        fvField  = null;
 
         // Delete Firebase Auth user
         await deleteUser(currentUser);
 
         // onAuthStateChanged will fire and call showAuthScreen()
         toast('Account deleted.', 'success');
-        closeConfirmModal();
       } catch (e) {
         if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
           toast('Wrong password. Account not deleted.', 'error');
