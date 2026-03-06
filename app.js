@@ -1078,7 +1078,40 @@ window.closeProfile = () => {
 };
 
 window.handleSignOut = async () => {
-  await signOut(auth);
+  // Close all open UI
+  document.getElementById('profile-modal').style.display  = 'none';
+  document.getElementById('exam-modal').style.display     = 'none';
+  document.getElementById('confirm-modal').style.display  = 'none';
+  document.getElementById('input-modal').style.display    = 'none';
+  document.getElementById('md-panel').style.display       = 'none';
+  document.getElementById('md-overlay').style.display     = 'none';
+  document.getElementById('fv-panel').style.display       = 'none';
+  document.getElementById('fv-overlay').style.display     = 'none';
+  document.getElementById('status-dd-menu').style.display = 'none';
+  document.getElementById('tag-dd-menu').style.display    = 'none';
+  document.getElementById('sort-dd-menu').style.display   = 'none';
+  document.getElementById('data-dd-menu').style.display   = 'none';
+
+  // Clear local state
+  allExams      = [];
+  filteredExams = [];
+  activeStatus  = 'all';
+  activeTags    = new Set();
+  searchQuery   = '';
+  activeSort    = 'createdAt_desc';
+  expandedCards = new Set();
+  selectionMode = false;
+  selectedIds   = new Set();
+  confirmCallback    = null;
+  inputModalCallback = null;
+  fvExamId = null;
+  fvField  = null;
+
+  // Brief feedback then sign out
+  toast('Signed out successfully.', 'success');
+  setTimeout(async () => {
+    await signOut(auth);
+  }, 600);
 };
 
 window.handleEditDisplayName = () => {
