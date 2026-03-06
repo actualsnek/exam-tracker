@@ -504,9 +504,18 @@ window.toggleResPopover = (id) => {
   if (!isOpen) {
     const btn  = wrap.querySelector('.exp-field-btn');
     const rect = (btn || wrap).getBoundingClientRect();
-    pop.style.top  = (rect.bottom + 6) + 'px';
-    pop.style.left = rect.left + 'px';
-    pop.style.display = 'block';
+    pop.style.display = 'block'; // show first so offsetHeight is available
+    const popH = pop.offsetHeight;
+    const popW = pop.offsetWidth;
+    const vH   = window.innerHeight;
+    const vW   = window.innerWidth;
+    // Flip above if not enough room below
+    const topBelow = rect.bottom + 6;
+    const topAbove = rect.top - popH - 6;
+    pop.style.top  = (topBelow + popH > vH && topAbove >= 0) ? topAbove + 'px' : topBelow + 'px';
+    // Clamp left so popover doesn't overflow right edge
+    const rawLeft = rect.left;
+    pop.style.left = Math.min(rawLeft, vW - popW - 8) + 'px';
     const handler = (e) => {
       if (!wrap.contains(e.target)) {
         pop.style.display = 'none';
@@ -1651,6 +1660,14 @@ window.openMdFromModal = (field) => {
 };
 
 window.closeMdPanel = () => {
+  // Warn if user has unsaved changes (textarea differs from what's in modalDraft)
+  if (mdCurrentField) {
+    const current = document.getElementById('md-editor-textarea').value;
+    const saved   = modalDraft[mdCurrentField] || '';
+    if (current !== saved) {
+      if (!confirm('You have unsaved changes. Discard them?')) return;
+    }
+  }
   document.getElementById('md-panel').style.display   = 'none';
   document.getElementById('md-overlay').style.display = 'none';
   mdCurrentField = null;
@@ -1725,11 +1742,30 @@ window.switchToEditMode = () => {
 };
 
 window.switchToViewMode = () => {
+  // Warn if user has unsaved changes (textarea differs from last saved value)
+  if (fvExamId && fvField) {
+    const current = document.getElementById('fv-editor-textarea').value;
+    const exam    = allExams.find(e => e.id === fvExamId);
+    const saved   = (exam && exam[fvField]) || '';
+    if (current !== saved) {
+      if (!confirm('You have unsaved changes. Discard them?')) return;
+    }
+  }
   document.getElementById('fv-view-mode').style.display = 'flex';
   document.getElementById('fv-edit-mode').style.display = 'none';
 };
 
 window.closeFieldView = () => {
+  // Warn only if currently in edit mode with unsaved changes
+  const editMode = document.getElementById('fv-edit-mode');
+  if (editMode && editMode.style.display !== 'none' && fvExamId && fvField) {
+    const current = document.getElementById('fv-editor-textarea').value;
+    const exam    = allExams.find(e => e.id === fvExamId);
+    const saved   = (exam && exam[fvField]) || '';
+    if (current !== saved) {
+      if (!confirm('You have unsaved changes. Discard them?')) return;
+    }
+  }
   document.getElementById('fv-panel').style.display   = 'none';
   document.getElementById('fv-overlay').style.display = 'none';
   fvExamId = null;
