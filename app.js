@@ -797,7 +797,7 @@ function tableRowHTML(exam, num) {
     <td class="td-expand-num" onclick="${selectionMode ? `toggleSelectRow('${exam.id}')` : `toggleExpand('${exam.id}')`}">
       ${selectionMode
         ? `<div class="row-select-cb${isSelected ? ' checked' : ''}"></div>`
-        : `<button class="expand-btn${isExpanded ? ' open' : ''}">${isExpanded ? '▼' : '▶'}</button>
+        : `<button class="expand-btn${isExpanded ? ' open' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg></button>
            <span class="row-num">${num}</span>`
       }
     </td>
@@ -831,7 +831,6 @@ window.toggleExpand = (id) => {
   // Update the expand button arrow
   const expandBtn = examRow.querySelector('.expand-btn');
   if (expandBtn) {
-    expandBtn.textContent = isNowExpanded ? '▼' : '▶';
     expandBtn.classList.toggle('open', isNowExpanded);
   }
 

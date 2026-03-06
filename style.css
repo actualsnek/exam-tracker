@@ -601,8 +601,16 @@ td.td-expand-num {
 td.td-expand-num:hover .expand-btn { color: var(--text); }
 .expand-btn {
   background: none; border: none; color: var(--muted);
-  font-size: 10px; padding: 10px 4px 10px 0; cursor: pointer;
+  padding: 10px 4px 10px 0; cursor: pointer;
   transition: color var(--transition); vertical-align: middle;
+  display: inline-flex; align-items: center;
+}
+.expand-btn svg {
+  transition: transform .2s ease;
+  transform: rotate(0deg);
+}
+.expand-btn.open svg {
+  transform: rotate(90deg);
 }
 .expand-btn:hover { color: var(--text); }
 .row-num {
