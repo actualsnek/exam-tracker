@@ -1186,46 +1186,70 @@ window.handleEditDisplayName = () => {
 };
 
 window.handleChangePassword = () => {
-  // Step 1: ask current password to reauthenticate proactively
-  openInputModal(
-    'Change Password',
-    'Current Password',
-    'password',
-    '',
-    'Enter your current password',
-    async (currentPassword) => {
-      if (!currentPassword) { toast('Enter your current password.', 'error'); throw new Error(); }
-      try {
-        const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
-        await reauthenticateWithCredential(currentUser, credential);
-      } catch (e) {
-        if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
-          toast('Current password is incorrect.', 'error');
-        } else {
-          toast('Reauthentication failed. Try again.', 'error');
-        }
-        throw e;
+  // Google users have no password — nothing to change
+  const isGoogle = currentUser?.providerData?.some(p => p.providerId === 'google.com');
+  if (isGoogle) {
+    toast('Google accounts don\'t use a password. Sign in with Google to access your account.', 'error');
+    return;
+  }
+
+  // Show single modal with both fields: current password + new password
+  document.getElementById('input-modal-title').textContent = 'Change Password';
+  document.getElementById('input-modal-label').textContent = 'Current Password';
+  const field1 = document.getElementById('input-modal-field');
+  field1.type        = 'password';
+  field1.value       = '';
+  field1.placeholder = 'Enter your current password';
+
+  const field2Group = document.getElementById('input-modal-field2-group');
+  const field2Label = document.getElementById('input-modal-label2');
+  const field2      = document.getElementById('input-modal-field2');
+  field2Group.style.display = 'block';
+  field2Label.textContent   = 'New Password';
+  field2.type        = 'password';
+  field2.value       = '';
+  field2.placeholder = 'min 6 characters';
+
+  const confirmBtn = document.getElementById('input-modal-confirm-btn');
+  confirmBtn.textContent = 'Update Password';
+  inputModalCallback = null; // not using the generic callback path
+
+  confirmBtn.onclick = async () => {
+    const currentPassword = field1.value;
+    const newPassword     = field2.value;
+    if (!currentPassword) { toast('Enter your current password.', 'error'); return; }
+    if (!newPassword || newPassword.length < 6) { toast('New password must be at least 6 characters.', 'error'); return; }
+    if (currentPassword === newPassword) { toast('New password must be different from current.', 'error'); return; }
+
+    const origText = confirmBtn.textContent;
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="loading-spinner"></span>';
+
+    try {
+      // Reauthenticate first
+      const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+      await reauthenticateWithCredential(currentUser, credential);
+      // Then update
+      await updatePassword(currentUser, newPassword);
+      toast('Password updated!', 'success');
+      closeInputModal();
+    } catch (e) {
+      if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+        toast('Current password is incorrect.', 'error');
+      } else {
+        toast('Failed to update password. Try again.', 'error');
       }
-      // Step 2: reauthenticated — open new password modal after current one closes
-      setTimeout(() => openInputModal(
-        'Change Password',
-        'New Password',
-        'password',
-        '',
-        'min 6 characters',
-        async (newPassword) => {
-          if (!newPassword || newPassword.length < 6) { toast('Enter a new password (min 6 chars).', 'error'); throw new Error(); }
-          try {
-            await updatePassword(currentUser, newPassword);
-            toast('Password updated!', 'success');
-          } catch (e) {
-            toast('Failed to update password.', 'error');
-            throw e;
-          }
-        }
-      ), 0);
+    } finally {
+      confirmBtn.disabled  = false;
+      confirmBtn.textContent = origText;
     }
-  );
+  };
+
+  field1.onkeydown = (e) => { if (e.key === 'Enter') field2.focus(); };
+  field2.onkeydown = (e) => { if (e.key === 'Enter') confirmBtn.click(); };
+
+  document.getElementById('input-modal').style.display = 'flex';
+  setTimeout(() => field1.focus(), 50);
 };
 
 // ── Input Modal (replaces window.prompt) ─────────────
@@ -1264,6 +1288,15 @@ function openInputModal(title, label, type, defaultValue, placeholder, callback)
 window.closeInputModal = () => {
   document.getElementById('input-modal').style.display = 'none';
   inputModalCallback = null;
+  // Reset second field in case Change Password used it
+  const g = document.getElementById('input-modal-field2-group');
+  if (g) g.style.display = 'none';
+  const f2 = document.getElementById('input-modal-field2');
+  if (f2) { f2.value = ''; f2.onkeydown = null; }
+  const f1 = document.getElementById('input-modal-field');
+  if (f1) f1.onkeydown = null;
+  const btn = document.getElementById('input-modal-confirm-btn');
+  if (btn) { btn.textContent = 'Save'; btn.onclick = null; }
 };
 
 window.handleForgotPasswordFromProfile = async () => {
