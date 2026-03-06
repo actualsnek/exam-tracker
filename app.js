@@ -729,12 +729,20 @@ function renderTable() {
   const scroll = document.getElementById('table-scroll');
   const table  = scroll ? scroll.querySelector('.exam-table') : null;
 
+  const emptyFiltered = document.getElementById('list-empty-filtered');
   if (filteredExams.length === 0) {
-    empty.style.display  = 'block';
     scroll.style.display = 'none';
+    if (allExams.length === 0) {
+      empty.style.display = 'block';
+      if (emptyFiltered) emptyFiltered.style.display = 'none';
+    } else {
+      empty.style.display = 'none';
+      if (emptyFiltered) emptyFiltered.style.display = 'block';
+    }
     return;
   }
-  empty.style.display  = 'none';
+  empty.style.display = 'none';
+  if (emptyFiltered) emptyFiltered.style.display = 'none';
   scroll.style.display = '';
 
   if (table) table.classList.toggle('selection-mode', selectionMode);

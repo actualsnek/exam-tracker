@@ -187,11 +187,19 @@
 
   <!-- EXAM TABLE -->
   <main class="exam-list">
+    <!-- True empty: no exams at all -->
     <div class="list-empty" id="list-empty" style="display:none">
       <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
       <div class="empty-title">No exams yet</div>
       <div class="empty-sub">Add your first exam to get started</div>
       <button class="btn-primary btn-primary--cta" onclick="openAddExam()">Add Exam</button>
+    </div>
+    <!-- Filtered empty: exams exist but none match current filters -->
+    <div class="list-empty" id="list-empty-filtered" style="display:none">
+      <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <div class="empty-title">No exams match your filters</div>
+      <div class="empty-sub">Try adjusting or clearing your filters to see results</div>
+      <button class="btn-primary btn-primary--cta" onclick="clearAllFilters()">Clear Filters</button>
     </div>
 
     <div class="table-scroll" id="table-scroll">
