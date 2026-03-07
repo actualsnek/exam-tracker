@@ -1703,8 +1703,6 @@ function openPickModal({ title, items, confirmLabel, onConfirm }) {
     </label>
   `).join('');
 
-  // Live count update
-  list.addEventListener('change', updatePickCount);
   updatePickCount();
 
   document.getElementById('pick-modal').style.display = 'flex';
@@ -1787,6 +1785,8 @@ function openDiscardModal(onDiscard) {
   document.getElementById('discard-modal').style.display = 'flex';
   // no lockScroll — a panel is already locking scroll underneath
 }
+
+document.getElementById('pick-list').addEventListener('change', updatePickCount);
 
 document.getElementById('discard-keep-btn').addEventListener('click', () => {
   animateOut(document.getElementById('discard-modal'), () => { discardCallback = null; });
