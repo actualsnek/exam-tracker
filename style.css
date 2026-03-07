@@ -1455,9 +1455,9 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .btn-select-mode,
   #btn-delete-selected { display: none !important; }
 
-  /* exam-list needs top padding = filter-bar height so first card isn't hidden under it */
+  /* sticky filter bar already pushes content down in normal flow — no padding-top needed */
   .exam-list {
-    padding-top: var(--filter-bar-h);
+    padding-top: 0;
     padding-left: 0;
     padding-right: 0;
     padding-bottom: 80px;
