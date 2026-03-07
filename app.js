@@ -153,11 +153,26 @@ function showAuthScreen() {
   if (loginBtn) loginBtn.textContent = 'Sign In';
   const regBtn = document.getElementById('register-btn-text');
   if (regBtn) regBtn.textContent = 'Create Account';
-  // Clear input fields
+  // Clear input fields and reset all auth button states
   ['login-email','login-password','reg-name','reg-email','reg-password'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  // Re-enable all auth buttons (in case sign-in was interrupted mid-flight)
+  document.querySelectorAll('#auth-screen button').forEach(b => {
+    b.disabled = false;
+    b.style.opacity = '';
+    b.style.pointerEvents = '';
+  });
+  // Reset password visibility back to hidden
+  resetPasswordVisibility('login-password');
+  resetPasswordVisibility('reg-password');
+  // Always show Login tab on return to auth screen
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  const loginTab = document.querySelector('.auth-tab');
+  if (loginTab) loginTab.classList.add('active');
+  document.getElementById('login-form').style.display    = 'block';
+  document.getElementById('register-form').style.display = 'none';
   // Clear any auth messages
   clearAuthMessages();
 
@@ -231,7 +246,49 @@ window.switchAuthTab = (tab) => {
   document.getElementById('login-form').style.display    = tab === 'login'    ? 'block' : 'none';
   document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
   clearAuthMessages();
+  // Clear fields on tab switch so stale input never confuses the user
+  if (tab === 'login') {
+    ['reg-name','reg-email','reg-password'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    // Re-show password fields (in case user had toggled show)
+    resetPasswordVisibility('reg-password');
+  } else {
+    ['login-email','login-password'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    resetPasswordVisibility('login-password');
+  }
 };
+
+// ── Password visibility toggle ────────────────────
+window.togglePassword = (inputId, btn) => {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  const showIcon = btn.querySelector('.pw-eye-show');
+  const hideIcon = btn.querySelector('.pw-eye-hide');
+  if (showIcon) showIcon.style.display = isText ? '' : 'none';
+  if (hideIcon) hideIcon.style.display = isText ? 'none' : '';
+  btn.setAttribute('aria-label', isText ? 'Show password' : 'Hide password');
+};
+
+function resetPasswordVisibility(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input || input.type === 'password') return;
+  input.type = 'password';
+  // Find the toggle button in the same wrap
+  const wrap = input.closest('.field-input-wrap');
+  if (!wrap) return;
+  const btn = wrap.querySelector('.pw-toggle');
+  if (!btn) return;
+  const showIcon = btn.querySelector('.pw-eye-show');
+  const hideIcon = btn.querySelector('.pw-eye-hide');
+  if (showIcon) showIcon.style.display = '';
+  if (hideIcon) hideIcon.style.display = 'none';
+  btn.setAttribute('aria-label', 'Show password');
+}
 
 function clearAuthMessages() {
   const e = document.getElementById('auth-error');
@@ -241,6 +298,7 @@ function clearAuthMessages() {
 }
 
 function showAuthError(msg) {
+  if (!msg) return; // silent codes return '' from friendlyAuthError
   const el = document.getElementById('auth-error');
   el.textContent = msg;
   el.style.display = 'block';
@@ -258,15 +316,18 @@ window.handleLogin = async () => {
   const email    = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   if (!email || !password) return showAuthError('Please fill in all fields.');
-  const btn = document.getElementById('login-btn-text');
-  btn.innerHTML = '<span class="loading-spinner"></span>Signing in…';
-  btn.closest('button').disabled = true;
+  const btnEl  = document.getElementById('login-btn-text').closest('button');
+  const btnTxt = document.getElementById('login-btn-text');
+  btnTxt.innerHTML = '<span class="loading-spinner"></span>Signing in…';
+  btnEl.disabled = true;
   clearAuthMessages();
   try {
     await signInWithEmailAndPassword(auth, email, password);
+    // On success onAuthStateChanged fires → showApp(). Button stays disabled/hidden
+    // with the auth screen, so no need to re-enable it here.
   } catch (e) {
-    btn.textContent = 'Sign In';
-    btn.closest('button').disabled = false;
+    btnTxt.textContent = 'Sign In';
+    btnEl.disabled = false;
     showAuthError(friendlyAuthError(e.code));
   }
 };
@@ -277,57 +338,89 @@ window.handleRegister = async () => {
   const password = document.getElementById('reg-password').value;
   if (!name || !email || !password) return showAuthError('Please fill in all fields.');
   if (password.length < 6) return showAuthError('Password must be at least 6 characters.');
-  const btn = document.getElementById('register-btn-text');
-  btn.innerHTML = '<span class="loading-spinner"></span>Creating…';
-  btn.closest('button').disabled = true;
+  const btnEl  = document.getElementById('register-btn-text').closest('button');
+  const btnTxt = document.getElementById('register-btn-text');
+  btnTxt.innerHTML = '<span class="loading-spinner"></span>Creating…';
+  btnEl.disabled = true;
   clearAuthMessages();
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(cred.user, { displayName: name });
+    // Set display name — if this fails the account was still created; not fatal
+    try { await updateProfile(cred.user, { displayName: name }); } catch (_) {}
+    // onAuthStateChanged fires → showApp(). Button stays with auth screen.
   } catch (e) {
-    btn.textContent = 'Create Account';
-    btn.closest('button').disabled = false;
+    btnTxt.textContent = 'Create Account';
+    btnEl.disabled = false;
     showAuthError(friendlyAuthError(e.code));
   }
 };
 
 window.handleGoogleLogin = async () => {
   clearAuthMessages();
-  const btn = document.querySelector('.btn-google');
-  if (btn) { btn.disabled = true; btn.style.opacity = '0.7'; }
+  // Use getElementById-equivalent via the auth-screen so we never grab
+  // a stale reference if the button is re-rendered
+  const btn = document.querySelector('#auth-screen .btn-google');
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    btn.style.pointerEvents = 'none';
+  }
   try {
     await signInWithPopup(auth, gProvider);
+    // On success onAuthStateChanged fires → showApp()
   } catch (e) {
-    showAuthError(friendlyAuthError(e.code));
+    // popup-closed-by-user is not an error worth showing
+    if (e.code !== 'auth/popup-closed-by-user') {
+      showAuthError(friendlyAuthError(e.code));
+    }
   } finally {
-    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }
   }
 };
 
 window.handleForgotPassword = async () => {
   const email = document.getElementById('login-email').value.trim();
   if (!email) return showAuthError('Enter your email above first.');
+  const btn = document.getElementById('forgot-btn');
+  const origText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  clearAuthMessages();
   try {
     await sendPasswordResetEmail(auth, email);
     showAuthSuccess('Reset email sent! Check your inbox.');
   } catch (e) {
     showAuthError(friendlyAuthError(e.code));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = origText; }
   }
 };
 
 function friendlyAuthError(code) {
   const map = {
-    'auth/invalid-email':            'Invalid email address.',
-    'auth/user-not-found':           'No account found with this email.',
-    'auth/wrong-password':           'Incorrect password.',
-    'auth/email-already-in-use':     'This email is already registered.',
-    'auth/weak-password':            'Password must be at least 6 characters.',
-    'auth/too-many-requests':        'Too many attempts. Try again later.',
-    'auth/popup-closed-by-user':     'Sign-in popup was closed.',
-    'auth/invalid-credential':       'Invalid credentials. Check email and password.',
-    'auth/network-request-failed':   'Network error. Check your connection.',
+    'auth/invalid-email':                        'Invalid email address.',
+    'auth/user-not-found':                       'No account found with this email.',
+    'auth/wrong-password':                       'Incorrect password.',
+    'auth/email-already-in-use':                 'This email is already registered.',
+    'auth/weak-password':                        'Password must be at least 6 characters.',
+    'auth/too-many-requests':                    'Too many attempts. Please try again later.',
+    'auth/popup-closed-by-user':                 'Sign-in popup was closed.',
+    'auth/invalid-credential':                   'Incorrect email or password.',
+    'auth/network-request-failed':               'Network error. Check your connection.',
+    'auth/operation-not-allowed':                'This sign-in method is not enabled.',
+    'auth/account-exists-with-different-credential':
+      'An account already exists with this email. Try signing in with a different method.',
+    'auth/popup-blocked':                        'Popup was blocked by your browser. Please allow popups for this site.',
+    'auth/cancelled-popup-request':              '',   // silent — another popup opened
+    'auth/user-disabled':                        'This account has been disabled.',
+    'auth/requires-recent-login':                'Please sign out and sign in again to continue.',
   };
-  return map[code] || 'Something went wrong. Try again.';
+  const msg = map[code];
+  if (msg === '') return '';   // intentionally silent codes
+  return msg || 'Something went wrong. Please try again.';
 }
 
 // ════════════════════════════════════════════════════

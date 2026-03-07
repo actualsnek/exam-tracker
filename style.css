@@ -232,6 +232,37 @@ a:hover { color: var(--accent-h); }
   box-shadow: 0 1px 4px rgba(0,0,0,.2);
 }
 
+/* Password show/hide wrapper */
+.field-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.field-input-wrap .field-input {
+  flex: 1;
+  padding-right: 38px; /* room for the toggle button */
+}
+.pw-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 0;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+.pw-toggle:hover { color: var(--text); }
+.pw-eye { width: 16px; height: 16px; display: block; }
+
+/* Disabled button — loading state */
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .auth-error {
   background: var(--no-bg);
   color: var(--no);

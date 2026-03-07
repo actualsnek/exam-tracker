@@ -32,32 +32,54 @@
     <!-- Login Form -->
     <div id="login-form">
       <div class="field-group">
-        <label class="field-label">Email</label>
-        <input type="email" id="login-email" class="field-input" placeholder="you@email.com" onkeydown="if(event.key==='Enter')handleLogin()"/>
+        <label class="field-label" for="login-email">Email</label>
+        <input type="email" id="login-email" class="field-input" placeholder="you@email.com"
+               autocomplete="email" inputmode="email"
+               onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()"/>
       </div>
       <div class="field-group">
-        <label class="field-label">Password</label>
-        <input type="password" id="login-password" class="field-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"/>
+        <label class="field-label" for="login-password">Password</label>
+        <div class="field-input-wrap">
+          <input type="password" id="login-password" class="field-input" placeholder="••••••••"
+                 autocomplete="current-password"
+                 onkeydown="if(event.key==='Enter')handleLogin()"/>
+          <button type="button" class="pw-toggle" onclick="togglePassword('login-password',this)" tabindex="-1" aria-label="Show password">
+            <svg class="pw-eye pw-eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="pw-eye pw-eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
       </div>
       <button class="btn-primary" onclick="handleLogin()">
         <span id="login-btn-text">Sign In</span>
       </button>
-      <button class="btn-link" onclick="handleForgotPassword()">Forgot password?</button>
+      <button class="btn-link" id="forgot-btn" onclick="handleForgotPassword()">Forgot password?</button>
     </div>
 
     <!-- Register Form -->
     <div id="register-form" style="display:none">
       <div class="field-group">
-        <label class="field-label">Display Name</label>
-        <input type="text" id="reg-name" class="field-input" placeholder="Your name" onkeydown="if(event.key==='Enter')handleRegister()"/>
+        <label class="field-label" for="reg-name">Display Name</label>
+        <input type="text" id="reg-name" class="field-input" placeholder="Your name"
+               autocomplete="name" autocapitalize="words"
+               onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()"/>
       </div>
       <div class="field-group">
-        <label class="field-label">Email</label>
-        <input type="email" id="reg-email" class="field-input" placeholder="you@email.com" onkeydown="if(event.key==='Enter')handleRegister()"/>
+        <label class="field-label" for="reg-email">Email</label>
+        <input type="email" id="reg-email" class="field-input" placeholder="you@email.com"
+               autocomplete="email" inputmode="email"
+               onkeydown="if(event.key==='Enter')document.getElementById('reg-password').focus()"/>
       </div>
       <div class="field-group">
-        <label class="field-label">Password</label>
-        <input type="password" id="reg-password" class="field-input" placeholder="min 6 characters" onkeydown="if(event.key==='Enter')handleRegister()"/>
+        <label class="field-label" for="reg-password">Password</label>
+        <div class="field-input-wrap">
+          <input type="password" id="reg-password" class="field-input" placeholder="min 6 characters"
+                 autocomplete="new-password"
+                 onkeydown="if(event.key==='Enter')handleRegister()"/>
+          <button type="button" class="pw-toggle" onclick="togglePassword('reg-password',this)" tabindex="-1" aria-label="Show password">
+            <svg class="pw-eye pw-eye-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="pw-eye pw-eye-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button>
+        </div>
       </div>
       <button class="btn-primary" onclick="handleRegister()">
         <span id="register-btn-text">Create Account</span>
