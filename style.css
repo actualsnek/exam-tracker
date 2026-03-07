@@ -849,8 +849,8 @@ tr.detail-row td {
   padding: 24px 28px;
 }
 /* Render parsed markdown in view mode — reuse md-preview-content styles */
-.fv-content h1,.fv-content h2,.fv-content h3 { color:var(--text);font-family:var(--serif);margin:16px 0 8px; }
-.fv-content h1{font-size:22px}.fv-content h2{font-size:17px}.fv-content h3{font-size:14px}
+.fv-content h1,.fv-content h2,.fv-content h3,.fv-content h4 { color:var(--text);font-family:var(--serif);margin:16px 0 8px; }
+.fv-content h1{font-size:22px}.fv-content h2{font-size:17px}.fv-content h3{font-size:14px}.fv-content h4{font-size:13px;font-family:var(--font);font-weight:600;color:var(--text2)}
 .fv-content p{margin-bottom:8px;font-size:13px;color:var(--text2);line-height:1.7}
 .fv-content strong{color:var(--text);font-weight:700}
 .fv-content em{font-style:italic;color:var(--text)}

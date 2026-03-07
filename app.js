@@ -2254,10 +2254,11 @@ function parseMd(md) {
   if (!md) return '';
   let html = escHtml(md);
 
-  // Headings
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm,  '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm,   '<h1>$1</h1>');
+  // Headings — most specific (####) first
+  html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+  html = html.replace(/^### (.+)$/gm,  '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm,   '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm,    '<h1>$1</h1>');
 
   // HR
   html = html.replace(/^---$/gm, '<hr>');
@@ -2307,7 +2308,6 @@ function parseMd(md) {
   html = html.replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => {
     let trimmed = url.trim();
     if (!/^https?:\/\//i.test(trimmed) && !/^mailto:/i.test(trimmed)) {
-      // block javascript:/data: but auto-prefix bare domains
       if (/^(javascript|data|vbscript):/i.test(trimmed)) return escHtml(label);
       trimmed = 'https://' + trimmed;
     }
