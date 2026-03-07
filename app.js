@@ -1457,9 +1457,8 @@ window.handleSignOut = async () => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
-  // Ensure scroll lock is released
-  document.body.classList.remove('scroll-locked');
-  document.body.style.overflow = '';
+  // Ensure scroll lock is released (lockScroll uses 'modal-open')
+  document.body.classList.remove('modal-open');
 
   // Hide skeleton immediately — onAuthStateChanged → showAuthScreen will
   // do the full DOM reset; we just need to make sure the skeleton isn't
@@ -1672,8 +1671,8 @@ window.confirmDeleteAccount = () => {
           const el = document.getElementById(id);
           if (el) el.style.display = 'none';
         });
-        document.body.classList.remove('scroll-locked');
-        document.body.style.overflow = '';
+        // Ensure scroll lock is released (lockScroll uses 'modal-open')
+        document.body.classList.remove('modal-open');
         const sk = document.getElementById('skeleton-loader');
         if (sk) sk.style.display = 'none';
 
