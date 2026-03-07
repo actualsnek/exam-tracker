@@ -113,9 +113,13 @@ function showApp() {
     appEl.addEventListener('animationend', () => {
       appEl.classList.remove('is-fading-in');
     }, { once: true });
-    // Show skeleton until first Firestore snapshot arrives
-    const sk = document.getElementById('skeleton-loader');
-    if (sk) sk.style.display = '';
+    // Show skeleton only if data hasn't arrived yet.
+    // If onSnapshot already fired during the 270ms auth-fade delay,
+    // dataLoaded is already true — don't re-show the skeleton.
+    if (!dataLoaded) {
+      const sk = document.getElementById('skeleton-loader');
+      if (sk) sk.style.display = '';
+    }
   };
   const timer = setTimeout(onAuthGone, 270);
   authEl.addEventListener('animationend', () => { clearTimeout(timer); onAuthGone(); }, { once: true });
