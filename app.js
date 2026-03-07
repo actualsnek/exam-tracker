@@ -1319,11 +1319,7 @@ window.handleSignOut = async () => {
   // Clear local state
   resetAppState();
 
-  // Brief feedback then sign out
-  toast('Signed out successfully.', 'success');
-  setTimeout(async () => {
-    await signOut(auth);
-  }, 600);
+  await signOut(auth);
 };
 
 window.handleEditDisplayName = () => {
