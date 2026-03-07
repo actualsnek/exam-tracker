@@ -1748,8 +1748,9 @@ window.confirmPick = () => {
   const selectedIds = [...document.querySelectorAll('.pick-cb:checked')]
     .map(cb => Number(cb.dataset.id));
   if (!selectedIds.length) return;
+  const cb = _pickCallback;   // save before closePickModal nulls it
   closePickModal();
-  if (_pickCallback) _pickCallback(selectedIds);
+  if (cb) cb(selectedIds);
 };
 
 function downloadFile(content, filename, type) {

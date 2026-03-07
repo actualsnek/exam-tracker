@@ -1912,6 +1912,14 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .md-pane { min-height: 160px; }
   .md-write-pane { flex: 1.2; }
   .md-preview-pane { flex: 1; }
+
+  /* ── Pick modal on mobile ── */
+  .pick-modal-inner { max-height: 85vh; max-width: 100%; }
+  .pick-toolbar { gap: 6px; }
+  .pick-sel-btn { padding: 5px 10px; font-size: 12px; }
+  .pick-item { padding: 10px 8px; }
+  .pick-item-label { font-size: 14px; }
+  .pick-cb { width: 18px; height: 18px; }
 }
 
 /* ── MODAL: MD-FIELDS-ROW (Eligibility · Syllabus · Pattern side by side) ── */
