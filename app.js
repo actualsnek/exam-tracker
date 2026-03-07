@@ -1494,14 +1494,9 @@ window.confirmDeleteAccount = () => {
         // Re-authenticate
         if (isGoogle) {
           // Google users must re-auth via popup
-          await reauthenticateWithCredential(
-            currentUser,
-            await (async () => {
-              const { GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
-              const result = await signInWithPopup(auth, gProvider);
-              return GoogleAuthProvider.credentialFromResult(result);
-            })()
-          );
+          const result = await signInWithPopup(auth, gProvider);
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          await reauthenticateWithCredential(currentUser, credential);
         } else {
           const password = document.getElementById('confirm-password-input').value;
           if (!password) return toast('Enter your password to confirm.', 'error');
