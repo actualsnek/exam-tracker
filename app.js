@@ -98,6 +98,11 @@ function showApp() {
   const authEl = document.getElementById('auth-screen');
   const appEl  = document.getElementById('app');
 
+  // Pre-apply no-pinned so filter-bar top is correct before first paint
+  const hasPinned = allExams.some(e => e.pinned);
+  if (!hasPinned) appEl.classList.add('no-pinned');
+  else            appEl.classList.remove('no-pinned');
+
   // Fade auth screen out, then hide it and reveal app
   authEl.classList.add('is-fading-out');
   const onAuthGone = () => {

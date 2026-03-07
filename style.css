@@ -1455,10 +1455,9 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .btn-select-mode,
   #btn-delete-selected { display: none !important; }
 
-  /* FIX 3: filter bar is sticky — no padding-top needed on exam-list,
-     it stacks naturally in normal flow */
+  /* exam-list needs top padding = filter-bar height so first card isn't hidden under it */
   .exam-list {
-    padding-top: 0;
+    padding-top: var(--filter-bar-h);
     padding-left: 0;
     padding-right: 0;
     padding-bottom: 80px;
