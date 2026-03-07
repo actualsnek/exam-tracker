@@ -1212,12 +1212,15 @@ window.clearAllFilters = () => {
 function renderCountdowns() {
   const pinned  = allExams.filter(e => e.pinned);
   const strip   = document.getElementById('countdown-rings');
+  const appEl   = document.getElementById('app');
   const CIRCUMF = 2 * Math.PI * 28;  // r=28
 
   if (pinned.length === 0) {
     strip.innerHTML = '<div class="countdown-empty">Pin up to 5 exams to track here</div>';
+    if (appEl) appEl.classList.add('no-pinned');
     return;
   }
+  if (appEl) appEl.classList.remove('no-pinned');
 
   strip.innerHTML = pinned.map(exam => {
     const targetDate = exam.examDate || exam.lastDate;
@@ -2207,11 +2210,6 @@ function mobileCardHTML(exam) {
       </div>
       <div class="m-card-right">
         ${statusLabel ? `<span class="m-status-pill ${statusCls}">${statusLabel}</span>` : ''}
-        <button class="m-card-edit-btn"
-                onclick="event.stopPropagation();openEditExam('${exam.id}')"
-                title="Edit">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
         <div class="m-card-applied${exam.applied ? ' checked' : ''}"
              onclick="event.stopPropagation();toggleApplied('${exam.id}')"
              title="Toggle applied"></div>

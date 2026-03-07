@@ -1394,9 +1394,8 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .countdown-strip:has(> .countdown-label + .countdown-rings > .countdown-empty:only-child) {
     display: none;
   }
-  /* When countdown strip is hidden, filter bar sticks just below topbar */
-  .countdown-strip:has(> .countdown-label + .countdown-rings > .countdown-empty:only-child) ~ * .filter-bar,
-  #app:not(:has(.countdown-strip:not([style*="display: none"]))) .filter-bar {
+  /* When no pinned exams: filter bar sticks right below topbar, no gap */
+  #app.no-pinned .filter-bar {
     top: var(--topbar-h);
   }
 
@@ -1488,16 +1487,12 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .m-card:first-child { border-top: 1px solid var(--border2); }
   .m-card.pinned-card { background: var(--accent-bg); }
   .m-card.pinned-card .m-card-top { border-left: 3px solid var(--accent); }
-  .m-card[data-status="open"]   .m-card-top { border-left: 3px solid var(--open); }
-  .m-card[data-status="closed"] .m-card-top { border-left: 3px solid var(--muted); }
-  .m-card[data-status="na"]     .m-card-top { border-left: 3px solid transparent; }
 
   .m-card-top {
     display: flex;
     align-items: center;
     padding: 11px 14px 11px 12px;
     gap: 10px;
-    border-left: 3px solid transparent;
   }
 
   .m-card-chevron {
@@ -1542,20 +1537,12 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .m-card-right {
     display: flex; align-items: center; gap: 4px; flex-shrink: 0;
   }
-  .m-card-edit-btn {
-    background: none; border: none; color: var(--muted);
-    padding: 11px 8px;
-    cursor: pointer;
-    transition: color var(--transition);
-    display: flex; align-items: center;
-  }
-  .m-card-edit-btn:active { color: var(--accent); }
-  .m-status-pill { display: none; }
+  .m-status-pill { display: inline-block; }
 
   /* FIX 6: larger tap targets for applied + pin */
   .m-card-applied {
-    /* visual size stays 18×18, tap area padded to ~40×40 */
-    width: 18px; height: 18px; border-radius: 4px;
+    /* visual size 15×15, tap area padded to ~40×40 */
+    width: 15px; height: 15px; border-radius: 3px;
     border: 1.5px solid var(--border);
     background: var(--bg2);
     display: inline-flex; align-items: center; justify-content: center;
@@ -1568,7 +1555,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .m-card-applied.checked { background: var(--yes); border-color: var(--yes); }
   .m-card-applied.checked::after {
     content: '';
-    width: 9px; height: 6px;
+    width: 7px; height: 5px;
     border-left: 2px solid var(--yes-check); border-bottom: 2px solid var(--yes-check);
     transform: rotate(-45deg) translateY(-1px);
   }
