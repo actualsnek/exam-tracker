@@ -769,9 +769,7 @@ tr.detail-row td {
 .exp-meta-item svg { width: 11px; height: 11px; color: var(--muted); flex-shrink: 0; }
 .exp-meta-label { font-size: 9px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 700; margin-right: 2px; }
 .exp-meta-val { font-family: var(--mono); font-size: 11px; color: var(--text2); }
-.exp-notif-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--accent); text-decoration: none; border: 1px solid var(--accent-soft); background: var(--accent-bg); padding: 3px 10px; border-radius: var(--r); transition: all .15s; }
-.exp-notif-link:hover { background: var(--accent); color: #fff; }
-.exp-notif-link svg { width: 11px; height: 11px; flex-shrink: 0; }
+
 .exp-website-link { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); text-decoration: none; transition: color .15s; }
 .exp-website-link:hover { color: var(--accent); }
 .exp-website-link svg { width: 11px; height: 11px; flex-shrink: 0; }

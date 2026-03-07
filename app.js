@@ -323,10 +323,6 @@ window.saveExam = async () => {
     lastDate:    document.getElementById('f-last-date').value,
     examDate:    document.getElementById('f-exam-date').value,
     website:     document.getElementById('f-website').value.trim(),
-    notification: {
-      label: 'Notification',
-      url:   document.getElementById('f-notif-url').value.trim(),
-    },
     vacancies:   document.getElementById('f-vacancies').value.trim(),
     pay:         document.getElementById('f-pay').value.trim(),
     eligibility: modalDraft.eligibility,
@@ -489,7 +485,7 @@ function setModalDraftPreview(field) {
 window.openAddExam = () => {
   document.getElementById('exam-modal-title').textContent = 'Add Exam';
   document.getElementById('exam-id').value = '';
-  ['f-name','f-agency','f-subtitle','f-last-date','f-exam-date','f-website','f-tags','f-year','f-vacancies','f-pay','f-notif-url'].forEach(id => {
+  ['f-name','f-agency','f-subtitle','f-last-date','f-exam-date','f-website','f-tags','f-year','f-vacancies','f-pay'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('f-exam-type').value = 'job';
@@ -517,7 +513,6 @@ window.openEditExam = (id) => {
   document.getElementById('f-last-date').value  = exam.lastDate || '';
   document.getElementById('f-exam-date').value  = exam.examDate || '';
   document.getElementById('f-website').value    = exam.website || '';
-  document.getElementById('f-notif-url').value   = (exam.notification && exam.notification.url)   || '';
   document.getElementById('f-vacancies').value  = exam.vacancies || '';
   document.getElementById('f-pay').value        = exam.pay || '';
   document.getElementById('f-tags').value       = (exam.tags || []).join(', ');
@@ -972,7 +967,6 @@ function detailRowHTML(exam) {
     try { return new URL(exam.website.startsWith('http') ? exam.website : 'https://' + exam.website).hostname; }
     catch(e) { return exam.website; }
   })() : '';
-  const notif = exam.notification || {};
   const isJob = !exam.examType || exam.examType === 'job';
 
   return `
@@ -996,10 +990,6 @@ function detailRowHTML(exam) {
               <span class="exp-meta-label">Exam</span>
               <span class="exp-meta-val">${formatDate(exam.examDate)}</span>
             </div>` : ''}
-            ${notif.label && notif.url ? `<a href="${notif.url.startsWith('http') ? notif.url : 'https://'+notif.url}" target="_blank" rel="noopener" class="exp-notif-link">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              ${escHtml(notif.label)}
-            </a>` : ''}
             ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="exp-website-link">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               ${escHtml(websiteHostname)}
@@ -1575,7 +1565,6 @@ window.exportJSON = () => {
     lastDate:     e.lastDate     || '',
     examDate:     e.examDate     || '',
     website:      e.website      || '',
-    notification: { url: (e.notification && e.notification.url) || '' },
     vacancies:    e.vacancies    || '',
     pay:          e.pay          || '',
     eligibility:  e.eligibility  || '',
@@ -1635,9 +1624,6 @@ window.importJSON = async (event) => {
           lastDate,
           examDate,
           website:      exam.website      || '',
-          notification: (exam.notification && exam.notification.url)
-                          ? { label: 'Notification', url: String(exam.notification.url) }
-                          : { label: '', url: '' },
           vacancies:    String(exam.vacancies || ''),
           pay:          String(exam.pay       || ''),
           eligibility:  exam.eligibility  || '',
@@ -2107,7 +2093,6 @@ function mobileCardHTML(exam) {
   }
 
   const isJob = !exam.examType || exam.examType === 'job';
-  const notif = exam.notification || {};
 
   // detail section
   const detailHTML = `
@@ -2166,10 +2151,6 @@ function mobileCardHTML(exam) {
             </div>
           </div>
         </div>` : ''}
-        ${notif.label && notif.url ? `<a href="${notif.url.startsWith('http') ? notif.url : 'https://'+notif.url}" target="_blank" rel="noopener" class="m-detail-field-btn m-detail-link-btn" onclick="event.stopPropagation()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Notification
-        </a>` : ''}
         ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="m-detail-field-btn m-detail-link-btn" onclick="event.stopPropagation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           Website
