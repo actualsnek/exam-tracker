@@ -1536,8 +1536,9 @@ window.confirmDeleteAccount = () => {
         selectedIds   = new Set();
         confirmCallback    = null;
         inputModalCallback = null;
-        fvExamId = null;
-        fvField  = null;
+        fvExamId       = null;
+        fvField        = null;
+        mdCurrentField = null;
 
         // Delete Firebase Auth user
         await deleteUser(currentUser);
