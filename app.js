@@ -1707,6 +1707,7 @@ function openPickModal({ title, items, confirmLabel, onConfirm }) {
   updatePickCount();
 
   document.getElementById('pick-modal').style.display = 'flex';
+  lockScroll();
 }
 
 function updatePickCount() {
@@ -1728,6 +1729,7 @@ window.pickSelectNone = () => {
 window.closePickModal = () => {
   document.getElementById('pick-modal').style.display = 'none';
   _pickCallback = null;
+  unlockScroll();
 };
 
 window.closePickModalOnOverlay = (e) => {
@@ -1835,6 +1837,7 @@ function unlockScroll() {
     document.getElementById('profile-modal')?.style.display === 'flex' ||
     document.getElementById('confirm-modal')?.style.display === 'flex' ||
     document.getElementById('input-modal')?.style.display   === 'flex' ||
+    document.getElementById('pick-modal')?.style.display    === 'flex' ||
     document.getElementById('md-panel')?.style.display      === 'flex' ||
     document.getElementById('fv-panel')?.style.display      === 'flex';
   if (!anyOpen) document.body.classList.remove('modal-open');
