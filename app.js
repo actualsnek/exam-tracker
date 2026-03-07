@@ -31,8 +31,7 @@ import {
   orderBy,
   serverTimestamp,
   writeBatch,
-  onSnapshot,
-  where
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ── Firebase Config ──────────────────────────────────
@@ -725,8 +724,6 @@ function applyFilters() {
   // ── Sort ──────────────────────────────────────────
   const [sortKey, sortDir] = activeSort.split('_');
   const asc = sortDir === 'asc';
-  const statusOrder = { open: 0, closed: 1 };
-
   filteredExams.sort((a, b) => {
     if (sortKey === 'deadline') {
       const ad = a.lastDate || a.examDate || '';
@@ -739,10 +736,6 @@ function applyFilters() {
       const av = (a.name || '').toLowerCase();
       const bv = (b.name || '').toLowerCase();
       return asc ? av.localeCompare(bv) : bv.localeCompare(av);
-    } else if (sortKey === 'status') {
-      const av = statusOrder[a.status] ?? 99;
-      const bv = statusOrder[b.status] ?? 99;
-      return asc ? av - bv : bv - av;
     } else {
       // createdAt
       const at = a.createdAt?.seconds ?? 0;
