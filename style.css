@@ -1594,7 +1594,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   }
   .m-card.expanded .m-card-detail { display: flex; }
 
-  .m-detail-meta { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 10px; }
+  .m-detail-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-top: 10px; }
   .m-detail-meta-item {
     display: flex; align-items: center; gap: 4px;
     font-size: 11px; color: var(--text2);
@@ -1620,39 +1620,34 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     background: var(--surface); color: var(--text2);
     font-size: 12px; font-weight: 500; cursor: pointer;
     transition: all .15s; font-family: var(--font);
+    text-decoration: none;
   }
   .m-detail-field-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
   .m-detail-field-btn.empty { opacity: .55; border-style: dashed; }
   .m-detail-field-btn:active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-soft); }
+  /* Notification / Website links — accent tint to distinguish from field btns */
+  .m-detail-link-btn {
+    color: var(--accent);
+    border-color: var(--accent-soft);
+    background: var(--accent-bg);
+  }
 
   .m-detail-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .m-detail-tags-label { font-size: 11px; color: var(--muted); }
-  .m-detail-tag {
-    font-size: 11px; font-weight: 500; color: var(--accent); cursor: pointer;
-  }
+  .m-detail-tag { font-size: 11px; font-weight: 500; color: var(--accent); cursor: pointer; }
 
-  .m-detail-links { display: flex; gap: 6px; flex-wrap: wrap; }
-  .m-detail-link {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 11px; color: var(--accent);
-    border: 1px solid var(--accent-soft); background: var(--accent-bg);
-    padding: 3px 10px; border-radius: var(--r); text-decoration: none;
-    transition: all .15s;
-  }
-  .m-detail-link svg { width: 11px; height: 11px; flex-shrink: 0; }
-
-  .m-detail-actions { display: flex; gap: 8px; padding-top: 2px; }
+  .m-detail-actions { display: flex; gap: 6px; padding-top: 2px; }
   .m-detail-action-btn {
-    padding: 7px 16px; border-radius: var(--r);
-    border: 1px solid var(--border); background: var(--bg2);
-    color: var(--text2); font-size: 12px; font-weight: 500;
+    padding: 5px 12px; border-radius: var(--r);
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); font-size: 11px; font-weight: 500;
     cursor: pointer; font-family: var(--font);
     display: flex; align-items: center; gap: 4px;
     transition: all .15s;
   }
   .m-detail-action-btn:active { background: var(--surface2); color: var(--text); }
   .m-detail-action-btn.danger {
-    color: var(--no); border-color: var(--no-border); background: var(--no-bg);
+    color: var(--no); border-color: var(--no-border); background: transparent;
   }
 
   /* ── empty states ── */

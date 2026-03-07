@@ -2106,11 +2106,12 @@ function mobileCardHTML(exam) {
   // detail section
   const detailHTML = `
     <div class="m-card-detail">
-      ${(exam.lastDate || exam.examDate || exam.year || (notif.label && notif.url) || exam.website) ? `
+
       <div class="m-detail-meta">
+        ${statusLabel ? `<span class="m-status-pill ${statusCls}">${statusLabel}</span>` : ''}
         ${exam.year ? `<div class="m-detail-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span class="m-detail-meta-label">Cycle</span>
+          <span class="m-detail-meta-label">Year</span>
           <span class="m-detail-meta-val">${escHtml(exam.year)}</span>
         </div>` : ''}
         ${exam.lastDate ? `<div class="m-detail-meta-item">
@@ -2123,7 +2124,7 @@ function mobileCardHTML(exam) {
           <span class="m-detail-meta-label">Exam</span>
           <span class="m-detail-meta-val">${formatDate(exam.examDate)}</span>
         </div>` : ''}
-      </div>` : ''}
+      </div>
 
       ${isJob && (exam.vacancies || exam.pay) ? `
       <div class="m-detail-chips">
@@ -2160,19 +2161,15 @@ function mobileCardHTML(exam) {
             </div>
           </div>
         </div>` : ''}
-      </div>
-
-      ${(notif.label && notif.url) || exam.website ? `
-      <div class="m-detail-links">
-        ${notif.label && notif.url ? `<a href="${notif.url.startsWith('http') ? notif.url : 'https://'+notif.url}" target="_blank" rel="noopener" class="m-detail-link" onclick="event.stopPropagation()">
+        ${notif.label && notif.url ? `<a href="${notif.url.startsWith('http') ? notif.url : 'https://'+notif.url}" target="_blank" rel="noopener" class="m-detail-field-btn m-detail-link-btn" onclick="event.stopPropagation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Notification
         </a>` : ''}
-        ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="m-detail-link" onclick="event.stopPropagation()">
+        ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="m-detail-field-btn m-detail-link-btn" onclick="event.stopPropagation()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           Website
         </a>` : ''}
-      </div>` : ''}
+      </div>
 
       ${tags.length > 0 ? `
       <div class="m-detail-tags">
@@ -2182,11 +2179,11 @@ function mobileCardHTML(exam) {
 
       <div class="m-detail-actions">
         <button class="m-detail-action-btn" onclick="event.stopPropagation();openEditExam('${exam.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Edit
         </button>
         <button class="m-detail-action-btn danger" onclick="event.stopPropagation();deleteExam('${exam.id}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
           Delete
         </button>
       </div>
@@ -2209,7 +2206,6 @@ function mobileCardHTML(exam) {
         </div>
       </div>
       <div class="m-card-right">
-        ${statusLabel ? `<span class="m-status-pill ${statusCls}">${statusLabel}</span>` : ''}
         <div class="m-card-applied${exam.applied ? ' checked' : ''}"
              onclick="event.stopPropagation();toggleApplied('${exam.id}')"
              title="Toggle applied"></div>
