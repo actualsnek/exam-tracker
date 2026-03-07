@@ -920,7 +920,12 @@ window.toggleExpand = (id) => {
   // ── Mobile path ──
   if (isMobile()) {
     const card = document.getElementById('mcard-' + id);
-    if (card) card.classList.toggle('expanded', isNowExpanded);
+    if (card) {
+      card.classList.toggle('expanded', isNowExpanded);
+      if (isNowExpanded) {
+        setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+      }
+    }
     return;
   }
 
@@ -2068,7 +2073,8 @@ function isMobile() {
 }
 
 function mobileCardHTML(exam) {
-  const tags = exam.tags || [];
+  const tags     = exam.tags || [];
+  const resItems = exam.resources || [];
   const isExpanded = expandedCards.has(exam.id);
 
   // deadline
@@ -2125,16 +2131,32 @@ function mobileCardHTML(exam) {
       <div class="m-detail-field-btns">
         <button class="m-detail-field-btn${exam.eligibility ? '' : ' empty'}" onclick="event.stopPropagation();openFieldView('${exam.id}','eligibility')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Eligibility
+          Eligibility${exam.eligibility ? '' : ' <span class="fbtn-empty">empty</span>'}
         </button>
         <button class="m-detail-field-btn${exam.pattern ? '' : ' empty'}" onclick="event.stopPropagation();openFieldView('${exam.id}','pattern')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
-          Pattern
+          Pattern${exam.pattern ? '' : ' <span class="fbtn-empty">empty</span>'}
         </button>
         <button class="m-detail-field-btn${exam.syllabus ? '' : ' empty'}" onclick="event.stopPropagation();openFieldView('${exam.id}','syllabus')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Syllabus
+          Syllabus${exam.syllabus ? '' : ' <span class="fbtn-empty">empty</span>'}
         </button>
+        ${resItems.length > 0 ? `<div class="res-popover-wrap" id="m-res-wrap-${exam.id}">
+          <button class="m-detail-field-btn exp-field-res" onclick="event.stopPropagation();toggleResPopover('m-${exam.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Resources <span class="res-count">${resItems.length}</span>
+          </button>
+          <div class="res-popover" id="res-pop-m-${exam.id}" style="display:none">
+            <div class="res-pop-list">
+              ${resItems.map(r => `<div class="res-pop-item">
+                ${r.type === 'PDF'
+                  ? `<svg class="res-pop-icon res-pop-icon-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`
+                  : `<svg class="res-pop-icon res-pop-icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`}
+                <a href="${r.url ? (r.url.startsWith('http') ? r.url : 'https://'+r.url) : '#'}" target="_blank" rel="noopener" class="res-pop-title">${escHtml(r.label || r.title || '')}</a>
+              </div>`).join('')}
+            </div>
+          </div>
+        </div>` : ''}
       </div>
 
       ${(notif.label && notif.url) || exam.website ? `
@@ -2185,6 +2207,11 @@ function mobileCardHTML(exam) {
       </div>
       <div class="m-card-right">
         ${statusLabel ? `<span class="m-status-pill ${statusCls}">${statusLabel}</span>` : ''}
+        <button class="m-card-edit-btn"
+                onclick="event.stopPropagation();openEditExam('${exam.id}')"
+                title="Edit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
         <div class="m-card-applied${exam.applied ? ' checked' : ''}"
              onclick="event.stopPropagation();toggleApplied('${exam.id}')"
              title="Toggle applied"></div>
@@ -2228,6 +2255,14 @@ let _resizeTimer = null;
 window.addEventListener('resize', () => {
   clearTimeout(_resizeTimer);
   _resizeTimer = setTimeout(() => {
+    // Reset selection mode when switching to mobile viewport
+    if (isMobile() && selectionMode) {
+      selectionMode = false;
+      selectedIds.clear();
+      const btn = document.getElementById('btn-select-mode');
+      if (btn) btn.classList.remove('active');
+      updateBatchDeleteBtn();
+    }
     if (allExams.length > 0 || dataLoaded) renderTable();
   }, 150);
 });
