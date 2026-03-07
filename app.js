@@ -66,9 +66,25 @@ let fvExamId       = null;
 let fvField        = null;
 let mdCurrentField = null; // tracks which field md-panel is editing
 
+function resetAppState() {
+  allExams           = [];
+  filteredExams      = [];
+  activeStatus       = 'all';
+  activeTags         = new Set();
+  searchQuery        = '';
+  activeSort         = 'createdAt_desc';
+  expandedCards      = new Set();
+  selectionMode      = false;
+  selectedIds        = new Set();
+  confirmCallback    = null;
+  inputModalCallback = null;
+  fvExamId           = null;
+  fvField            = null;
+  mdCurrentField     = null;
+}
+
 // ── Auth State Listener ──────────────────────────────
 onAuthStateChanged(auth, user => {
-  // Detach any existing Firestore listener before switching users
   if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
   if (user) {
     currentUser = user;
@@ -76,22 +92,9 @@ onAuthStateChanged(auth, user => {
     subscribeExams();
     updateUserUI();
   } else {
-    currentUser    = null;
-    allExams       = [];
-    filteredExams  = [];
-    activeStatus   = 'all';
-    activeTags     = new Set();
-    searchQuery    = '';
-    activeSort     = 'createdAt_desc';
-    expandedCards  = new Set();
-    selectionMode  = false;
-    selectedIds    = new Set();
-    confirmCallback    = null;
-    inputModalCallback = null;
-    fvExamId = null;
-    fvField  = null;
-    mdCurrentField = null;
-    dataLoaded = false;
+    currentUser = null;
+    dataLoaded  = false;
+    resetAppState();
     showAuthScreen();
   }
 });
@@ -1309,20 +1312,7 @@ window.handleSignOut = async () => {
   document.getElementById('data-dd-menu').style.display   = 'none';
 
   // Clear local state
-  allExams      = [];
-  filteredExams = [];
-  activeStatus  = 'all';
-  activeTags    = new Set();
-  searchQuery   = '';
-  activeSort    = 'createdAt_desc';
-  expandedCards = new Set();
-  selectionMode = false;
-  selectedIds   = new Set();
-  confirmCallback    = null;
-  inputModalCallback = null;
-  fvExamId = null;
-  fvField  = null;
-  mdCurrentField = null;
+  resetAppState();
 
   // Brief feedback then sign out
   toast('Signed out successfully.', 'success');
@@ -1525,20 +1515,7 @@ window.confirmDeleteAccount = () => {
         document.getElementById('data-dd-menu').style.display   = 'none';
 
         // Clear all local state
-        allExams      = [];
-        filteredExams = [];
-        activeStatus  = 'all';
-        activeTags    = new Set();
-        searchQuery   = '';
-        activeSort    = 'createdAt_desc';
-        expandedCards = new Set();
-        selectionMode = false;
-        selectedIds   = new Set();
-        confirmCallback    = null;
-        inputModalCallback = null;
-        fvExamId       = null;
-        fvField        = null;
-        mdCurrentField = null;
+        resetAppState();
 
         // Delete Firebase Auth user
         await deleteUser(currentUser);
@@ -2507,22 +2484,6 @@ function parseMd(md) {
   return html;
 }
 
-// Inline preview for exp-card-body (renders but truncated)
-function renderMdPreviewInline(md) {
-  if (!md) return '';
-  // Plain text fallback for card preview — strip markdown symbols
-  const plain = md
-    .replace(/#{1,6} /g, '')
-    .replace(/\*\*(.+?)\*\*/g, '$1')
-    .replace(/\*(.+?)\*/g, '$1')
-    .replace(/`(.+?)`/g, '$1')
-    .replace(/^[-*] /gm, '• ')
-    .replace(/^\d+\. /gm, '')
-    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
-    .replace(/^---$/gm, '');
-  return `<span style="white-space:pre-wrap;font-size:12px">${escHtml(plain)}</span>`;
-}
-
 // ════════════════════════════════════════════════════
 //  HELPERS
 // ════════════════════════════════════════════════════
@@ -2539,10 +2500,6 @@ function formatDate(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function capitalize(s) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 }
 
 function escHtml(s) {
