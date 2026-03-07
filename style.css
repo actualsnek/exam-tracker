@@ -940,7 +940,8 @@ tr.detail-row td {
 /* Task checkboxes */
 .fv-content .task-list { list-style: none; padding-left: 4px; }
 .fv-content .task-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; font-size: 13px; color: var(--text2); }
-.fv-content .task-cb { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid var(--border2); border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+.fv-content .task-cb { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid var(--border2); border-radius: 3px; flex-shrink: 0; margin-top: 1px; cursor: pointer; background: none; padding: 0; transition: all .15s; }
+.fv-content .task-cb:hover { border-color: var(--accent); background: var(--accent-bg); }
 .fv-content .task-cb--checked { background: var(--accent); border-color: var(--accent); }
 .fv-content .task-cb--checked::after { content: ''; display: block; width: 8px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
 .fv-content .task-done .task-label { text-decoration: line-through; color: var(--muted); opacity: .6; }
@@ -1453,7 +1454,8 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 /* Task checkboxes */
 .md-preview-content .task-list { list-style: none; padding-left: 4px; }
 .md-preview-content .task-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
-.md-preview-content .task-cb { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid var(--border2); border-radius: 3px; flex-shrink: 0; margin-top: 1px; }
+.md-preview-content .task-cb { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid var(--border2); border-radius: 3px; flex-shrink: 0; margin-top: 1px; cursor: pointer; background: none; padding: 0; transition: all .15s; }
+.md-preview-content .task-cb:hover { border-color: var(--accent); background: var(--accent-bg); }
 .md-preview-content .task-cb--checked { background: var(--accent); border-color: var(--accent); }
 .md-preview-content .task-cb--checked::after { content: ''; display: block; width: 8px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
 .md-preview-content .task-done .task-label { text-decoration: line-through; color: var(--muted); opacity: .6; }

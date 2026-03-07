@@ -2332,6 +2332,13 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
+// Toggle task checkbox click (visual only — does not write back to source)
+window.toggleTaskCb = (btn) => {
+  const isChecked = btn.classList.toggle('task-cb--checked');
+  const li = btn.closest('.task-item');
+  if (li) li.classList.toggle('task-done', isChecked);
+};
+
 function parseMd(md) {
   if (!md) return '';
   let html = escHtml(md);
@@ -2398,9 +2405,9 @@ function parseMd(md) {
     return out;
   });
 
-  // Task checkboxes (before regular lists)
-  html = html.replace(/^- \[x\] (.+)$/gim, '<li class="task-item task-done"><span class="task-cb task-cb--checked"></span><span class="task-label">$1</span></li>');
-  html = html.replace(/^- \[ \] (.+)$/gm,  '<li class="task-item"><span class="task-cb"></span><span class="task-label">$1</span></li>');
+  // Task checkboxes (before regular lists) — clickable toggle
+  html = html.replace(/^- \[x\] (.+)$/gim, '<li class="task-item task-done"><button class="task-cb task-cb--checked" onclick="toggleTaskCb(this)" type="button"></button><span class="task-label">$1</span></li>');
+  html = html.replace(/^- \[ \] (.+)$/gm,  '<li class="task-item"><button class="task-cb" onclick="toggleTaskCb(this)" type="button"></button><span class="task-label">$1</span></li>');
   // Wrap consecutive task items
   html = html.replace(/(<li class="task-item[^"]*">.*<\/li>\n?)+/g, match => `<ul class="task-list">${match}</ul>`);
 
