@@ -822,13 +822,23 @@ tr.detail-row td {
 /* View mode */
 #fv-view-mode { display: flex; flex-direction: column; height: 100%; }
 .fv-header {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 20px 24px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  flex-shrink: 0; gap: 12px;
 }
-.fv-title { font-family: var(--serif); font-size: 20px; color: var(--text); }
-.fv-sub   { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.fv-back-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: none; color: var(--muted);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  padding: 6px 8px; border-radius: var(--r);
+  transition: all .15s; white-space: nowrap; flex-shrink: 0;
+  font-family: var(--font);
+}
+.fv-back-btn:hover { background: var(--surface2); color: var(--text); }
+.fv-header-center { flex: 1; min-width: 0; }
+.fv-title { font-family: var(--serif); font-size: 18px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fv-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fv-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 .fv-edit-btn {
   padding: 7px 16px; border-radius: var(--r);
@@ -836,14 +846,9 @@ tr.detail-row td {
   background: var(--accent-bg); color: var(--accent);
   font-size: 12px; font-weight: 600; cursor: pointer;
   transition: all .15s; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 5px;
 }
 .fv-edit-btn:hover { background: var(--accent); color: #fff; }
-.fv-close-btn {
-  background: none; border: none; color: var(--muted);
-  font-size: 18px; cursor: pointer; padding: 4px 8px;
-  transition: color var(--transition); line-height: 1;
-}
-.fv-close-btn:hover { color: var(--text); }
 .fv-content {
   flex: 1; overflow-y: auto;
   padding: 24px 28px;
@@ -965,6 +970,13 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   animation: overlayIn .2s ease;
 }
 #discard-modal { z-index: 300; }
+#discard-modal .modal-footer {
+  gap: 10px;
+}
+#discard-modal .btn-ghost,
+#discard-modal .btn-danger {
+  flex: 1; width: auto; margin-top: 0; text-align: center;
+}
 @keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
 

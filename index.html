@@ -575,13 +575,16 @@
     <!-- VIEW MODE -->
     <div id="fv-view-mode">
       <div class="fv-header">
-        <div>
+        <button class="fv-back-btn" onclick="closeFieldView()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="15 18 9 12 15 6"/></svg>
+          Back
+        </button>
+        <div class="fv-header-center">
           <div class="fv-title" id="fv-title">Eligibility</div>
           <div class="fv-sub" id="fv-sub">SSC CGL 2025</div>
         </div>
         <div class="fv-header-actions">
           <button class="fv-edit-btn" id="fv-edit-btn" onclick="switchToEditMode()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
-          <button class="fv-close-btn" onclick="closeFieldView()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
       </div>
       <div class="fv-content" id="fv-content"></div>
