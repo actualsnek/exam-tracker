@@ -1297,6 +1297,9 @@ window.closeProfile = () => {
 };
 
 window.handleSignOut = async () => {
+  // Detach Firestore listener immediately so onSnapshot can't fire during cleanup
+  if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
+
   // Close all open UI
   document.getElementById('profile-modal').style.display  = 'none';
   document.getElementById('exam-modal').style.display     = 'none';
@@ -1310,6 +1313,8 @@ window.handleSignOut = async () => {
   document.getElementById('tag-dd-menu').style.display    = 'none';
   document.getElementById('sort-dd-menu').style.display   = 'none';
   document.getElementById('data-dd-menu').style.display   = 'none';
+  const sk = document.getElementById('skeleton-loader');
+  if (sk) sk.style.display = 'none';
 
   // Clear local state
   resetAppState();
@@ -1494,6 +1499,9 @@ window.confirmDeleteAccount = () => {
           await reauthenticateWithCredential(currentUser, credential);
         }
 
+        // Detach Firestore listener before deleting data so onSnapshot can't fire
+        if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
+
         // Delete all Firestore exam data
         const snap = await getDocs(examsRef());
         const batch = writeBatch(db);
@@ -1513,6 +1521,8 @@ window.confirmDeleteAccount = () => {
         document.getElementById('tag-dd-menu').style.display    = 'none';
         document.getElementById('sort-dd-menu').style.display   = 'none';
         document.getElementById('data-dd-menu').style.display   = 'none';
+        const sk = document.getElementById('skeleton-loader');
+        if (sk) sk.style.display = 'none';
 
         // Clear all local state
         resetAppState();
