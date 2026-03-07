@@ -62,6 +62,9 @@ let examsUnsubscribe = null; // holds the onSnapshot detach function
 let selectionMode = false;
 let selectedIds   = new Set();
 let dataLoaded    = false;  // true after first onSnapshot fires
+let fvExamId       = null;
+let fvField        = null;
+let mdCurrentField = null; // tracks which field md-panel is editing
 
 // ── Auth State Listener ──────────────────────────────
 onAuthStateChanged(auth, user => {
@@ -844,9 +847,9 @@ function tableRowHTML(exam, num) {
   }
 
   // Year
-  let cycleHTML = '<span style="color:var(--muted)">—</span>';
+  let yearHTML = '<span style="color:var(--muted)">—</span>';
   if (exam.year) {
-    cycleHTML = escHtml(exam.year);
+    yearHTML = escHtml(exam.year);
   }
   const tags = exam.tags || [];
   let tagsHTML = '<span style="color:var(--muted)">—</span>';
@@ -880,7 +883,7 @@ function tableRowHTML(exam, num) {
       }
     </td>
     <td class="td-name" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${escHtml(exam.name)}</td>
-    <td class="td-cycle">${cycleHTML}</td>
+    <td class="td-year">${yearHTML}</td>
     <td class="td-agency" onclick="toggleExpand('${exam.id}')" style="cursor:pointer">${exam.agency ? escHtml(exam.agency) : '<span style="color:var(--muted)">—</span>'}</td>
     <td class="td-tag">${tagsHTML}</td>
     <td class="td-deadline">${deadlineHTML}</td>
@@ -1977,10 +1980,6 @@ window.saveMdPanel = () => {
 // ════════════════════════════════════════════════════
 //  FIELD VIEW PANEL (view → edit → save)
 // ════════════════════════════════════════════════════
-
-let fvExamId       = null;
-let fvField        = null;
-let mdCurrentField = null; // tracks which field md-panel is editing — never parse the title
 
 window.openFieldView = (examId, field) => {
   const exam = allExams.find(e => e.id === examId);

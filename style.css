@@ -956,8 +956,8 @@ tr.exam-row.expanded { background: var(--bg2); }
 tr.exam-row.expanded td { border-bottom: none; }
 
 /* Year column */
-.th-cycle { min-width: 80px; }
-td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+.th-year { min-width: 80px; }
+td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
 @media (max-width: 900px) {
   .exp-cards { grid-template-columns: 1fr; }
