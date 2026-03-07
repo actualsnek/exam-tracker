@@ -1790,29 +1790,161 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .res-url-input { min-width: 0; }
 
   /* ══════════════════════════════════════
-     FIX 5: fv-panel editor on mobile
-     - Hide live preview pane in edit mode
-     - Give full height to textarea
-     - View mode is still accessible for
-       reading the rendered output
+     MOBILE: md-panel + fv-panel
+     Both panels become full-screen overlays
+     (slide up from bottom, not side-sheet)
+     Toolbar: single scrollable row
+     Split: tab toggle (Write / Preview)
   ══════════════════════════════════════ */
-  .fv-inner { width: 100vw; overflow-x: hidden; }
 
-  /* In edit mode: hide preview pane entirely, textarea gets full height */
-  #fv-edit-mode .md-preview-pane { display: none; }
-  #fv-edit-mode .md-divider       { display: none; }
-  #fv-edit-mode .md-split         { flex-direction: column; }
-  #fv-edit-mode .md-write-pane    { flex: 1; min-height: 0; }
-  #fv-edit-mode .md-pane-label    { display: none; } /* hide WRITE label when solo */
+  /* ── Panel geometry: full screen ── */
+  .md-panel,
+  .fv-inner {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100%;
+    border-left: none;
+    border-radius: 0;
+    box-shadow: none;
+    animation: mobileSlideUp .25s ease;
+  }
+  @keyframes mobileSlideUp {
+    from { transform: translateY(48px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  /* fv-panel itself (wrapper) also full screen */
+  .fv-panel { align-items: stretch; justify-content: stretch; }
 
-  /* md-panel (add/edit modal panels): also hide preview, textarea full height */
+  /* ── Panel header: compact, safe for thumb on top ── */
+  .md-panel-header {
+    padding: 12px 14px;
+    gap: 10px;
+    min-height: 52px;
+  }
+  .md-panel-title { font-size: 14px; }
+  .md-panel-sub   { font-size: 10px; margin-top: 1px; }
+
+  .fv-header { padding: 12px 14px; min-height: 52px; }
+  .fv-title  { font-size: 16px; }
+  .fv-sub    { font-size: 11px; }
+  .fv-back-btn { padding: 8px 6px; font-size: 11px; }
+  .fv-edit-btn { padding: 7px 14px; font-size: 12px; }
+
+  /* ── Toolbar: single horizontally scrollable row ── */
+  .md-toolbar {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;       /* hide scrollbar on Firefox */
+    -webkit-overflow-scrolling: touch;
+    padding: 0;
+  }
+  .md-toolbar::-webkit-scrollbar { display: none; }
+
+  /* Merge both rows into one horizontal strip */
+  .md-toolbar-row {
+    display: inline-flex;      /* inline so both rows sit in flow */
+    flex-wrap: nowrap;
+    padding: 6px 10px;
+    gap: 2px;
+    white-space: nowrap;
+  }
+  /* Stack the two rows into a single scrollable line */
+  .md-toolbar { display: flex; flex-direction: row; align-items: center; }
+  .md-toolbar-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; margin: 0 4px; align-self: center; }
+
+  /* Bigger tap targets on toolbar buttons */
+  .md-tool { padding: 7px 9px; font-size: 13px; }
+  .md-tool--text { padding: 7px 9px; font-size: 12px; }
+  .md-tool svg { width: 16px; height: 16px; }
+  .md-tool-sep { display: none; } /* separators take too much space on mobile */
+
+  /* ── Split pane: tab-based Write / Preview ── */
+  /* Hide the vertical divider — not needed with tabs */
+  .md-divider { display: none !important; }
+
+  /* Stack panes vertically but show only active one */
   .md-split {
     flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    position: relative;
   }
-  .md-divider { width: 100%; height: 1px; }
-  .md-pane { min-height: 160px; }
-  .md-write-pane { flex: 1.2; }
-  .md-preview-pane { flex: 1; }
+
+  /* Both panes take full space; preview hidden by default */
+  .md-write-pane,
+  .md-preview-pane {
+    flex: 1;
+    min-height: 0;
+  }
+  .md-preview-pane { display: none; }
+
+  /* When preview is toggled on: show preview, hide editor */
+  .md-preview-visible .md-write-pane  { display: none; }
+  .md-preview-visible .md-preview-pane { display: flex; }
+
+  /* ── Pane label bar: acts as tab switcher ── */
+  .md-pane-label {
+    padding: 8px 14px;
+    font-size: 10px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Preview toggle pill — bigger and clearer on mobile */
+  .md-preview-toggle {
+    font-size: 10px;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  /* ── Textarea: comfortable on mobile keyboard ── */
+  .md-textarea {
+    font-size: 14px;
+    line-height: 1.75;
+    padding: 14px;
+    /* prevent zoom on focus on iOS */
+    font-size: max(16px, 14px);
+  }
+
+  /* ── Preview content: readable on small screens ── */
+  .md-preview-content {
+    font-size: 14px;
+    padding: 16px 16px 32px;
+    line-height: 1.75;
+  }
+  .md-preview-content h2 { font-size: 17px; }
+  .md-preview-content h3 { font-size: 15px; }
+  .md-preview-content table { font-size: 12px; display: block; overflow-x: auto; }
+
+  /* ── Footer: full-width sticky Save/Cancel ── */
+  .md-panel-footer {
+    padding: 10px 14px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+  .panel-footer-actions { display: flex; gap: 8px; flex: 1; justify-content: flex-end; }
+  .panel-footer-actions .btn-ghost {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  .panel-footer-actions .btn-primary--auto {
+    padding: 10px 24px;
+    font-size: 13px;
+  }
+
+  /* ── fv-view mode: clean full-screen reading ── */
+  #fv-view-mode { display: flex; flex-direction: column; height: 100%; }
+  .fv-content {
+    padding: 16px 16px 40px;
+    font-size: 14px;
+  }
+
+  /* fv edit mode: same treatment as md-panel */
+  #fv-edit-mode .md-preview-pane { display: none; }
+  #fv-edit-mode .md-preview-visible .md-preview-pane { display: flex; }
+  #fv-edit-mode .md-preview-visible .md-write-pane   { display: none; }
 }
 
 /* ── MODAL: MD-FIELDS-ROW (Eligibility · Syllabus · Pattern side by side) ── */

@@ -2073,14 +2073,25 @@ window.toggleMdPreview = () => {
 
 function applyMdPreviewState() {
   const show = mdPreviewVisible;
+  const isMobile = window.innerWidth <= 640;
   [1, 2].forEach(i => {
     const pane   = document.getElementById(`md-preview-pane-${i}`);
     const div    = document.getElementById(`md-divider-${i}`);
     const label  = document.getElementById(`md-preview-toggle-label-${i}`);
     const btn    = document.getElementById(`md-preview-toggle-${i}`);
     if (!pane) return;
-    pane.style.display  = show ? '' : 'none';
-    div.style.display   = show ? '' : 'none';
+    // On mobile: use class-based toggle on the parent split container
+    // On desktop: use inline display style
+    if (isMobile) {
+      const split = pane.closest('.md-split');
+      if (split) split.classList.toggle('md-preview-visible', show);
+      // Let CSS handle pane visibility — remove any inline overrides
+      pane.style.display = '';
+      if (div) div.style.display = '';
+    } else {
+      pane.style.display = show ? '' : 'none';
+      if (div) div.style.display = show ? '' : 'none';
+    }
     if (label) label.textContent = show ? 'Hide Preview' : 'Preview';
     if (btn)   btn.classList.toggle('md-preview-toggle--off', !show);
   });
