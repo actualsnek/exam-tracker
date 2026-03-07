@@ -1664,8 +1664,8 @@ window.importJSON = async (event) => {
       confirmLabel: 'Import',
       onConfirm: async (selectedIds) => {
         const toImport = selectedIds.map(i => parsed[i]);
-        if (toImport.length > 60) return toast('Import limit is 60 exams per file.', 'error');
-        const CHUNK = 400;
+        if (toImport.length > 151) return toast('Import limit is 151 exams per file.', 'error');
+        const CHUNK = 151;
         for (let i = 0; i < toImport.length; i += CHUNK) {
           const batch = writeBatch(db);
           toImport.slice(i, i + CHUNK).forEach(clean => {
