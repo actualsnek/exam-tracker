@@ -17,8 +17,7 @@ import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   deleteUser,
-  updateProfile,
-  sendEmailVerification
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore,
@@ -88,15 +87,6 @@ function resetAppState() {
 onAuthStateChanged(auth, user => {
   if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
   if (user) {
-    // Google sign-in: email is always pre-verified by Google.
-    // Email/password: require the user to verify their email first.
-    if (!user.emailVerified && !isGoogleUser(user)) {
-      // Signed in but email not verified — hold in verification screen.
-      // Keep currentUser set so resend and sign-out work.
-      currentUser = user;
-      showVerificationScreen(user.email);
-      return;
-    }
     currentUser = user;
     showApp();
     subscribeExams();
@@ -108,10 +98,6 @@ onAuthStateChanged(auth, user => {
     showAuthScreen();
   }
 });
-
-function isGoogleUser(user) {
-  return user?.providerData?.some(p => p.providerId === 'google.com');
-}
 
 function showApp() {
   const authEl = document.getElementById('auth-screen');
@@ -162,9 +148,6 @@ function showAuthScreen() {
   appEl.style.display   = 'none';
   authEl.style.display  = 'flex';
   authEl.classList.remove('is-fading-out');
-  // Also hide verification screen in case user came from there
-  const verifEl = document.getElementById('verif-screen');
-  if (verifEl) verifEl.style.display = 'none';
   // Reset login button state
   const loginBtn = document.getElementById('login-btn-text');
   if (loginBtn) loginBtn.textContent = 'Sign In';
@@ -242,102 +225,6 @@ function showAuthScreen() {
   const selectBtn = document.getElementById('btn-select-mode');
   if (selectBtn) selectBtn.classList.remove('active');
 }
-
-// ════════════════════════════════════════════════════
-//  EMAIL VERIFICATION SCREEN
-// ════════════════════════════════════════════════════
-
-function showVerificationScreen(email) {
-  const appEl    = document.getElementById('app');
-  const authEl   = document.getElementById('auth-screen');
-  const verifEl  = document.getElementById('verif-screen');
-
-  appEl.style.display   = 'none';
-  authEl.style.display  = 'none';
-  verifEl.style.display = 'flex';
-
-  // Show which address the email was sent to
-  const addrEl = document.getElementById('verif-email-addr');
-  if (addrEl) addrEl.textContent = email || '';
-
-  // Reset resend button
-  const resendBtn = document.getElementById('verif-resend-btn');
-  if (resendBtn) { resendBtn.disabled = false; resendBtn.textContent = 'Resend Email'; }
-
-  document.getElementById('verif-msg').textContent = '';
-}
-
-function hideVerificationScreen() {
-  const verifEl = document.getElementById('verif-screen');
-  if (verifEl) verifEl.style.display = 'none';
-}
-
-// Called when user clicks "Resend Email"
-window.handleResendVerification = async () => {
-  if (!currentUser) return;
-  const btn = document.getElementById('verif-resend-btn');
-  const msg = document.getElementById('verif-msg');
-  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-  if (msg) msg.textContent = '';
-  try {
-    await sendEmailVerification(currentUser);
-    if (msg) { msg.textContent = 'Email sent! Check your inbox (and spam folder).'; msg.className = 'verif-msg success'; }
-    // Disable resend for 30s to prevent spam
-    let secs = 30;
-    const tick = setInterval(() => {
-      secs--;
-      if (btn) btn.textContent = `Resend in ${secs}s`;
-      if (secs <= 0) {
-        clearInterval(tick);
-        if (btn) { btn.disabled = false; btn.textContent = 'Resend Email'; }
-      }
-    }, 1000);
-  } catch (e) {
-    const errMsg = e.code === 'auth/too-many-requests'
-      ? 'Too many requests. Please wait a few minutes before resending.'
-      : 'Failed to send email. Try again.';
-    if (msg) { msg.textContent = errMsg; msg.className = 'verif-msg error'; }
-    if (btn) { btn.disabled = false; btn.textContent = 'Resend Email'; }
-  }
-};
-
-// Called when user clicks "I've Verified — Continue"
-window.handleCheckVerification = async () => {
-  if (!currentUser) return;
-  const btn = document.getElementById('verif-check-btn');
-  const msg = document.getElementById('verif-msg');
-  if (btn) { btn.disabled = true; btn.textContent = 'Checking…'; }
-  if (msg) msg.textContent = '';
-  try {
-    // Reload the user object to get fresh emailVerified status from Firebase
-    await currentUser.reload();
-    // currentUser.reload() updates in place — re-read from auth
-    const refreshed = auth.currentUser;
-    if (refreshed && refreshed.emailVerified) {
-      // Verified! — proceed into the app
-      currentUser = refreshed;
-      hideVerificationScreen();
-      showApp();
-      subscribeExams();
-      updateUserUI();
-    } else {
-      if (msg) { msg.textContent = 'Email not verified yet. Check your inbox and click the link.'; msg.className = 'verif-msg error'; }
-      if (btn) { btn.disabled = false; btn.textContent = 'I've Verified — Continue'; }
-    }
-  } catch (e) {
-    if (msg) { msg.textContent = 'Could not check status. Check your connection.'; msg.className = 'verif-msg error'; }
-    if (btn) { btn.disabled = false; btn.textContent = 'I've Verified — Continue'; }
-  }
-};
-
-// Called when user clicks "Use a different account" on verification screen
-window.handleVerifSignOut = async () => {
-  hideVerificationScreen();
-  if (currentUser) {
-    try { await signOut(auth); } catch (_) {}
-  }
-  // onAuthStateChanged will fire → showAuthScreen()
-};
 
 function updateUserUI() {
   if (!currentUser) return;
@@ -436,9 +323,8 @@ window.handleLogin = async () => {
   clearAuthMessages();
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    // On success onAuthStateChanged fires.
-    // If emailVerified → showApp(). If not → showVerificationScreen().
-    // Either way the button stays hidden with the auth screen — no re-enable needed.
+    // On success onAuthStateChanged fires → showApp(). Button stays disabled/hidden
+    // with the auth screen, so no need to re-enable it here.
   } catch (e) {
     btnTxt.textContent = 'Sign In';
     btnEl.disabled = false;
@@ -461,10 +347,7 @@ window.handleRegister = async () => {
     const cred = await createUserWithEmailAndPassword(auth, email, password);
     // Set display name — if this fails the account was still created; not fatal
     try { await updateProfile(cred.user, { displayName: name }); } catch (_) {}
-    // Send verification email before letting the user into the app
-    try { await sendEmailVerification(cred.user); } catch (_) {}
-    // onAuthStateChanged fires but emailVerified is false → showVerificationScreen()
-    // (handled in the listener — nothing more needed here)
+    // onAuthStateChanged fires → showApp(). Button stays with auth screen.
   } catch (e) {
     btnTxt.textContent = 'Create Account';
     btnEl.disabled = false;
@@ -1564,10 +1447,6 @@ window.closeProfile = () => {
 window.handleSignOut = async () => {
   // Detach Firestore listener immediately — no more onSnapshot events
   if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
-
-  // Hide verification screen if it's showing
-  const verifEl = document.getElementById('verif-screen');
-  if (verifEl) verifEl.style.display = 'none';
 
   // Close every open overlay/modal/dropdown immediately (no animation — we're leaving)
   ['profile-modal','exam-modal','confirm-modal','input-modal',

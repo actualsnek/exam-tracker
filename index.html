@@ -95,42 +95,6 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════
-     EMAIL VERIFICATION SCREEN
-════════════════════════════════════════════════ -->
-<div id="verif-screen" class="auth-screen" style="display:none">
-  <div class="auth-bg-grid"></div>
-  <div class="auth-card verif-card">
-    <div class="auth-logo">EXAM <span>TRACKER</span></div>
-
-    <div class="verif-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-        <polyline points="22,6 12,13 2,6"/>
-      </svg>
-    </div>
-
-    <h2 class="verif-title">Verify your email</h2>
-    <p class="verif-sub">
-      We sent a verification link to<br>
-      <strong id="verif-email-addr"></strong>
-    </p>
-    <p class="verif-hint">Click the link in the email, then come back and press the button below.</p>
-
-    <p id="verif-msg" class="verif-msg"></p>
-
-    <button class="btn-primary" id="verif-check-btn" onclick="handleCheckVerification()">
-      I've Verified — Continue
-    </button>
-
-    <div class="verif-actions">
-      <button class="btn-link" id="verif-resend-btn" onclick="handleResendVerification()">Resend Email</button>
-      <span class="verif-sep">·</span>
-      <button class="btn-link" onclick="handleVerifSignOut()">Use a different account</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════════
      MAIN APP
 ════════════════════════════════════════════════ -->
 <div id="app" style="display:none">
