@@ -1051,7 +1051,7 @@ function detailRowHTML(exam) {
         <div class="exp-bar">
           <div class="exp-tags-row">
             <span class="exp-tags-label">Tags:</span>
-            ${tags.map(t => `<span class="exp-tag" onclick="toggleTagFilter('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}
+            ${tags.map(t => `<span class="exp-tag" onclick="toggleTagFilter(${escHtml(JSON.stringify(t))})">${escHtml(t)}</span>`).join('')}
             <button class="exp-tag-add" onclick="openEditExam('${exam.id}')">+ add</button>
           </div>
           <div class="exp-actions">
@@ -1088,7 +1088,7 @@ function renderTagDropdown() {
   }
 
   list.innerHTML = allTags.map(tag => `
-    <div class="tag-dd-item${activeTags.has(tag) ? ' active' : ''}" onclick="toggleTagFilter('${escHtml(tag)}')">
+    <div class="tag-dd-item${activeTags.has(tag) ? ' active' : ''}" onclick="toggleTagFilter(${escHtml(JSON.stringify(tag))})">
       <div class="tag-dd-checkbox"></div>
       <span>${escHtml(tag)}</span>
     </div>`).join('');
@@ -2310,7 +2310,7 @@ function mobileCardHTML(exam) {
       ${tags.length > 0 ? `
       <div class="m-detail-tags">
         <span class="m-detail-tags-label">Tags:</span>
-        ${tags.map(t => `<span class="m-detail-tag" onclick="event.stopPropagation();toggleTagFilter('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}
+        ${tags.map(t => `<span class="m-detail-tag" onclick="event.stopPropagation();toggleTagFilter(${escHtml(JSON.stringify(t))})">${escHtml(t)}</span>`).join('')}
       </div>` : ''}
 
       <div class="m-detail-actions">
