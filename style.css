@@ -1537,7 +1537,15 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .m-card-right {
     display: flex; align-items: center; gap: 4px; flex-shrink: 0;
   }
-  .m-status-pill { display: inline-block; }
+  /* status pill + deadline inline in card meta row */
+  .m-card-status-date {
+    display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  }
+  .m-status-pill {
+    display: inline-block;
+    padding: 2px 7px; font-size: 9px; font-weight: 700;
+    border-radius: 100px; white-space: nowrap;
+  }
 
   /* FIX 6: larger tap targets for applied + pin */
   .m-card-applied {
