@@ -1388,8 +1388,15 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .ring-days  { font-size: 11px; }
   .ring-unit  { font-size: 6px; }
   .ring-name  { font-size: 8px; max-width: 46px; }
-  /* Empty strip: constrain height to match */
-  .countdown-empty { height: 54px; font-size: 10px; }
+  /* FIX 1: collapse strip entirely when no exams pinned — zero dead space */
+  .countdown-empty { display: none; }
+  .countdown-strip:has(> .countdown-label + .countdown-rings > .countdown-empty:only-child) {
+    display: none;
+  }
+
+  /* FIX 5: hide "PINNED" label on mobile — rings are self-explanatory,
+     also frees horizontal room for more rings before scroll */
+  .countdown-label { display: none; }
 
   /* FIX 2 + 3: filter bar → sticky (stacks naturally, no top calc needed) */
   .filter-bar {
@@ -1434,6 +1441,11 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .inline-search { flex: 1; min-width: 0; }
   .inline-search-input { width: 100%; min-width: 0; }
 
+  /* FIX 2: Add Exam — icon only on mobile, frees ~60px for search input */
+  .btn-add-text { display: none; }
+  .btn-add { padding: 0; width: 34px; height: 34px; justify-content: center; flex-shrink: 0; }
+  .btn-add svg { width: 16px; height: 16px; }
+
   /* hide Select & Delete-selected on mobile */
   .btn-select-mode,
   #btn-delete-selected { display: none !important; }
@@ -1465,6 +1477,8 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     cursor: pointer;
     transition: background var(--transition);
   }
+  /* FIX 4: brief tap flash — visual feedback on touch */
+  .m-card-top:active { background: var(--surface2); }
   .m-card:first-child { border-top: 1px solid var(--border2); }
   .m-card.pinned-card { background: var(--accent-bg); }
   .m-card.pinned-card .m-card-top { border-left: 3px solid var(--accent); }
@@ -1540,6 +1554,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     /* expand touch target with padding */
     padding: 11px;
     box-sizing: content-box;
+    position: relative;
   }
   .m-card-applied.checked { background: var(--yes); border-color: var(--yes); }
   .m-card-applied.checked::after {
@@ -1547,6 +1562,19 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     width: 9px; height: 6px;
     border-left: 2px solid var(--yes-check); border-bottom: 2px solid var(--yes-check);
     transform: rotate(-45deg) translateY(-1px);
+  }
+  /* FIX 3: show "Applied" label above the checkbox when checked — touch-friendly context */
+  .m-card-applied.checked::before {
+    content: 'Applied';
+    position: absolute;
+    bottom: calc(100% + 1px);
+    left: 50%; transform: translateX(-50%);
+    font-size: 8px; font-weight: 700;
+    color: var(--yes);
+    font-family: var(--font);
+    letter-spacing: .3px;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   .m-card-pin {
