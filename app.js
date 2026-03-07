@@ -375,14 +375,19 @@ window.toggleApplied = async (id) => {
   const newVal = !exam.applied;
   // Optimistic update
   exam.applied = newVal;
+  // desktop
   const cb = document.querySelector(`#row-${id} .row-checkbox`);
   if (cb) cb.classList.toggle('checked', newVal);
+  // mobile
+  const mcb = document.querySelector(`#mcard-${id} .m-card-applied`);
+  if (mcb) mcb.classList.toggle('checked', newVal);
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { applied: newVal });
   } catch (e) {
     // Revert on failure
     exam.applied = !newVal;
-    if (cb) cb.classList.toggle('checked', !newVal);
+    if (cb)  cb.classList.toggle('checked', !newVal);
+    if (mcb) mcb.classList.toggle('checked', !newVal);
     toast('Update failed.', 'error');
   }
 };
@@ -399,6 +404,8 @@ window.togglePin = async (id) => {
   exam.pinned = newVal;
   const pinBtn = document.querySelector(`#row-${id} .pin-btn`);
   if (pinBtn) pinBtn.classList.toggle('pinned', newVal);
+  const mPinBtn = document.querySelector(`#mcard-${id} .m-card-pin`);
+  if (mPinBtn) mPinBtn.classList.toggle('pinned', newVal);
   renderCountdowns();
   try {
     await updateDoc(doc(db, 'users', currentUser.uid, 'exams', id), { pinned: newVal });
@@ -406,6 +413,7 @@ window.togglePin = async (id) => {
     // Revert on failure
     exam.pinned = !newVal;
     if (pinBtn) pinBtn.classList.toggle('pinned', !newVal);
+    if (mPinBtn) mPinBtn.classList.toggle('pinned', !newVal);
     renderCountdowns();
     toast('Update failed.', 'error');
   }
@@ -759,6 +767,25 @@ window.setSortOrder = (val) => {
 };
 
 function renderTable() {
+  // ── Mobile: render cards instead of table ──
+  if (isMobile()) {
+    const tableScroll   = document.getElementById('table-scroll');
+    const mobileList    = document.getElementById('mobile-card-list');
+    if (tableScroll) tableScroll.style.display = 'none';
+    if (mobileList)  mobileList.style.display  = '';
+    // Safety: hide skeleton
+    if (dataLoaded) {
+      const sk = document.getElementById('skeleton-loader');
+      if (sk) sk.style.display = 'none';
+    }
+    renderMobileCards();
+    return;
+  }
+
+  // ── Desktop: original table logic ──
+  const mobileList = document.getElementById('mobile-card-list');
+  if (mobileList) mobileList.style.display = 'none';
+
   const tbody  = document.getElementById('exam-tbody');
   const empty  = document.getElementById('list-empty');
   const scroll = document.getElementById('table-scroll');
@@ -872,38 +899,46 @@ window.toggleExpand = (id) => {
     expandedCards.forEach(openId => {
       if (openId === id) return;
       expandedCards.delete(openId);
+      // desktop
       const openRow = document.getElementById('row-' + openId);
-      if (!openRow) return;
-      openRow.classList.remove('expanded');
-      const openBtn = openRow.querySelector('.expand-btn');
-      if (openBtn) openBtn.classList.remove('open');
-      const openDetail = openRow.nextElementSibling;
-      if (openDetail && openDetail.classList.contains('detail-row')) openDetail.remove();
+      if (openRow) {
+        openRow.classList.remove('expanded');
+        const openBtn = openRow.querySelector('.expand-btn');
+        if (openBtn) openBtn.classList.remove('open');
+        const openDetail = openRow.nextElementSibling;
+        if (openDetail && openDetail.classList.contains('detail-row')) openDetail.remove();
+      }
+      // mobile
+      const openCard = document.getElementById('mcard-' + openId);
+      if (openCard) openCard.classList.remove('expanded');
     });
   }
 
   if (isNowExpanded) expandedCards.add(id);
   else expandedCards.delete(id);
 
-  // ── Surgical update: only touch the two rows for this exam ──
+  // ── Mobile path ──
+  if (isMobile()) {
+    const card = document.getElementById('mcard-' + id);
+    if (card) card.classList.toggle('expanded', isNowExpanded);
+    return;
+  }
+
+  // ── Desktop path: surgical DOM update ──
   const examRow = document.getElementById('row-' + id);
   if (!examRow) { renderTable(); return; }
 
-  // Toggle classes on the main exam-row
   examRow.classList.toggle('expanded', isNowExpanded);
 
-  // Update the expand button arrow
   const expandBtn = examRow.querySelector('.expand-btn');
   if (expandBtn) {
     expandBtn.classList.toggle('open', isNowExpanded);
   }
 
-  // Insert or remove the detail-row that follows
   const existingDetailRow = examRow.nextElementSibling;
   const hasDetailRow = existingDetailRow && existingDetailRow.classList.contains('detail-row');
 
   if (isNowExpanded && !hasDetailRow) {
-    // Build and insert the detail row
     const exam = filteredExams.find(e => e.id === id);
     if (!exam) { renderTable(); return; }
     const tmp = document.createElement('tbody');
@@ -911,7 +946,6 @@ window.toggleExpand = (id) => {
     const newDetailRow = tmp.firstElementChild;
     if (newDetailRow) examRow.insertAdjacentElement('afterend', newDetailRow);
   } else if (!isNowExpanded && hasDetailRow) {
-    // Remove the detail row
     existingDetailRow.remove();
   }
 };
@@ -2025,7 +2059,174 @@ window.mdInsertTable = () => {
   preview();
 };
 
-// ── Minimal Markdown parser ───────────────────────
+// ════════════════════════════════════════════════════
+//  MOBILE CARD RENDERER  (≤ 640px)
+// ════════════════════════════════════════════════════
+
+function isMobile() {
+  return window.innerWidth <= 640;
+}
+
+function mobileCardHTML(exam) {
+  const tags = exam.tags || [];
+  const isExpanded = expandedCards.has(exam.id);
+
+  // deadline
+  const dateStr = exam.lastDate || exam.examDate;
+  let dlClass = '', dlText = '';
+  if (dateStr) {
+    const days = daysUntil(dateStr);
+    dlText = formatDate(dateStr);
+    if (days < 0)      dlClass = 'past';
+    else if (days <= 7)  dlClass = 'warn';
+    else if (days <= 30) dlClass = 'ok';
+    else                 dlClass = 'normal';
+  }
+
+  // status
+  let statusCls = 'na', statusLabel = '';
+  if (exam.lastDate) {
+    const d = daysUntil(exam.lastDate);
+    statusCls   = d < 0 ? 'closed' : 'open';
+    statusLabel = d < 0 ? 'Closed' : 'Open';
+  }
+
+  const isJob = !exam.examType || exam.examType === 'job';
+  const notif = exam.notification || {};
+
+  // detail section
+  const detailHTML = `
+    <div class="m-card-detail">
+      ${(exam.lastDate || exam.examDate || (notif.label && notif.url) || exam.website) ? `
+      <div class="m-detail-meta">
+        ${exam.lastDate ? `<div class="m-detail-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="m-detail-meta-label">Apply by</span>
+          <span class="m-detail-meta-val">${formatDate(exam.lastDate)}</span>
+        </div>` : ''}
+        ${exam.examDate ? `<div class="m-detail-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="m-detail-meta-label">Exam</span>
+          <span class="m-detail-meta-val">${formatDate(exam.examDate)}</span>
+        </div>` : ''}
+      </div>` : ''}
+
+      ${isJob && (exam.vacancies || exam.pay) ? `
+      <div class="m-detail-chips">
+        ${exam.vacancies ? `<div class="m-detail-chip"><span class="m-chip-label">Vacancies</span><span class="m-chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
+        ${exam.pay ? `<div class="m-detail-chip"><span class="m-chip-label">Pay</span><span class="m-chip-val">₹${escHtml(exam.pay)}</span></div>` : ''}
+      </div>` : ''}
+
+      <div class="m-detail-field-btns">
+        <button class="m-detail-field-btn${exam.eligibility ? '' : ' empty'}" onclick="event.stopPropagation();openFieldView('${exam.id}','eligibility')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Eligibility
+        </button>
+        <button class="m-detail-field-btn${exam.pattern ? '' : ' empty'}" onclick="event.stopPropagation();openFieldView('${exam.id}','pattern')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+          Pattern
+        </button>
+        <button class="m-detail-field-btn${exam.syllabus ? '' : ' empty'}" onclick="event.stopPropagation();openFieldView('${exam.id}','syllabus')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Syllabus
+        </button>
+      </div>
+
+      ${(notif.label && notif.url) || exam.website ? `
+      <div class="m-detail-links">
+        ${notif.label && notif.url ? `<a href="${notif.url.startsWith('http') ? notif.url : 'https://'+notif.url}" target="_blank" rel="noopener" class="m-detail-link" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Notification
+        </a>` : ''}
+        ${exam.website ? `<a href="${exam.website.startsWith('http') ? exam.website : 'https://'+exam.website}" target="_blank" rel="noopener" class="m-detail-link" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Website
+        </a>` : ''}
+      </div>` : ''}
+
+      ${tags.length > 0 ? `
+      <div class="m-detail-tags">
+        <span class="m-detail-tags-label">Tags:</span>
+        ${tags.map(t => `<span class="m-detail-tag" onclick="event.stopPropagation();toggleTagFilter('${escHtml(t)}')">${escHtml(t)}</span>`).join('')}
+      </div>` : ''}
+
+      <div class="m-detail-actions">
+        <button class="m-detail-action-btn" onclick="event.stopPropagation();openEditExam('${exam.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="m-detail-action-btn danger" onclick="event.stopPropagation();deleteExam('${exam.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Delete
+        </button>
+      </div>
+    </div>`;
+
+  return `
+  <div class="m-card${exam.pinned ? ' pinned-card' : ''}${isExpanded ? ' expanded' : ''}"
+       data-status="${statusCls}" data-id="${exam.id}"
+       id="mcard-${exam.id}">
+    <div class="m-card-top" onclick="toggleExpand('${exam.id}')">
+      <div class="m-card-chevron">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="m-card-main">
+        <div class="m-card-name">${escHtml(exam.name)}</div>
+        <div class="m-card-meta">
+          ${exam.agency ? `<span class="m-card-agency">${escHtml(exam.agency)}</span>` : ''}
+          ${exam.year   ? `<span class="m-card-agency" style="color:var(--muted)">${escHtml(exam.year)}</span>` : ''}
+          ${dlText ? `<span class="m-card-deadline ${dlClass}">${dlText}</span>` : ''}
+        </div>
+      </div>
+      <div class="m-card-right">
+        ${statusLabel ? `<span class="m-status-pill ${statusCls}">${statusLabel}</span>` : ''}
+        <div class="m-card-applied${exam.applied ? ' checked' : ''}"
+             onclick="event.stopPropagation();toggleApplied('${exam.id}')"
+             title="Toggle applied"></div>
+        <button class="m-card-pin${exam.pinned ? ' pinned' : ''}"
+                onclick="event.stopPropagation();togglePin('${exam.id}')"
+                title="${exam.pinned ? 'Unpin' : 'Pin'}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    ${detailHTML}
+  </div>`;
+}
+
+function renderMobileCards() {
+  const container = document.getElementById('mobile-card-list');
+  if (!container) return;
+
+  const empty         = document.getElementById('list-empty');
+  const emptyFiltered = document.getElementById('list-empty-filtered');
+
+  if (filteredExams.length === 0) {
+    container.innerHTML = '';
+    if (allExams.length === 0) {
+      empty.style.display = 'block';
+      if (emptyFiltered) emptyFiltered.style.display = 'none';
+    } else {
+      empty.style.display = 'none';
+      if (emptyFiltered) emptyFiltered.style.display = 'block';
+    }
+    return;
+  }
+
+  empty.style.display = 'none';
+  if (emptyFiltered) emptyFiltered.style.display = 'none';
+  container.innerHTML = filteredExams.map(e => mobileCardHTML(e)).join('');
+}
+
+// Re-render on resize (rotate phone, devtools resize)
+let _resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    if (allExams.length > 0 || dataLoaded) renderTable();
+  }, 150);
+});
+
 function parseMd(md) {
   if (!md) return '';
   let html = escHtml(md);
