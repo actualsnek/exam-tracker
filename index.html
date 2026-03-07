@@ -688,6 +688,28 @@
   </div>
 </div>
 
+<!-- Pick Modal — used for selective export & selective import -->
+<div id="pick-modal" class="modal-overlay" style="display:none" onclick="closePickModalOnOverlay(event)">
+  <div class="modal pick-modal-inner">
+    <div class="modal-header">
+      <div class="modal-title" id="pick-modal-title">Select Exams</div>
+      <button class="modal-close" onclick="closePickModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="pick-toolbar">
+        <button class="btn-ghost pick-sel-btn" onclick="pickSelectAll()">Select All</button>
+        <button class="btn-ghost pick-sel-btn" onclick="pickSelectNone()">Select None</button>
+        <span class="pick-count" id="pick-count">0 selected</span>
+      </div>
+      <div class="pick-list" id="pick-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closePickModal()">Cancel</button>
+      <button class="btn-primary" id="pick-confirm-btn" onclick="confirmPick()">Export</button>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="app.js"></script>
 </body>
 </html>

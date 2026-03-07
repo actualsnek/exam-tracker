@@ -1572,25 +1572,36 @@ window.confirmDeleteAccount = () => {
 // ════════════════════════════════════════════════════
 
 window.exportJSON = () => {
-  const data = allExams.map(e => ({
-    name:         e.name         || '',
-    agency:       e.agency       || '',
-    subtitle:     e.subtitle     || '',
-    examType:     e.examType     || 'job',
-    lastDate:     e.lastDate     || '',
-    examDate:     e.examDate     || '',
-    website:      e.website      || '',
-    vacancies:    e.vacancies    || '',
-    pay:          e.pay          || '',
-    eligibility:  e.eligibility  || '',
-    pattern:      e.pattern      || '',
-    syllabus:     e.syllabus     || '',
-    tags:         Array.isArray(e.tags) ? e.tags : [],
-    year:         e.year         || '',
-    resources:    Array.isArray(e.resources) ? e.resources : [],
-  }));
-  downloadFile(JSON.stringify(data, null, 2), 'exams.json', 'application/json');
-  toast('Exported JSON!', 'success');
+  if (!allExams.length) return toast('No exams to export.', 'error');
+  openPickModal({
+    title: 'Select Exams to Export',
+    items: allExams.map((e, i) => ({ id: i, label: e.name || '(Untitled)', sub: e.agency || '' })),
+    confirmLabel: 'Export',
+    onConfirm: (selectedIds) => {
+      const data = selectedIds.map(i => {
+        const e = allExams[i];
+        return {
+          name:        e.name        || '',
+          agency:      e.agency      || '',
+          subtitle:    e.subtitle    || '',
+          examType:    e.examType    || 'job',
+          lastDate:    e.lastDate    || '',
+          examDate:    e.examDate    || '',
+          website:     e.website     || '',
+          vacancies:   e.vacancies   || '',
+          pay:         e.pay         || '',
+          eligibility: e.eligibility || '',
+          pattern:     e.pattern     || '',
+          syllabus:    e.syllabus    || '',
+          tags:        Array.isArray(e.tags) ? e.tags : [],
+          year:        e.year        || '',
+          resources:   Array.isArray(e.resources) ? e.resources : [],
+        };
+      });
+      downloadFile(JSON.stringify(data, null, 2), 'exams.json', 'application/json');
+      toast(`Exported ${data.length} exam${data.length !== 1 ? 's' : ''}!`, 'success');
+    }
+  });
 };
 
 window.toggleDataDropdown = () => {
@@ -1624,56 +1635,121 @@ window.importJSON = async (event) => {
     const data = JSON.parse(text);
     if (!Array.isArray(data)) return toast('Invalid JSON format.', 'error');
 
-    // Build the cleaned list first
-    const toImport = data
+    // Build cleaned list from file
+    const parsed = data
       .filter(exam => exam.name)
-      .map(exam => {
-        const lastDate  = exam.lastDate  || '';
-        const examDate  = exam.examDate  || '';
+      .map(exam => ({
+        name:         String(exam.name      || ''),
+        agency:       String(exam.agency    || ''),
+        subtitle:     String(exam.subtitle  || ''),
+        examType:     exam.examType === 'entrance' ? 'entrance' : 'job',
+        lastDate:     exam.lastDate         || '',
+        examDate:     exam.examDate         || '',
+        website:      exam.website          || '',
+        vacancies:    String(exam.vacancies || ''),
+        pay:          String(exam.pay       || ''),
+        eligibility:  exam.eligibility      || '',
+        pattern:      exam.pattern          || '',
+        syllabus:     exam.syllabus         || '',
+        tags:         Array.isArray(exam.tags) ? exam.tags.map(String) : [],
+        year:         String(exam.year      || ''),
+        applied:      false,
+        pinned:       false,
+        resources:    Array.isArray(exam.resources)
+                        ? exam.resources
+                            .filter(r => r.type && r.label && r.url)
+                            .map(r => ({ type: String(r.type), label: String(r.label), url: String(r.url) }))
+                        : [],
+        createdAt:    serverTimestamp(),
+      }));
 
-        return {
-          name:         String(exam.name   || ''),
-          agency:       String(exam.agency || ''),
-          subtitle:     String(exam.subtitle || ''),
-          examType:     exam.examType === 'entrance' ? 'entrance' : 'job',
-          lastDate,
-          examDate,
-          website:      exam.website      || '',
-          vacancies:    String(exam.vacancies || ''),
-          pay:          String(exam.pay       || ''),
-          eligibility:  exam.eligibility  || '',
-          pattern:      exam.pattern      || '',
-          syllabus:     exam.syllabus     || '',
-          tags:         Array.isArray(exam.tags) ? exam.tags.map(String) : [],
-          year:         String(exam.year  || ''),
-          applied:      false,
-          pinned:       false,
-          resources:    Array.isArray(exam.resources)
-                          ? exam.resources
-                              .filter(r => r.type && r.label && r.url)
-                              .map(r => ({ type: String(r.type), label: String(r.label), url: String(r.url) }))
-                          : [],
-          createdAt:    serverTimestamp(),
-        };
-      });
+    if (parsed.length === 0) return toast('No valid exams found in file.', 'error');
 
-    if (toImport.length === 0) return toast('No valid exams found in file.', 'error');
-    if (toImport.length > 60) return toast('Import limit is 60 exams per file.', 'error');
-
-    // Firestore batch limit is 500 — chunk to be safe
-    const CHUNK = 400;
-    for (let i = 0; i < toImport.length; i += CHUNK) {
-      const batch = writeBatch(db);
-      toImport.slice(i, i + CHUNK).forEach(clean => {
-        batch.set(doc(collection(db, 'users', currentUser.uid, 'exams')), clean);
-      });
-      await batch.commit();
-    }
-    toast(`Imported ${toImport.length} exam${toImport.length !== 1 ? 's' : ''}!`, 'success');
+    // Show selection modal
+    openPickModal({
+      title: 'Select Exams to Import',
+      items: parsed.map((e, i) => ({ id: i, label: e.name, sub: e.agency || '' })),
+      confirmLabel: 'Import',
+      onConfirm: async (selectedIds) => {
+        const toImport = selectedIds.map(i => parsed[i]);
+        if (toImport.length > 60) return toast('Import limit is 60 exams per file.', 'error');
+        const CHUNK = 400;
+        for (let i = 0; i < toImport.length; i += CHUNK) {
+          const batch = writeBatch(db);
+          toImport.slice(i, i + CHUNK).forEach(clean => {
+            batch.set(doc(collection(db, 'users', currentUser.uid, 'exams')), clean);
+          });
+          await batch.commit();
+        }
+        toast(`Imported ${toImport.length} exam${toImport.length !== 1 ? 's' : ''}!`, 'success');
+      }
+    });
   } catch (e) {
     toast('Import failed. Check JSON format.', 'error');
   }
   event.target.value = '';
+};
+
+// ════════════════════════════════════════════════════
+//  PICK MODAL — selective export / import
+// ════════════════════════════════════════════════════
+
+let _pickCallback = null;
+
+function openPickModal({ title, items, confirmLabel, onConfirm }) {
+  _pickCallback = onConfirm;
+  document.getElementById('pick-modal-title').textContent   = title;
+  document.getElementById('pick-confirm-btn').textContent   = confirmLabel;
+
+  const list = document.getElementById('pick-list');
+  list.innerHTML = items.map(item => `
+    <label class="pick-item">
+      <input type="checkbox" class="pick-cb" data-id="${item.id}" checked>
+      <span class="pick-item-info">
+        <span class="pick-item-label">${item.label}</span>
+        ${item.sub ? `<span class="pick-item-sub">${item.sub}</span>` : ''}
+      </span>
+    </label>
+  `).join('');
+
+  // Live count update
+  list.addEventListener('change', updatePickCount);
+  updatePickCount();
+
+  document.getElementById('pick-modal').style.display = 'flex';
+}
+
+function updatePickCount() {
+  const total    = document.querySelectorAll('.pick-cb').length;
+  const selected = document.querySelectorAll('.pick-cb:checked').length;
+  document.getElementById('pick-count').textContent = `${selected} of ${total} selected`;
+  document.getElementById('pick-confirm-btn').disabled = selected === 0;
+}
+
+window.pickSelectAll = () => {
+  document.querySelectorAll('.pick-cb').forEach(cb => cb.checked = true);
+  updatePickCount();
+};
+window.pickSelectNone = () => {
+  document.querySelectorAll('.pick-cb').forEach(cb => cb.checked = false);
+  updatePickCount();
+};
+
+window.closePickModal = () => {
+  document.getElementById('pick-modal').style.display = 'none';
+  _pickCallback = null;
+};
+
+window.closePickModalOnOverlay = (e) => {
+  if (e.target === document.getElementById('pick-modal')) closePickModal();
+};
+
+window.confirmPick = () => {
+  const selectedIds = [...document.querySelectorAll('.pick-cb:checked')]
+    .map(cb => Number(cb.dataset.id));
+  if (!selectedIds.length) return;
+  closePickModal();
+  if (_pickCallback) _pickCallback(selectedIds);
 };
 
 function downloadFile(content, filename, type) {

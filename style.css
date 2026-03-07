@@ -1060,6 +1060,21 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 }
 .modal-sm { max-width: 400px; }
 
+/* ── Pick Modal (selective export / import) ─────────── */
+.pick-modal-inner { max-width: 480px; width: 100%; display: flex; flex-direction: column; max-height: 80vh; }
+.pick-toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+.pick-sel-btn { padding: 4px 10px; font-size: 12px; }
+.pick-count { margin-left: auto; font-size: 12px; color: var(--text2); }
+.pick-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 2px; padding-right: 4px; }
+.pick-list::-webkit-scrollbar { width: 4px; }
+.pick-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.pick-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 7px; cursor: pointer; transition: background .12s; }
+.pick-item:hover { background: var(--surface2); }
+.pick-cb { width: 15px; height: 15px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+.pick-item-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.pick-item-label { font-size: 13px; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick-item-sub { font-size: 11px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 @keyframes modalIn {
   from { opacity: 0; transform: scale(.96) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
