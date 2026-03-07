@@ -2097,8 +2097,13 @@ function mobileCardHTML(exam) {
   // detail section
   const detailHTML = `
     <div class="m-card-detail">
-      ${(exam.lastDate || exam.examDate || (notif.label && notif.url) || exam.website) ? `
+      ${(exam.lastDate || exam.examDate || exam.year || (notif.label && notif.url) || exam.website) ? `
       <div class="m-detail-meta">
+        ${exam.year ? `<div class="m-detail-meta-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="m-detail-meta-label">Cycle</span>
+          <span class="m-detail-meta-val">${escHtml(exam.year)}</span>
+        </div>` : ''}
         ${exam.lastDate ? `<div class="m-detail-meta-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           <span class="m-detail-meta-label">Apply by</span>
@@ -2174,7 +2179,7 @@ function mobileCardHTML(exam) {
         <div class="m-card-name">${escHtml(exam.name)}</div>
         <div class="m-card-meta">
           ${exam.agency ? `<span class="m-card-agency">${escHtml(exam.agency)}</span>` : ''}
-          ${exam.year   ? `<span class="m-card-agency" style="color:var(--muted)">${escHtml(exam.year)}</span>` : ''}
+          ${exam.year   ? `<span class="m-card-agency m-card-year" style="color:var(--muted)">${escHtml(exam.year)}</span>` : ''}
           ${dlText ? `<span class="m-card-deadline ${dlClass}">${dlText}</span>` : ''}
         </div>
       </div>

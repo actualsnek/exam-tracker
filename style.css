@@ -1353,10 +1353,24 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 ════════════════════════════════════════ */
 @media (max-width: 640px) {
 
-  /* ── root overrides ── */
+  /* ══════════════════════════════════════
+     FIX 1 + 2 + 3: Layout stacking
+     - Shrink rings to 40px so strip is a
+       genuine 72px (pad 8px + ring 40px +
+       name ~13px + gap = ~69px ≈ 72px)
+     - Filter bar switches to sticky so it
+       stacks naturally below countdown
+       instead of relying on fixed + top
+       calc that breaks when strip varies
+     - exam-list padding only needs to
+       clear the filter bar height (the
+       topbar+countdown are sticky and
+       scroll above it naturally)
+  ══════════════════════════════════════ */
+
   :root {
-    --filter-bar-h: 84px;   /* 2-row filter bar */
-    --countdown-h:  72px;
+    --filter-bar-h: 84px;  /* 2-row filter bar */
+    --countdown-h:  72px;  /* matches shrunk rings below */
   }
 
   /* ── auth ── */
@@ -1365,26 +1379,52 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   /* ── topbar ── */
   .topbar { padding: 0 12px; }
 
-  /* ── countdown strip ── */
+  /* ── countdown strip: shrink rings to 40px so real height = 72px ── */
   .countdown-strip { padding: 8px 12px; gap: 10px; }
   .ring-wrap { gap: 3px; }
+  /* FIX 1: shrink rings to 40×40 so strip height matches --countdown-h */
+  .ring       { width: 40px; height: 40px; }
+  .ring svg   { width: 40px; height: 40px; }
+  .ring-days  { font-size: 11px; }
+  .ring-unit  { font-size: 6px; }
+  .ring-name  { font-size: 8px; max-width: 46px; }
+  /* Empty strip: constrain height to match */
+  .countdown-empty { height: 54px; font-size: 10px; }
 
-  /* ── filter bar: 2 clean rows ── */
+  /* FIX 2 + 3: filter bar → sticky (stacks naturally, no top calc needed) */
   .filter-bar {
-    top: calc(var(--topbar-h) + var(--countdown-h));
+    position: sticky;
+    top: var(--topbar-h);  /* sticks just below topbar on scroll */
     flex-wrap: wrap;
     padding: 6px 12px;
     gap: 6px;
     row-gap: 6px;
+    /* remove the fixed positioning left/right — sticky uses normal flow width */
+    left: unset;
+    right: unset;
   }
-  /* Row 1: dropdowns + clear */
+
+  /* Row 1: the 3 dropdowns — stay flex-shrink: 0 */
   .tag-dd-wrap,
   #status-dd-wrap,
   #sort-dd-wrap { flex-shrink: 0; }
 
   .filter-sep { display: none; }
 
-  /* Row 2: search expands + Add button */
+  /* FIX 8: Clear button — icon-only on mobile to prevent 3rd row overflow */
+  .btn-clear-all {
+    padding: 5px 8px;
+    font-size: 0;      /* hide text */
+    min-width: 28px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* inject ✕ via pseudo so no HTML change needed */
+  .btn-clear-all::before {
+    content: '✕';
+    font-size: 11px;
+  }
+
+  /* Row 2: search + Add push to own row */
   .filter-right {
     margin-left: 0;
     width: 100%;
@@ -1394,13 +1434,14 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .inline-search { flex: 1; min-width: 0; }
   .inline-search-input { width: 100%; min-width: 0; }
 
-  /* hide Select & Delete-selected on mobile — too complex */
+  /* hide Select & Delete-selected on mobile */
   .btn-select-mode,
   #btn-delete-selected { display: none !important; }
 
-  /* ── exam list area ── */
+  /* FIX 3: exam-list — padding-top only needs to clear filter bar
+     (topbar + countdown are sticky and scroll with page naturally) */
   .exam-list {
-    padding-top: calc(var(--filter-bar-h) + 8px);
+    padding-top: calc(var(--filter-bar-h) + 6px);
     padding-left: 0;
     padding-right: 0;
     padding-bottom: 80px;
@@ -1454,12 +1495,24 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     font-size: 13px; font-weight: 600; color: var(--text);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+
+  /* FIX 7: collapsed meta shows only agency + deadline (no year).
+     Year is shown in expanded detail instead. */
   .m-card-meta {
-    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    display: flex; align-items: center; gap: 6px;
+    /* no flex-wrap: single line only — prevents multi-line card collapse height */
+    flex-wrap: nowrap; overflow: hidden;
   }
-  .m-card-agency { font-size: 11px; color: var(--muted); }
+  .m-card-agency {
+    font-size: 11px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* year span in meta: hidden on mobile (shown in detail) */
+  .m-card-meta .m-card-year { display: none; }
+
   .m-card-deadline {
     font-family: var(--mono); font-size: 10px; font-weight: 600;
+    white-space: nowrap; flex-shrink: 0;
   }
   .m-card-deadline.warn   { color: #ef4444; }
   .m-card-deadline.ok     { color: var(--upcoming); }
@@ -1467,7 +1520,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .m-card-deadline.past   { color: var(--muted); }
 
   .m-card-right {
-    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 4px; flex-shrink: 0;
   }
   .m-status-pill {
     display: inline-block; padding: 2px 8px;
@@ -1476,12 +1529,17 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .m-status-pill.open   { background: var(--open-bg);   color: var(--open);   border: 1px solid var(--open-border); }
   .m-status-pill.closed { background: var(--closed-bg); color: var(--closed); border: 1px solid var(--closed-border); }
 
+  /* FIX 6: larger tap targets for applied + pin */
   .m-card-applied {
+    /* visual size stays 18×18, tap area padded to ~40×40 */
     width: 18px; height: 18px; border-radius: 4px;
     border: 1.5px solid var(--border);
     background: var(--bg2);
     display: inline-flex; align-items: center; justify-content: center;
     transition: all var(--transition); flex-shrink: 0;
+    /* expand touch target with padding */
+    padding: 11px;
+    box-sizing: content-box;
   }
   .m-card-applied.checked { background: var(--yes); border-color: var(--yes); }
   .m-card-applied.checked::after {
@@ -1493,7 +1551,9 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
   .m-card-pin {
     background: none; border: none; color: var(--muted);
-    padding: 2px 0; cursor: pointer;
+    /* expand touch target with padding, ~40×40 tap area */
+    padding: 11px 10px;
+    cursor: pointer;
     transition: color var(--transition);
     display: flex; align-items: center;
   }
@@ -1574,12 +1634,37 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   /* ── empty states ── */
   .list-empty { padding: 50px 20px; }
 
-  /* ── modals ── */
-  .modal-overlay { padding: 0; align-items: flex-end; }
+  /* ══════════════════════════════════════
+     FIX 4: Modal bottom sheet
+     - overflow: hidden on overlay prevents
+       iOS keyboard push issues
+     - width: 100% on modal ensures full
+       sheet width on all devices
+  ══════════════════════════════════════ */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+    overflow: hidden;  /* prevent iOS keyboard from pushing layout */
+  }
   .modal {
     border-radius: var(--r-xl) var(--r-xl) 0 0;
     max-height: 92vh;
     max-width: 100%;
+    width: 100%;
+    min-height: 0;   /* allow shrinking without forcing scroll */
+    /* slide up from bottom instead of scale in */
+    animation: sheetIn .25s ease;
+  }
+  @keyframes sheetIn {
+    from { transform: translateY(40px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .modal-overlay.is-closing .modal {
+    animation: sheetOut .18s ease forwards;
+  }
+  @keyframes sheetOut {
+    from { transform: translateY(0);    opacity: 1; }
+    to   { transform: translateY(40px); opacity: 0; }
   }
   .modal-sm { max-width: 100%; }
   .modal-body { padding: 16px; }
@@ -1592,7 +1677,23 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .res-type-sel { width: 80px; }
   .res-url-input { min-width: 0; }
 
-  /* ── md / fv panels: stack panes vertically ── */
+  /* ══════════════════════════════════════
+     FIX 5: fv-panel editor on mobile
+     - Hide live preview pane in edit mode
+     - Give full height to textarea
+     - View mode is still accessible for
+       reading the rendered output
+  ══════════════════════════════════════ */
+  .fv-inner { width: 100vw; }
+
+  /* In edit mode: hide preview pane entirely, textarea gets full height */
+  #fv-edit-mode .md-preview-pane { display: none; }
+  #fv-edit-mode .md-divider       { display: none; }
+  #fv-edit-mode .md-split         { flex-direction: column; }
+  #fv-edit-mode .md-write-pane    { flex: 1; min-height: 0; }
+  #fv-edit-mode .md-pane-label    { display: none; } /* hide WRITE label when solo */
+
+  /* md-panel (add/edit modal panels): also hide preview, textarea full height */
   .md-split {
     flex-direction: column;
   }
@@ -1600,9 +1701,6 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   .md-pane { min-height: 160px; }
   .md-write-pane { flex: 1.2; }
   .md-preview-pane { flex: 1; }
-
-  /* fv panel full screen */
-  .fv-inner { width: 100vw; }
 }
 
 /* ── MODAL: MD-FIELDS-ROW (Eligibility · Syllabus · Pattern side by side) ── */
