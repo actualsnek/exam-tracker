@@ -1841,14 +1841,10 @@ window.openMdFromModal = (field) => {
   ta.value = modalDraft[field] || '';
   mdPreview();
   document.getElementById('md-save-status').textContent = '';
-  // On mobile, always start in write mode (not preview)
-  if (window.innerWidth <= 640) mdPreviewVisible = false;
   document.getElementById('md-panel').style.display   = 'flex';
   document.getElementById('md-overlay').style.display = 'block';
-  applyMdPreviewState();
   lockScroll();
-  // Delay focus slightly so panel is visible before keyboard opens
-  setTimeout(() => ta.focus(), 80);
+  ta.focus();
 };
 
 window.closeMdPanel = () => {
@@ -1940,10 +1936,7 @@ window.switchToEditMode = () => {
   fvLivePreview();
   document.getElementById('fv-view-mode').style.display = 'none';
   document.getElementById('fv-edit-mode').style.display = 'flex';
-  // On mobile, always start in write mode
-  if (window.innerWidth <= 640) mdPreviewVisible = false;
-  applyMdPreviewState();
-  setTimeout(() => ta.focus(), 80);
+  ta.focus();
 };
 
 window.switchToViewMode = () => {
@@ -2080,28 +2073,16 @@ window.toggleMdPreview = () => {
 
 function applyMdPreviewState() {
   const show = mdPreviewVisible;
-  const isMobile = window.innerWidth <= 640;
   [1, 2].forEach(i => {
     const pane   = document.getElementById(`md-preview-pane-${i}`);
     const div    = document.getElementById(`md-divider-${i}`);
     const label  = document.getElementById(`md-preview-toggle-label-${i}`);
     const btn    = document.getElementById(`md-preview-toggle-${i}`);
     if (!pane) return;
-    if (isMobile) {
-      // Clear any inline display overrides so CSS takes over
-      pane.style.display = '';
-      if (div) div.style.display = '';
-      // Toggle class on the md-split parent
-      const split = pane.closest('.md-split');
-      if (split) split.classList.toggle('md-preview-visible', show);
-    } else {
-      pane.style.display = show ? '' : 'none';
-      if (div) div.style.display = show ? '' : 'none';
-    }
+    pane.style.display  = show ? '' : 'none';
+    div.style.display   = show ? '' : 'none';
     if (label) label.textContent = show ? 'Hide Preview' : 'Preview';
     if (btn)   btn.classList.toggle('md-preview-toggle--off', !show);
-  });
-}
   });
 }
 
