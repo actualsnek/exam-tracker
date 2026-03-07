@@ -124,6 +124,12 @@ function showApp() {
 function showAuthScreen() {
   const appEl  = document.getElementById('app');
   const authEl = document.getElementById('auth-screen');
+
+  // Clean up any lingering animation classes and skeleton from the app
+  appEl.classList.remove('is-fading-in');
+  const sk = document.getElementById('skeleton-loader');
+  if (sk) sk.style.display = 'none';
+
   appEl.style.display   = 'none';
   authEl.style.display  = 'flex';
   authEl.classList.remove('is-fading-out');
