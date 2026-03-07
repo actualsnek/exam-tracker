@@ -1545,6 +1545,9 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     padding: 2px 7px; font-size: 9px; font-weight: 700;
     border-radius: 100px; white-space: nowrap;
   }
+  .m-status-pill.open   { background: var(--open-bg);   color: var(--open);   border: 1px solid var(--open-border); }
+  .m-status-pill.closed { background: var(--closed-bg); color: var(--closed); border: 1px solid var(--closed-border); }
+  .m-status-pill.na     { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
   /* FIX 6: larger tap targets for applied + pin */
   .m-card-applied {
