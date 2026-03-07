@@ -1791,160 +1791,229 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
   /* ══════════════════════════════════════
      MOBILE: md-panel + fv-panel
-     Both panels become full-screen overlays
-     (slide up from bottom, not side-sheet)
-     Toolbar: single scrollable row
-     Split: tab toggle (Write / Preview)
+     Full-screen, tab-based Write/Preview
   ══════════════════════════════════════ */
 
-  /* ── Panel geometry: full screen ── */
-  .md-panel,
+  /* ── Both panels: full-screen fixed overlay ── */
+  .md-panel {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    right: 0 !important; bottom: 0 !important;
+    width: 100vw !important;
+    height: 100% !important;
+    border-left: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    animation: mobileSlideUp .22s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .fv-panel {
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
   .fv-inner {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    width: 100vw;
-    height: 100%;
-    border-left: none;
-    border-radius: 0;
-    box-shadow: none;
-    animation: mobileSlideUp .25s ease;
+    width: 100vw !important;
+    height: 100% !important;
+    border-left: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    animation: mobileSlideUp .22s ease !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   @keyframes mobileSlideUp {
-    from { transform: translateY(48px); opacity: 0; }
+    from { transform: translateY(40px); opacity: 0; }
     to   { transform: translateY(0);    opacity: 1; }
   }
-  /* fv-panel itself (wrapper) also full screen */
-  .fv-panel { align-items: stretch; justify-content: stretch; }
 
-  /* ── Panel header: compact, safe for thumb on top ── */
+  /* ── md-panel-inner: explicit height chain ── */
+  .md-panel-inner {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* ── Header ── */
   .md-panel-header {
-    padding: 12px 14px;
-    gap: 10px;
-    min-height: 52px;
+    padding: 10px 14px !important;
+    min-height: 50px !important;
+    flex-shrink: 0 !important;
+    gap: 10px !important;
   }
-  .md-panel-title { font-size: 14px; }
-  .md-panel-sub   { font-size: 10px; margin-top: 1px; }
+  .md-panel-title { font-size: 14px !important; }
+  .md-panel-sub   { font-size: 10px !important; }
+  /* Hide the ← back icon button on mobile — back is via Cancel in footer */
+  .md-back-btn    { display: none !important; }
+  .md-panel-close { display: flex !important; } /* keep the × */
 
-  .fv-header { padding: 12px 14px; min-height: 52px; }
-  .fv-title  { font-size: 16px; }
-  .fv-sub    { font-size: 11px; }
-  .fv-back-btn { padding: 8px 6px; font-size: 11px; }
-  .fv-edit-btn { padding: 7px 14px; font-size: 12px; }
+  .fv-header { padding: 10px 14px !important; min-height: 50px !important; flex-shrink: 0 !important; }
+  .fv-title  { font-size: 16px !important; }
+  .fv-sub    { font-size: 11px !important; }
+  .fv-back-btn { padding: 8px 6px !important; font-size: 11px !important; display: inline-flex !important; }
+  .fv-edit-btn { padding: 8px 14px !important; font-size: 12px !important; }
 
-  /* ── Toolbar: single horizontally scrollable row ── */
+  /* ── Toolbar: single horizontally scrollable strip ── */
   .md-toolbar {
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: none;       /* hide scrollbar on Firefox */
-    -webkit-overflow-scrolling: touch;
-    padding: 0;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
   }
-  .md-toolbar::-webkit-scrollbar { display: none; }
-
-  /* Merge both rows into one horizontal strip */
+  .md-toolbar::-webkit-scrollbar { display: none !important; }
   .md-toolbar-row {
-    display: inline-flex;      /* inline so both rows sit in flow */
-    flex-wrap: nowrap;
-    padding: 6px 10px;
-    gap: 2px;
-    white-space: nowrap;
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    padding: 6px 8px !important;
+    gap: 2px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
-  /* Stack the two rows into a single scrollable line */
-  .md-toolbar { display: flex; flex-direction: row; align-items: center; }
-  .md-toolbar-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; margin: 0 4px; align-self: center; }
+  .md-toolbar-divider {
+    width: 1px !important; height: 24px !important;
+    flex-shrink: 0 !important; margin: 0 4px !important;
+    align-self: center !important;
+  }
+  .md-tool         { padding: 8px 10px !important; }
+  .md-tool--text   { padding: 8px 10px !important; font-size: 12px !important; }
+  .md-tool svg     { width: 16px !important; height: 16px !important; }
+  .md-tool-sep     { display: none !important; }
 
-  /* Bigger tap targets on toolbar buttons */
-  .md-tool { padding: 7px 9px; font-size: 13px; }
-  .md-tool--text { padding: 7px 9px; font-size: 12px; }
-  .md-tool svg { width: 16px; height: 16px; }
-  .md-tool-sep { display: none; } /* separators take too much space on mobile */
+  /* ── WRITE / PREVIEW tab bar (replaces pane-label) ── */
+  .md-pane-label { display: none !important; } /* hide the plain label */
 
-  /* ── Split pane: tab-based Write / Preview ── */
-  /* Hide the vertical divider — not needed with tabs */
+  /* Inject a tab bar above the write pane only — we'll use
+     the existing preview-toggle pill but bigger and centered */
+  .md-write-pane {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Tab strip: "WRITE" tab with preview toggle pill lives here.
+     We re-show the pane-label on the write pane only as a tab bar */
+  .md-write-pane > .md-pane-label {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 8px 14px !important;
+    font-size: 11px !important;
+    background: var(--bg2) !important;
+    border-bottom: 1px solid var(--border) !important;
+    flex-shrink: 0 !important;
+  }
+  .md-preview-toggle {
+    font-size: 11px !important;
+    padding: 5px 14px !important;
+    border-radius: 20px !important;
+  }
+
+  /* ── Textarea: fills all remaining height, keyboard-friendly ── */
+  .md-textarea {
+    flex: 1 !important;
+    min-height: 0 !important;
+    height: 0 !important;        /* flex-child trick: forces it to grow not shrink */
+    font-size: 16px !important;  /* prevents iOS auto-zoom */
+    line-height: 1.7 !important;
+    padding: 14px !important;
+    resize: none !important;
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+
+  /* ── Split pane layout ── */
+  .md-split {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  /* Hide the divider */
   .md-divider { display: none !important; }
 
-  /* Stack panes vertically but show only active one */
-  .md-split {
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    min-height: 0;
-    position: relative;
-  }
-
-  /* Both panes take full space; preview hidden by default */
-  .md-write-pane,
+  /* Preview pane: hidden by default, shown when toggled */
   .md-preview-pane {
-    flex: 1;
-    min-height: 0;
-  }
-  .md-preview-pane { display: none; }
-
-  /* When preview is toggled on: show preview, hide editor */
-  .md-preview-visible .md-write-pane  { display: none; }
-  .md-preview-visible .md-preview-pane { display: flex; }
-
-  /* ── Pane label bar: acts as tab switcher ── */
-  .md-pane-label {
-    padding: 8px 14px;
-    font-size: 10px;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
+    display: none !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
   }
 
-  /* Preview toggle pill — bigger and clearer on mobile */
-  .md-preview-toggle {
-    font-size: 10px;
-    padding: 4px 12px;
-    border-radius: 20px;
-  }
+  /* When preview active: swap panes */
+  .md-preview-visible .md-write-pane   { display: none !important; }
+  .md-preview-visible .md-preview-pane { display: flex !important; }
 
-  /* ── Textarea: comfortable on mobile keyboard ── */
-  .md-textarea {
-    font-size: 14px;
-    line-height: 1.75;
-    padding: 14px;
-    /* prevent zoom on focus on iOS */
-    font-size: max(16px, 14px);
-  }
-
-  /* ── Preview content: readable on small screens ── */
+  /* ── Preview content ── */
   .md-preview-content {
-    font-size: 14px;
-    padding: 16px 16px 32px;
-    line-height: 1.75;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    font-size: 14px !important;
+    padding: 16px 16px 40px !important;
+    line-height: 1.75 !important;
   }
-  .md-preview-content h2 { font-size: 17px; }
-  .md-preview-content h3 { font-size: 15px; }
-  .md-preview-content table { font-size: 12px; display: block; overflow-x: auto; }
+  .md-preview-content h2 { font-size: 17px !important; }
+  .md-preview-content h3 { font-size: 15px !important; }
+  .md-preview-content table {
+    font-size: 12px !important; display: block !important; overflow-x: auto !important;
+  }
 
-  /* ── Footer: full-width sticky Save/Cancel ── */
+  /* ── Footer ── */
   .md-panel-footer {
-    padding: 10px 14px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    gap: 10px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    flex-shrink: 0 !important;
+    gap: 10px !important;
   }
-  .panel-footer-actions { display: flex; gap: 8px; flex: 1; justify-content: flex-end; }
-  .panel-footer-actions .btn-ghost {
-    padding: 10px 20px;
-    font-size: 13px;
-  }
-  .panel-footer-actions .btn-primary--auto {
-    padding: 10px 24px;
-    font-size: 13px;
-  }
+  .panel-footer-actions { display: flex !important; gap: 8px !important; }
+  .panel-footer-actions .btn-ghost        { padding: 10px 20px !important; font-size: 13px !important; }
+  .panel-footer-actions .btn-primary--auto { padding: 10px 24px !important; font-size: 13px !important; }
 
-  /* ── fv-view mode: clean full-screen reading ── */
-  #fv-view-mode { display: flex; flex-direction: column; height: 100%; }
+  /* ── fv-view mode ── */
+  #fv-view-mode {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
   .fv-content {
-    padding: 16px 16px 40px;
-    font-size: 14px;
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 16px 16px 40px !important;
+    font-size: 14px !important;
   }
 
-  /* fv edit mode: same treatment as md-panel */
-  #fv-edit-mode .md-preview-pane { display: none; }
-  #fv-edit-mode .md-preview-visible .md-preview-pane { display: flex; }
-  #fv-edit-mode .md-preview-visible .md-write-pane   { display: none; }
+  /* ── fv edit mode ── */
+  #fv-edit-mode {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  #fv-edit-mode .md-split--fill {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+  #fv-edit-mode .md-preview-pane { display: none !important; }
+  #fv-edit-mode .md-preview-visible .md-preview-pane { display: flex !important; }
+  #fv-edit-mode .md-preview-visible .md-write-pane   { display: none !important; }
 }
 
 /* ── MODAL: MD-FIELDS-ROW (Eligibility · Syllabus · Pattern side by side) ── */
