@@ -2041,14 +2041,24 @@ function getActiveEditor() {
   return { ta: document.getElementById('md-editor-textarea'), preview: mdPreview };
 }
 
-window.mdInsert = (before, after) => {
+window.mdInsert = (before, after, lineStart = false) => {
   const { ta, preview } = getActiveEditor();
   const s = ta.selectionStart, e = ta.selectionEnd;
   const selected = ta.value.substring(s, e);
-  const replacement = before + (selected || 'text') + after;
+  let replacement, cursorStart, cursorEnd;
+  if (lineStart) {
+    // Insert at start of line — no wrapping
+    replacement = before + (selected || '');
+    cursorStart = s + before.length;
+    cursorEnd   = s + before.length + (selected || '').length;
+  } else {
+    replacement = before + (selected || 'text') + after;
+    cursorStart = s + before.length;
+    cursorEnd   = s + before.length + (selected || 'text').length;
+  }
   ta.value = ta.value.substring(0, s) + replacement + ta.value.substring(e);
-  ta.selectionStart = s + before.length;
-  ta.selectionEnd   = s + before.length + (selected || 'text').length;
+  ta.selectionStart = cursorStart;
+  ta.selectionEnd   = cursorEnd;
   ta.focus();
   preview();
 };
@@ -2058,6 +2068,40 @@ window.mdInsertTable = () => {
   const { ta, preview } = getActiveEditor();
   const pos = ta.selectionStart;
   ta.value  = ta.value.substring(0, pos) + tbl + ta.value.substring(pos);
+  ta.focus();
+  preview();
+};
+
+window.mdInsertLink = () => {
+  const { ta, preview } = getActiveEditor();
+  const s = ta.selectionStart, e = ta.selectionEnd;
+  const selected = ta.value.substring(s, e) || 'Link text';
+  const replacement = `[${selected}](https://url)`;
+  ta.value = ta.value.substring(0, s) + replacement + ta.value.substring(e);
+  ta.selectionStart = s + selected.length + 3;
+  ta.selectionEnd   = s + replacement.length - 1;
+  ta.focus();
+  preview();
+};
+
+window.mdInsertCallout = () => {
+  const { ta, preview } = getActiveEditor();
+  const pos = ta.selectionStart;
+  const snippet = '\n:::info\nYour important note here\n:::\n';
+  ta.value = ta.value.substring(0, pos) + snippet + ta.value.substring(pos);
+  ta.selectionStart = pos + 9;
+  ta.selectionEnd   = pos + 9 + 24;
+  ta.focus();
+  preview();
+};
+
+window.mdInsertCollapsible = () => {
+  const { ta, preview } = getActiveEditor();
+  const pos = ta.selectionStart;
+  const snippet = '\n+++ Section Title\nContent goes here\n+++\n';
+  ta.value = ta.value.substring(0, pos) + snippet + ta.value.substring(pos);
+  ta.selectionStart = pos + 5;
+  ta.selectionEnd   = pos + 5 + 13;
   ta.focus();
   preview();
 };
@@ -2254,7 +2298,7 @@ function parseMd(md) {
   if (!md) return '';
   let html = escHtml(md);
 
-  // Headings — most specific (####) first
+  // Headings — most specific first
   html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
   html = html.replace(/^### (.+)$/gm,  '<h3>$1</h3>');
   html = html.replace(/^## (.+)$/gm,   '<h2>$1</h2>');
@@ -2266,21 +2310,45 @@ function parseMd(md) {
   // Blockquote
   html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
 
-  // Bold + italic
+  // Callout boxes :::type ... :::
+  html = html.replace(/:::(\w+)\n([\s\S]*?):::/gm, (_, type, content) => {
+    const t = type.toLowerCase();
+    const cls = t === 'warn' || t === 'warning' ? 'callout-warn'
+              : t === 'tip'                      ? 'callout-tip'
+              : t === 'success'                  ? 'callout-success'
+              :                                    'callout-info';
+    const icon = t === 'warn' || t === 'warning' ? '⚠️'
+               : t === 'tip'                      ? '💡'
+               : t === 'success'                  ? '✅'
+               :                                    'ℹ️';
+    return `<div class="md-callout ${cls}"><span class="callout-icon">${icon}</span><div class="callout-body">${content.trim()}</div></div>`;
+  });
+
+  // Collapsible +++ Title \n content \n +++
+  html = html.replace(/\+\+\+ (.+)\n([\s\S]*?)\+\+\+/gm, (_, title, content) => {
+    return `<details class="md-collapsible"><summary class="md-collapsible-title">${title.trim()}</summary><div class="md-collapsible-body">${content.trim()}</div></details>`;
+  });
+
+  // Bold + italic (order: *** before ** before *)
   html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
   html = html.replace(/\*\*(.+?)\*\*/g,     '<strong>$1</strong>');
   html = html.replace(/\*(.+?)\*/g,         '<em>$1</em>');
 
+  // Underline, strikethrough, highlight
+  html = html.replace(/__(.+?)__/g,   '<u>$1</u>');
+  html = html.replace(/~~(.+?)~~/g,   '<s>$1</s>');
+  html = html.replace(/==(.+?)==/g,   '<mark>$1</mark>');
+
   // Inline code
   html = html.replace(/`(.+?)`/g, '<code>$1</code>');
 
-  // Tables — detect pipe rows
+  // Tables
   html = html.replace(/((^\|.+\|\n?)+)/gm, (match) => {
     const rows = match.trim().split('\n').filter(r => r.trim());
     if (rows.length < 2) return match;
     let out = '<table>';
     rows.forEach((row, i) => {
-      if (/^\|[-| ]+\|$/.test(row.replace(/&lt;|&gt;/g,'-'))) return; // separator row
+      if (/^\|[-| ]+\|$/.test(row.replace(/&lt;|&gt;/g,'-'))) return;
       const cells = row.split('|').filter((_, ci) => ci > 0 && ci < row.split('|').length - 1);
       if (i === 0) {
         out += '<tr>' + cells.map(c => `<th>${c.trim()}</th>`).join('') + '</tr>';
@@ -2291,6 +2359,12 @@ function parseMd(md) {
     out += '</table>';
     return out;
   });
+
+  // Task checkboxes (before regular lists)
+  html = html.replace(/^- \[x\] (.+)$/gim, '<li class="task-item task-done"><span class="task-cb task-cb--checked"></span><span class="task-label">$1</span></li>');
+  html = html.replace(/^- \[ \] (.+)$/gm,  '<li class="task-item"><span class="task-cb"></span><span class="task-label">$1</span></li>');
+  // Wrap consecutive task items
+  html = html.replace(/(<li class="task-item[^"]*">.*<\/li>\n?)+/g, match => `<ul class="task-list">${match}</ul>`);
 
   // Unordered list
   html = html.replace(/(^- .+$\n?)+/gm, match => {
@@ -2304,7 +2378,7 @@ function parseMd(md) {
     return `<ol>${items}</ol>`;
   });
 
-  // Links — sanitize URL to block javascript: and data: XSS vectors
+  // Links
   html = html.replace(/\[(.+?)\]\((.+?)\)/g, (_, label, url) => {
     let trimmed = url.trim();
     if (!/^https?:\/\//i.test(trimmed) && !/^mailto:/i.test(trimmed)) {
@@ -2314,7 +2388,7 @@ function parseMd(md) {
     return `<a href="${trimmed}" target="_blank" rel="noopener">${label}</a>`;
   });
 
-  // Paragraphs — wrap bare lines not already wrapped in tags
+  // Paragraphs — wrap bare lines not already in tags
   html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
 
   return html;
