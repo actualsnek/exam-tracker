@@ -108,9 +108,15 @@ function showApp() {
   if (!hasPinned) appEl.classList.add('no-pinned');
   else            appEl.classList.remove('no-pinned');
 
-  // Fade auth screen out, then hide it and reveal app
+  // Fade auth screen out, then hide it and reveal app.
+  // Guard with `fired` so the callback runs exactly once regardless of
+  // whether the CSS animationend or the 270ms safety timer wins the race.
   authEl.classList.add('is-fading-out');
+  let fired = false;
   const onAuthGone = () => {
+    if (fired) return;
+    fired = true;
+    clearTimeout(timer); // no-op if animationend won; cancels timer if it fires late
     authEl.classList.remove('is-fading-out');
     authEl.style.display = 'none';
     appEl.style.display  = 'block';
@@ -119,15 +125,15 @@ function showApp() {
       appEl.classList.remove('is-fading-in');
     }, { once: true });
     // Show skeleton only if data hasn't arrived yet.
-    // If onSnapshot already fired during the 270ms auth-fade delay,
-    // dataLoaded is already true — don't re-show the skeleton.
+    // If onSnapshot already fired during the auth-fade delay,
+    // dataLoaded is already true — skip the skeleton entirely.
     if (!dataLoaded) {
       const sk = document.getElementById('skeleton-loader');
       if (sk) sk.style.display = '';
     }
   };
   const timer = setTimeout(onAuthGone, 270);
-  authEl.addEventListener('animationend', () => { clearTimeout(timer); onAuthGone(); }, { once: true });
+  authEl.addEventListener('animationend', onAuthGone, { once: true });
 }
 
 function showAuthScreen() {
@@ -155,10 +161,14 @@ function showAuthScreen() {
   // Clear any auth messages
   clearAuthMessages();
 
+  // ── Reset #app layout classes ──────────────────────────────────────────────
+  // no-pinned controls filter-bar top offset; must be set correctly before
+  // #app is ever shown again. Since no exams are loaded yet, always add it.
+  appEl.classList.add('no-pinned');
+
   // ── Clear stale exam DOM so it never bleeds into the next login session ──
-  // Without this, the previous user's table rows / mobile cards remain in the
-  // DOM while #app is hidden. When a new user signs in, showApp() reveals #app
-  // before onSnapshot fires, causing a flash of stale rows + skeleton together.
+  // #app is hidden here, but we wipe it clean now so the moment it becomes
+  // visible again (after the next login fade), there is zero stale content.
   const tbody = document.getElementById('exam-tbody');
   if (tbody) tbody.innerHTML = '';
   const mobileList = document.getElementById('mobile-card-list');
@@ -169,8 +179,36 @@ function showAuthScreen() {
   if (listEmpty) listEmpty.style.display = 'none';
   const listEmptyFiltered = document.getElementById('list-empty-filtered');
   if (listEmptyFiltered) listEmptyFiltered.style.display = 'none';
+  // Restore countdown-rings to its HTML default (empty-state text) so the
+  // CSS :has rule can hide the strip correctly on mobile, and desktop shows
+  // no rings. Also reset the strip's own display in case it was force-hidden.
+  const countdownStrip = document.getElementById('countdown-strip');
+  if (countdownStrip) countdownStrip.style.display = '';
   const countdownRings = document.getElementById('countdown-rings');
-  if (countdownRings) countdownRings.innerHTML = '';
+  if (countdownRings) countdownRings.innerHTML = '<div class="countdown-empty">Pin up to 5 exams to track here</div>';
+  // Reset filter-bar UI: labels, active states, search input
+  const statusLabel = document.getElementById('status-dd-label');
+  if (statusLabel) statusLabel.textContent = 'Status';
+  const statusBtn = document.getElementById('status-dd-btn');
+  if (statusBtn) statusBtn.classList.remove('has-active');
+  const sortLabel = document.getElementById('sort-dd-label');
+  if (sortLabel) sortLabel.textContent = 'Sort';
+  const sortBtn = document.getElementById('sort-dd-btn');
+  if (sortBtn) sortBtn.classList.remove('has-active');
+  const tagCount = document.getElementById('tag-active-count');
+  if (tagCount) tagCount.style.display = 'none';
+  const tagBtn = document.querySelector('.tag-dd-btn');
+  if (tagBtn) tagBtn.classList.remove('has-active');
+  const tagList = document.getElementById('tag-dd-list');
+  if (tagList) tagList.innerHTML = '<div class="tag-dd-empty">No tags yet</div>';
+  const searchInp = document.getElementById('search-input');
+  if (searchInp) searchInp.value = '';
+  const clearBtn = document.getElementById('btn-clear-all');
+  if (clearBtn) clearBtn.style.display = 'none';
+  const batchBtn = document.getElementById('btn-delete-selected');
+  if (batchBtn) batchBtn.style.display = 'none';
+  const selectBtn = document.getElementById('btn-select-mode');
+  if (selectBtn) selectBtn.classList.remove('active');
 }
 
 function updateUserUI() {
@@ -1314,29 +1352,40 @@ window.closeProfile = () => {
 };
 
 window.handleSignOut = async () => {
-  // Detach Firestore listener immediately so onSnapshot can't fire during cleanup
+  // Detach Firestore listener immediately — no more onSnapshot events
   if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
 
-  // Close all open UI
-  document.getElementById('profile-modal').style.display  = 'none';
-  document.getElementById('exam-modal').style.display     = 'none';
-  document.getElementById('confirm-modal').style.display  = 'none';
-  document.getElementById('input-modal').style.display    = 'none';
-  document.getElementById('md-panel').style.display       = 'none';
-  document.getElementById('md-overlay').style.display     = 'none';
-  document.getElementById('fv-panel').style.display       = 'none';
-  document.getElementById('fv-overlay').style.display     = 'none';
-  document.getElementById('status-dd-menu').style.display = 'none';
-  document.getElementById('tag-dd-menu').style.display    = 'none';
-  document.getElementById('sort-dd-menu').style.display   = 'none';
-  document.getElementById('data-dd-menu').style.display   = 'none';
+  // Close every open overlay/modal/dropdown immediately (no animation — we're leaving)
+  ['profile-modal','exam-modal','confirm-modal','input-modal',
+   'md-panel','md-overlay','fv-panel','fv-overlay',
+   'status-dd-menu','tag-dd-menu','sort-dd-menu','data-dd-menu',
+   'pick-modal'
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  // Ensure scroll lock is released
+  document.body.classList.remove('scroll-locked');
+  document.body.style.overflow = '';
+
+  // Hide skeleton immediately — onAuthStateChanged → showAuthScreen will
+  // do the full DOM reset; we just need to make sure the skeleton isn't
+  // sitting visible during the async sign-out gap.
   const sk = document.getElementById('skeleton-loader');
   if (sk) sk.style.display = 'none';
 
-  // Clear local state
+  // Clear JS state now so if anything async peeks at it, it sees empty
   resetAppState();
+  dataLoaded = false;
 
-  await signOut(auth);
+  // Sign out — onAuthStateChanged fires → showAuthScreen() handles the rest
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.error('Sign out error:', e);
+    // Even on error, force the auth screen — user's session is likely gone
+    showAuthScreen();
+  }
 };
 
 window.handleEditDisplayName = () => {
@@ -1521,24 +1570,23 @@ window.confirmDeleteAccount = () => {
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
 
-        // Close all open UI
-        document.getElementById('profile-modal').style.display  = 'none';
-        document.getElementById('exam-modal').style.display     = 'none';
-        document.getElementById('confirm-modal').style.display  = 'none';
-        document.getElementById('input-modal').style.display    = 'none';
-        document.getElementById('md-panel').style.display       = 'none';
-        document.getElementById('md-overlay').style.display     = 'none';
-        document.getElementById('fv-panel').style.display       = 'none';
-        document.getElementById('fv-overlay').style.display     = 'none';
-        document.getElementById('status-dd-menu').style.display = 'none';
-        document.getElementById('tag-dd-menu').style.display    = 'none';
-        document.getElementById('sort-dd-menu').style.display   = 'none';
-        document.getElementById('data-dd-menu').style.display   = 'none';
+        // Close all open UI (no animation — account is being destroyed)
+        ['profile-modal','exam-modal','confirm-modal','input-modal',
+         'md-panel','md-overlay','fv-panel','fv-overlay',
+         'status-dd-menu','tag-dd-menu','sort-dd-menu','data-dd-menu',
+         'pick-modal'
+        ].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+        document.body.classList.remove('scroll-locked');
+        document.body.style.overflow = '';
         const sk = document.getElementById('skeleton-loader');
         if (sk) sk.style.display = 'none';
 
         // Clear all local state
         resetAppState();
+        dataLoaded = false;
 
         // Delete Firebase Auth user
         await deleteUser(currentUser);
