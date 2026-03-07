@@ -26,9 +26,9 @@
   --upcoming:        #fbbf24;
   --upcoming-bg:     #1c1400;
   --upcoming-border: rgba(251,191,36,.22);
-  --closed:        #94a3b8;
-  --closed-bg:     #151d2b;
-  --closed-border: rgba(148,163,184,.2);
+  --closed:        #f87171;
+  --closed-bg:     #2d1515;
+  --closed-border: rgba(248,113,113,.25);
   --yes:      #34d399;
   --yes-check: #022c22;
   --no:       #f87171;
@@ -72,9 +72,9 @@
   --upcoming:        #92400e;
   --upcoming-bg:     #fffbeb;
   --upcoming-border: #fcd34d;
-  --closed:        #4a5568;
-  --closed-bg:     #eef2f9;
-  --closed-border: #a0aec0;
+  --closed:        #dc2626;
+  --closed-bg:     #fff0f0;
+  --closed-border: #fca5a5;
   --yes:      #0a8f4f;
   --yes-check: #ffffff;
   --no:       #c8131b;
@@ -1547,7 +1547,6 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   }
   .m-status-pill.open   { background: var(--open-bg);   color: var(--open);   border: 1px solid var(--open-border); }
   .m-status-pill.closed { background: var(--closed-bg); color: var(--closed); border: 1px solid var(--closed-border); }
-  .m-status-pill.na     { background: transparent; color: var(--muted); border: 1px solid var(--border); }
 
   /* FIX 6: larger tap targets for applied + pin */
   .m-card-applied {
