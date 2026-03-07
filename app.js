@@ -840,15 +840,13 @@ function tableRowHTML(exam, num) {
   const isExpanded = expandedCards.has(exam.id);
 
   // Deadline
-  const dateStr = exam.lastDate || exam.examDate;
+  const dateStr = exam.lastDate;
   let deadlineHTML = '<span class="deadline-normal">—</span>';
   if (dateStr) {
     const days = daysUntil(dateStr);
-    if (days === null)      deadlineHTML = '<span class="deadline-normal">—</span>';
-    else if (days < 0)     deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
-    else if (days <= 7)    deadlineHTML = `<span class="deadline-warn">${formatDate(dateStr)}</span>`;
-    else if (days <= 30)   deadlineHTML = `<span class="deadline-ok">${formatDate(dateStr)}</span>`;
-    else                   deadlineHTML = `<span class="deadline-normal">${formatDate(dateStr)}</span>`;
+    if (days === null)  deadlineHTML = '<span class="deadline-normal">—</span>';
+    else if (days < 0) deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
+    else               deadlineHTML = `<span class="deadline-active">${formatDate(dateStr)}</span>`;
   }
 
   // Year
@@ -2091,16 +2089,13 @@ function mobileCardHTML(exam) {
   const resItems = exam.resources || [];
   const isExpanded = expandedCards.has(exam.id);
 
-  // deadline
-  const dateStr = exam.lastDate || exam.examDate;
+  // deadline — apply-by only, not exam date
+  const dateStr = exam.lastDate;
   let dlClass = '', dlText = '';
   if (dateStr) {
     const days = daysUntil(dateStr);
-    dlText = formatDate(dateStr);
-    if (days < 0)      dlClass = 'past';
-    else if (days <= 7)  dlClass = 'warn';
-    else if (days <= 30) dlClass = 'ok';
-    else                 dlClass = 'normal';
+    dlText  = formatDate(dateStr);
+    dlClass = days < 0 ? 'past' : 'active';
   }
 
   // status
