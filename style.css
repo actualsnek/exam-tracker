@@ -969,7 +969,7 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   padding: 16px;
   animation: overlayIn .2s ease;
 }
-#discard-modal { z-index: 300; }
+#discard-modal { z-index: 9999; }
 #discard-modal .modal-footer {
   gap: 10px;
 }
