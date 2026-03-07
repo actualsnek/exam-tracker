@@ -542,11 +542,17 @@
     <!-- Split pane -->
     <div class="md-split">
       <div class="md-pane md-write-pane">
-        <div class="md-pane-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> WRITE</div>
+        <div class="md-pane-label">
+          <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> WRITE</span>
+          <button class="md-preview-toggle" id="md-preview-toggle-1" onclick="toggleMdPreview()" title="Toggle Preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span id="md-preview-toggle-label-1">Preview</span>
+          </button>
+        </div>
         <textarea id="md-editor-textarea" class="md-textarea" oninput="mdPreview()" placeholder="Write in Markdown…"></textarea>
       </div>
-      <div class="md-divider"></div>
-      <div class="md-pane md-preview-pane">
+      <div class="md-divider" id="md-divider-1"></div>
+      <div class="md-pane md-preview-pane" id="md-preview-pane-1">
         <div class="md-pane-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> PREVIEW</div>
         <div id="md-preview" class="md-preview-content"></div>
       </div>
@@ -622,11 +628,17 @@
       </div>
       <div class="md-split md-split--fill">
         <div class="md-pane md-write-pane">
-          <div class="md-pane-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> WRITE</div>
+          <div class="md-pane-label">
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> WRITE</span>
+            <button class="md-preview-toggle" id="md-preview-toggle-2" onclick="toggleMdPreview()" title="Toggle Preview">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span id="md-preview-toggle-label-2">Preview</span>
+            </button>
+          </div>
           <textarea id="fv-editor-textarea" class="md-textarea" oninput="fvLivePreview()" placeholder="Write in Markdown…"></textarea>
         </div>
-        <div class="md-divider"></div>
-        <div class="md-pane md-preview-pane">
+        <div class="md-divider" id="md-divider-2"></div>
+        <div class="md-pane md-preview-pane" id="md-preview-pane-2">
           <div class="md-pane-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="11" height="11"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> PREVIEW</div>
           <div id="fv-live-preview" class="md-preview-content"></div>
         </div>

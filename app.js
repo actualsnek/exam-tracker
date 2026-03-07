@@ -2063,6 +2063,29 @@ window.mdInsert = (before, after, lineStart = false) => {
   preview();
 };
 
+// Preview toggle — shared by both md-panel and fv-panel
+let mdPreviewVisible = true; // default: on
+
+window.toggleMdPreview = () => {
+  mdPreviewVisible = !mdPreviewVisible;
+  applyMdPreviewState();
+};
+
+function applyMdPreviewState() {
+  const show = mdPreviewVisible;
+  [1, 2].forEach(i => {
+    const pane   = document.getElementById(`md-preview-pane-${i}`);
+    const div    = document.getElementById(`md-divider-${i}`);
+    const label  = document.getElementById(`md-preview-toggle-label-${i}`);
+    const btn    = document.getElementById(`md-preview-toggle-${i}`);
+    if (!pane) return;
+    pane.style.display  = show ? '' : 'none';
+    div.style.display   = show ? '' : 'none';
+    if (label) label.textContent = show ? 'Hide Preview' : 'Preview';
+    if (btn)   btn.classList.toggle('md-preview-toggle--off', !show);
+  });
+}
+
 window.mdInsertTable = () => {
   const tbl = '\n| Column 1 | Column 2 | Column 3 |\n|---|---|---|\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |\n';
   const { ta, preview } = getActiveEditor();
