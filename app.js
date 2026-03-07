@@ -843,9 +843,11 @@ function tableRowHTML(exam, num) {
   let deadlineHTML = '<span class="deadline-normal">—</span>';
   if (dateStr) {
     const days = daysUntil(dateStr);
-    if (days === null)  deadlineHTML = '<span class="deadline-normal">—</span>';
-    else if (days < 0) deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
-    else               deadlineHTML = `<span class="deadline-active">${formatDate(dateStr)}</span>`;
+    if (days === null)    deadlineHTML = '<span class="deadline-normal">—</span>';
+    else if (days < 0)   deadlineHTML = `<span class="deadline-past">${formatDate(dateStr)}</span>`;
+    else if (days <= 7)  deadlineHTML = `<span class="deadline-warn">${formatDate(dateStr)}</span>`;
+    else if (days <= 30) deadlineHTML = `<span class="deadline-ok">${formatDate(dateStr)}</span>`;
+    else                 deadlineHTML = `<span class="deadline-active">${formatDate(dateStr)}</span>`;
   }
 
   // Year
@@ -973,6 +975,15 @@ function detailRowHTML(exam) {
   })() : '';
   const isJob = !exam.examType || exam.examType === 'job';
 
+  // Apply by urgency class
+  let applyUrgencyCls = '';
+  if (exam.lastDate) {
+    const d = daysUntil(exam.lastDate);
+    if (d < 0)       applyUrgencyCls = 'meta-past';
+    else if (d <= 7) applyUrgencyCls = 'meta-warn';
+    else if (d <= 30) applyUrgencyCls = 'meta-ok';
+  }
+
   return `
   <tr class="detail-row">
     <td colspan="9">
@@ -984,7 +995,7 @@ function detailRowHTML(exam) {
           ${exam.subtitle ? `<div class="exp-subtitle">${escHtml(exam.subtitle)}</div>` : ''}
 
           <div class="exp-meta-row">
-            ${exam.lastDate ? `<div class="exp-meta-item">
+            ${exam.lastDate ? `<div class="exp-meta-item ${applyUrgencyCls}">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               <span class="exp-meta-label">Apply by</span>
               <span class="exp-meta-val">${formatDate(exam.lastDate)}</span>
@@ -1001,8 +1012,8 @@ function detailRowHTML(exam) {
           </div>
 
           ${isJob && (exam.vacancies || exam.pay) ? `<div class="exp-job-row">
-            ${exam.vacancies ? `<div class="exp-job-chip"><span class="chip-label">Vacancies</span><span class="chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
-            ${exam.pay ? `<div class="exp-job-chip"><span class="chip-label">Pay Scale</span><span class="chip-val">₹${escHtml(exam.pay)}</span></div>` : ''}
+            ${exam.vacancies ? `<div class="exp-job-chip chip-vacancies"><span class="chip-label">Vacancies</span><span class="chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
+            ${exam.pay ? `<div class="exp-job-chip chip-pay"><span class="chip-label">Pay Scale</span><span class="chip-val">₹${escHtml(exam.pay)}</span></div>` : ''}
           </div>` : ''}
         </div>
 
@@ -2189,8 +2200,8 @@ function mobileCardHTML(exam) {
 
       ${isJob && (exam.vacancies || exam.pay) ? `
       <div class="m-detail-chips">
-        ${exam.vacancies ? `<div class="m-detail-chip"><span class="m-chip-label">Vacancies</span><span class="m-chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
-        ${exam.pay ? `<div class="m-detail-chip"><span class="m-chip-label">Pay</span><span class="m-chip-val">₹${escHtml(exam.pay)}</span></div>` : ''}
+        ${exam.vacancies ? `<div class="m-detail-chip chip-vacancies"><span class="m-chip-label">Vacancies</span><span class="m-chip-val">${escHtml(exam.vacancies)}</span></div>` : ''}
+        ${exam.pay ? `<div class="m-detail-chip chip-pay"><span class="m-chip-label">Pay</span><span class="m-chip-val">₹${escHtml(exam.pay)}</span></div>` : ''}
       </div>` : ''}
 
       <div class="m-detail-field-btns">

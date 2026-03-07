@@ -90,6 +90,32 @@
   --row-base: #ffffff;
 }
 
+/* Light mode overrides for semantic chip colours */
+[data-theme="light"] .exp-job-chip.chip-vacancies,
+[data-theme="light"] .m-detail-chip.chip-vacancies {
+  background: rgba(59,130,246,.07); border-color: rgba(59,130,246,.25);
+}
+[data-theme="light"] .exp-job-chip.chip-vacancies .chip-label,
+[data-theme="light"] .m-detail-chip.chip-vacancies .m-chip-label { color: #2563eb; }
+[data-theme="light"] .exp-job-chip.chip-vacancies .chip-val,
+[data-theme="light"] .m-detail-chip.chip-vacancies .m-chip-val   { color: #1d4ed8; }
+
+[data-theme="light"] .exp-job-chip.chip-pay,
+[data-theme="light"] .m-detail-chip.chip-pay {
+  background: rgba(22,163,74,.07); border-color: rgba(22,163,74,.22);
+}
+[data-theme="light"] .exp-job-chip.chip-pay .chip-label,
+[data-theme="light"] .m-detail-chip.chip-pay .m-chip-label { color: #15803d; opacity: 1; }
+[data-theme="light"] .exp-job-chip.chip-pay .chip-val,
+[data-theme="light"] .m-detail-chip.chip-pay .m-chip-val   { color: #15803d; }
+
+/* Light mode: urgency deadline colours stay the same red/amber — already readable */
+[data-theme="light"] .deadline-warn { color: #dc2626; }
+[data-theme="light"] .m-card-deadline.warn { color: #dc2626; }
+[data-theme="light"] .exp-meta-item.meta-warn .exp-meta-val { color: #dc2626; }
+[data-theme="light"] .exp-meta-item.meta-warn .exp-meta-label,
+[data-theme="light"] .exp-meta-item.meta-warn svg { color: #dc2626; }
+
 /* ── BASE ── */
 html { font-size: 14px; }
 body {
@@ -693,6 +719,8 @@ td.td-deadline { font-family: var(--mono); font-size: 11px; font-weight: 600; }
 .deadline-normal { color: var(--text2); }
 .deadline-past   { color: var(--muted); opacity: .5; }
 .deadline-active { color: var(--text2); }
+.deadline-warn   { color: #ef4444; }          /* ≤ 7 days  — urgent red */
+.deadline-ok     { color: var(--upcoming); }   /* ≤ 30 days — amber */
 
 /* status */
 td.td-status {}
@@ -779,6 +807,32 @@ tr.detail-row td {
 .exp-job-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; padding: 3px 10px; border-radius: var(--r); background: var(--surface2); border: 1px solid var(--border2); }
 .chip-label { font-size: 9px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 700; }
 .chip-val { font-weight: 600; color: var(--text); font-size: 11px; }
+
+/* Vacancies chip — blue tint (count = factual/neutral) */
+.exp-job-chip.chip-vacancies {
+  background: rgba(59,130,246,.08);
+  border-color: rgba(59,130,246,.22);
+}
+.exp-job-chip.chip-vacancies .chip-label { color: #6baed6; }
+.exp-job-chip.chip-vacancies .chip-val   { color: #93c5fd; }
+
+/* Pay chip — green tint (money = positive) */
+.exp-job-chip.chip-pay {
+  background: rgba(52,211,153,.08);
+  border-color: rgba(52,211,153,.2);
+}
+.exp-job-chip.chip-pay .chip-label { color: #4ade80; opacity: .75; }
+.exp-job-chip.chip-pay .chip-val   { color: #4ade80; }
+
+/* exp-meta-val urgency colouring for Apply by date */
+.exp-meta-item.meta-warn .exp-meta-val { color: #ef4444; }
+.exp-meta-item.meta-ok   .exp-meta-val { color: var(--upcoming); }
+.exp-meta-item.meta-past .exp-meta-val { color: var(--muted); opacity: .6; }
+/* Also tint the label and icon when urgent */
+.exp-meta-item.meta-warn .exp-meta-label,
+.exp-meta-item.meta-warn svg { color: #ef4444; opacity: .8; }
+.exp-meta-item.meta-ok .exp-meta-label,
+.exp-meta-item.meta-ok svg   { color: var(--upcoming); opacity: .8; }
 .exp-divider { height: 1px; background: var(--border); }
 
 /* 3 field buttons in expanded row */
@@ -794,9 +848,15 @@ tr.detail-row td {
   color: var(--text2); font-size: 12px; font-weight: 500;
   cursor: pointer; transition: all .15s;
 }
+/* Filled field button — warm accent resting state */
+.exp-field-btn:not(.empty) {
+  border-color: var(--accent-soft);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
 .exp-field-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-.exp-field-btn:hover { border-color: var(--accent-soft); color: var(--accent); background: var(--accent-bg); }
-.exp-field-btn.empty { opacity: .55; border-style: dashed; }
+.exp-field-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); filter: brightness(1.08); }
+.exp-field-btn.empty { opacity: .5; border-style: dashed; border-color: var(--border); background: var(--surface); color: var(--muted); }
 .exp-field-sep { width: 1px; background: var(--border2); margin: 0 4px; align-self: stretch; flex-shrink: 0; }
 .exp-field-link { text-decoration: none; color: var(--text2); }
 .exp-field-link:hover { color: var(--accent); border-color: var(--accent-soft); background: var(--accent-bg); }
@@ -918,11 +978,14 @@ tr.detail-row td {
 }
 .exp-tags-label { font-size: 11px; color: var(--muted); }
 .exp-tag {
-  font-size: 11px; font-weight: 500; color: var(--accent);
-  cursor: pointer; transition: color .15s;
-  padding: 1px 0;
+  font-size: 10px; font-weight: 600; color: var(--accent);
+  cursor: pointer; transition: all .15s;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-soft);
 }
-.exp-tag:hover { color: var(--accent-h); text-decoration: underline; }
+.exp-tag:hover { background: var(--accent); color: #fff; border-color: var(--accent); text-decoration: none; }
 .exp-tag-add {
   font-size: 11px; color: var(--muted);
   background: none; border: none; cursor: pointer;
@@ -1702,6 +1765,19 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     font-size: 11px; padding: 3px 10px;
     border-radius: var(--r); background: var(--surface2); border: 1px solid var(--border2);
   }
+  /* Vacancies chip — blue tint */
+  .m-detail-chip.chip-vacancies {
+    background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.22);
+  }
+  .m-detail-chip.chip-vacancies .m-chip-label { color: #6baed6; }
+  .m-detail-chip.chip-vacancies .m-chip-val   { color: #93c5fd; }
+  /* Pay chip — green tint */
+  .m-detail-chip.chip-pay {
+    background: rgba(52,211,153,.08); border-color: rgba(52,211,153,.2);
+  }
+  .m-detail-chip.chip-pay .m-chip-label { color: #4ade80; opacity: .75; }
+  .m-detail-chip.chip-pay .m-chip-val   { color: #4ade80; }
+
   .m-chip-label { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); font-weight: 700; }
   .m-chip-val   { font-weight: 600; color: var(--text); font-size: 11px; }
 
@@ -1715,9 +1791,15 @@ td.td-cycle { font-family: var(--mono); font-size: 11px; color: var(--text2); }
     transition: all .15s; font-family: var(--font);
     text-decoration: none;
   }
+  /* Filled mobile field buttons — match desktop warm accent */
+  .m-detail-field-btn:not(.empty) {
+    border-color: var(--accent-soft);
+    color: var(--accent);
+    background: var(--accent-bg);
+  }
   .m-detail-field-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
-  .m-detail-field-btn.empty { opacity: .55; border-style: dashed; }
-  .m-detail-field-btn:active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-soft); }
+  .m-detail-field-btn.empty { opacity: .5; border-style: dashed; border-color: var(--border); background: var(--surface); color: var(--muted); }
+  .m-detail-field-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
   /* Notification / Website links — accent tint to distinguish from field btns */
   .m-detail-link-btn {
     color: var(--accent);
