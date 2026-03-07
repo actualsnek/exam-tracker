@@ -154,6 +154,23 @@ function showAuthScreen() {
   });
   // Clear any auth messages
   clearAuthMessages();
+
+  // ── Clear stale exam DOM so it never bleeds into the next login session ──
+  // Without this, the previous user's table rows / mobile cards remain in the
+  // DOM while #app is hidden. When a new user signs in, showApp() reveals #app
+  // before onSnapshot fires, causing a flash of stale rows + skeleton together.
+  const tbody = document.getElementById('exam-tbody');
+  if (tbody) tbody.innerHTML = '';
+  const mobileList = document.getElementById('mobile-card-list');
+  if (mobileList) mobileList.innerHTML = '';
+  const tableScroll = document.getElementById('table-scroll');
+  if (tableScroll) tableScroll.style.display = 'none';
+  const listEmpty = document.getElementById('list-empty');
+  if (listEmpty) listEmpty.style.display = 'none';
+  const listEmptyFiltered = document.getElementById('list-empty-filtered');
+  if (listEmptyFiltered) listEmptyFiltered.style.display = 'none';
+  const countdownRings = document.getElementById('countdown-rings');
+  if (countdownRings) countdownRings.innerHTML = '';
 }
 
 function updateUserUI() {
