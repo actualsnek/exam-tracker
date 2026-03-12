@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Offline — Exam Tracker</title>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'dark');</script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #131416;
+      --surface: #1c1e21;
+      --border:  #2a2d31;
+      --text:    #e8e3dc;
+      --text2:   #a09890;
+      --muted:   #6b6560;
+      --accent:  #f97316;
+      --font: system-ui, -apple-system, sans-serif;
+      --serif: Georgia, serif;
+    }
+
+    [data-theme="light"] {
+      --bg:      #faf9f7;
+      --surface: #ffffff;
+      --border:  #e0dbd4;
+      --text:    #1a1714;
+      --text2:   #5c5549;
+      --muted:   #9c9288;
+      --accent:  #ea6c0a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      opacity: .8;
+    }
+
+    h1 {
+      font-family: var(--serif);
+      font-size: 26px;
+      color: var(--text);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--text2);
+      text-align: center;
+      line-height: 1.6;
+      max-width: 280px;
+      margin-bottom: 32px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn:hover { opacity: .88; }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); opacity: 1; }
+
+    .status {
+      margin-top: 40px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .4px;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="icon">📡</div>
+  <h1>You're offline</h1>
+  <p>Exam Tracker needs a connection to load your data. Reconnect and try again.</p>
+
+  <div class="actions">
+    <button class="btn" onclick="window.location.reload()">↺ &nbsp;Try again</button>
+    <button class="btn btn-ghost" onclick="window.history.back()">Go back</button>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <script>
+    window.addEventListener('online', () => {
+      document.getElementById('status').textContent = 'Connection restored — reloading…';
+      setTimeout(() => window.location.reload(), 800);
+    });
+
+    window.addEventListener('offline', () => {
+      document.getElementById('status').textContent = 'Still offline.';
+    });
+  </script>
+</body>
+</html>
