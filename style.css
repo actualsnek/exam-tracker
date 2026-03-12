@@ -39,7 +39,7 @@
   --r: 6px;
   --r-lg: 12px;
   --r-xl: 16px;
-  --font: 'DM Sans', sans-serif;
+  --font: 'Inter', sans-serif;
   --mono: 'Inter', sans-serif;
   --serif: 'DM Serif Display', serif;
   --shadow: 0 4px 24px rgba(0,0,0,.6);
@@ -132,6 +132,14 @@ body {
   min-height: 100vh;
   transition: background var(--transition), color var(--transition);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Tabular nums for all date/number displays */
+.date-text, .ring-days, .row-num, td.td-year,
+.m-date-sub, .m-date-pill, .date-pill,
+.countdown-label, .ring-unit {
+  font-variant-numeric: tabular-nums;
 }
 
 body.modal-open { overflow: hidden; }
@@ -1664,7 +1672,7 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 .md-rendered h2 { font-size: 16px; }
 .md-rendered h3 { font-size: 14px; }
 .md-rendered h4 { font-size: 13px; font-family: var(--font); font-weight: 600; color: var(--text2); }
-.md-rendered p  { margin-bottom: 8px; }
+.md-rendered p  { margin-bottom: 12px; font-size: 15px; line-height: 1.8; color: var(--text); }
 .md-rendered strong { color: var(--text); font-weight: 700; }
 .md-rendered em { font-style: italic; color: var(--text); }
 .md-rendered u  { text-decoration: underline; text-underline-offset: 2px; }
