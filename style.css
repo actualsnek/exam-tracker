@@ -1406,7 +1406,7 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 ═══════════════════════════════════════════════════ */
 
 /* The content-column width. Change only this to resize. */
-:root { --ep-col: 900px; --ep-pad: 40px; }
+:root { --ep-col: 720px; --ep-pad: 40px; }
 
 .ep-overlay {
   position: fixed; inset: 0;
@@ -1611,7 +1611,7 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   flex: 1; border: none; outline: none; resize: none;
   background: var(--bg);
   color: var(--text);
-  font-family: var(--mono); font-size: 14px;
+  font-family: var(--font); font-size: 15px;
   line-height: 1.85;
   overflow-y: auto;
   /* Full width — side padding creates the column, NOT max-width */
@@ -1624,7 +1624,7 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 /* Preview */
 .ep-preview-inner {
   padding-top: 40px; padding-bottom: 48px;
-  font-size: 14px; line-height: 1.85; color: var(--text2);
+  font-size: 15px; line-height: 1.85; color: var(--text);
 }
 
 /* View mode */
@@ -1667,12 +1667,12 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
    Applied to: .fv-content and .md-preview-content
    via the .md-rendered class on both elements.
 ════════════════════════════════════════ */
-.md-rendered h1,.md-rendered h2,.md-rendered h3,.md-rendered h4 { color: var(--text); font-family: var(--serif); margin: 16px 0 8px; }
-.md-rendered h1 { font-size: 20px; }
-.md-rendered h2 { font-size: 16px; }
-.md-rendered h3 { font-size: 14px; }
-.md-rendered h4 { font-size: 13px; font-family: var(--font); font-weight: 600; color: var(--text2); }
-.md-rendered p  { margin-bottom: 12px; font-size: 15px; line-height: 1.8; color: var(--text); }
+.md-rendered h1,.md-rendered h2,.md-rendered h3,.md-rendered h4 { color: var(--text); font-family: var(--font); font-weight: 600; letter-spacing: -.2px; margin: 28px 0 8px; }
+.md-rendered h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin-top: 8px; }
+.md-rendered h2 { font-size: 17px; border-bottom: 1px solid var(--border2); padding-bottom: 6px; }
+.md-rendered h3 { font-size: 15px; }
+.md-rendered h4 { font-size: 13px; font-weight: 600; color: var(--text2); }
+.md-rendered p  { margin-bottom: 14px; font-size: 15px; line-height: 1.85; color: var(--text); }
 .md-rendered strong { color: var(--text); font-weight: 700; }
 .md-rendered em { font-style: italic; color: var(--text); }
 .md-rendered u  { text-decoration: underline; text-underline-offset: 2px; }
@@ -1699,8 +1699,8 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   margin-bottom: 8px; font-weight: 600;
 }
 .md-rendered pre code { background: none; padding: 0; color: var(--text2); }
-.md-rendered ul,.md-rendered ol { padding-left: 20px; margin-bottom: 8px; }
-.md-rendered li { margin-bottom: 3px; font-size: 13px; color: var(--text2); }
+.md-rendered ul,.md-rendered ol { padding-left: 22px; margin-bottom: 12px; }
+.md-rendered li { margin-bottom: 6px; font-size: 15px; line-height: 1.75; color: var(--text); }
 .md-rendered blockquote {
   border-left: 3px solid var(--accent);
   padding: 6px 14px; margin: 10px 0;
@@ -1711,12 +1711,12 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 .md-rendered table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
 .md-rendered th {
   background: var(--bg2); color: var(--muted);
-  font-size: 10px; letter-spacing: .6px; text-transform: uppercase;
-  padding: 7px 12px; border: 1px solid var(--border); text-align: left;
+  font-size: 11px; letter-spacing: .8px; text-transform: uppercase; font-weight: 600;
+  padding: 9px 14px; border: 1px solid var(--border); text-align: left;
 }
 .md-rendered td {
-  padding: 7px 12px; border: 1px solid var(--border2);
-  font-size: 12px; color: var(--text2);
+  padding: 9px 14px; border: 1px solid var(--border2);
+  font-size: 14px; color: var(--text);
 }
 .md-rendered tr:hover td { background: var(--bg2); }
 .md-rendered a { color: var(--accent); }
