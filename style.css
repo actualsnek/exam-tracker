@@ -1730,19 +1730,20 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 .md-rendered .task-cb--checked { background: var(--accent); border-color: var(--accent); }
 .md-rendered .task-cb--checked::after { content: ''; display: block; width: 8px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
 .md-rendered .task-done .task-label { text-decoration: line-through; color: var(--muted); opacity: .6; }
-.md-rendered .md-callout { display: block; padding: 10px 16px; border-radius: 0; margin: 20px 0; font-size: 14px; line-height: 1.8; }
+.md-rendered .md-callout { display: block; padding: 8px 0 8px 14px; border-radius: 0; margin: 20px 0; font-size: 14px; line-height: 1.8; }
 .md-rendered .callout-icon { display: none; }
 .md-rendered .callout-body { color: var(--text2); flex: 1; }
 .md-rendered .callout-info    { background: none; border-left: 2px solid #6366f1; color: var(--text2); }
 .md-rendered .callout-warn    { background: none; border-left: 2px solid #f5c518; color: var(--text2); }
 .md-rendered .callout-tip     { background: none; border-left: 2px solid #10b981; color: var(--text2); }
 .md-rendered .callout-success { background: none; border-left: 2px solid #22c55e; color: var(--text2); }
-.md-rendered .md-collapsible { border: 1px solid var(--border); border-radius: var(--r); margin: 10px 0; overflow: hidden; }
-.md-rendered .md-collapsible-title { display: flex; align-items: center; gap: 8px; padding: 9px 14px; font-size: 13px; font-weight: 600; color: var(--text); cursor: pointer; background: var(--bg2); list-style: none; user-select: none; }
-.md-rendered .md-collapsible-title::before { content: '▶'; font-size: 9px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+.md-rendered .md-collapsible { border: 1px solid var(--border2); border-radius: var(--r); margin: 16px 0; overflow: hidden; background: none; }
+.md-rendered .md-collapsible-title { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; background: none; list-style: none; user-select: none; transition: color .15s, background .15s; }
+.md-rendered .md-collapsible-title:hover { background: var(--surface2); color: var(--text); }
+.md-rendered .md-collapsible-title::before { content: '▶'; font-size: 8px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
 .md-rendered .md-collapsible[open] .md-collapsible-title::before { transform: rotate(90deg); }
 .md-rendered .md-collapsible-title::-webkit-details-marker { display: none; }
-.md-rendered .md-collapsible-body { padding: 12px 14px; font-size: 13px; color: var(--text2); border-top: 1px solid var(--border); }
+.md-rendered .md-collapsible-body { padding: 12px 14px; font-size: 14px; color: var(--text2); border-top: 1px solid var(--border2); line-height: 1.75; }
 
 .md-panel-footer {
   display: flex; align-items: center; justify-content: space-between;
