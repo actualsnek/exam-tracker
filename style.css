@@ -220,19 +220,6 @@ a:hover { color: var(--accent-h); }
 .auth-logo-wordmark {
   display: inline-flex; align-items: center; gap: 10px;
 }
-.auth-logo-wordmark .logo-mark-et {
-  width: 32px; height: 32px;
-  font-size: 13px; font-weight: 800;
-  border-radius: 9px;
-  background: var(--accent);
-  color: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
-  line-height: 1;
-  letter-spacing: -.4px;
-  font-family: var(--font);
-  flex-shrink: 0;
-  user-select: none;
-}
 .auth-logo-name {
   font-family: var(--font);
   font-size: 18px;
