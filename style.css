@@ -1701,9 +1701,9 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
 /* H1 — document title, only appears once at top */
 .md-rendered h1 {
-  font-size: 22px; font-weight: 700;
-  letter-spacing: -.4px; line-height: 1.2;
-  margin-top: 0; margin-bottom: 12px;
+  font-size: 26px; font-weight: 700;
+  letter-spacing: -.5px; line-height: 1.2;
+  margin-top: 0; margin-bottom: 14px;
   color: var(--text);
 }
 
@@ -1719,18 +1719,18 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 
 /* H3 — subsection heading, clear but not dominant */
 .md-rendered h3 {
-  font-size: 15px; font-weight: 600;
-  letter-spacing: -.1px;
+  font-size: 17px; font-weight: 600;
+  letter-spacing: -.15px;
   color: var(--text);
-  margin-top: 24px; margin-bottom: 6px;
+  margin-top: 34px; margin-bottom: 6px;
 }
 
 /* H4 — inline label, subtle */
 .md-rendered h4 {
-  font-size: 13px; font-weight: 600;
+  font-size: 14px; font-weight: 600;
   color: var(--text2);
-  margin-top: 16px; margin-bottom: 4px;
-  letter-spacing: 0;
+  margin-top: 22px; margin-bottom: 4px;
+  letter-spacing: -.05px;
 }
 
 .md-rendered p  { margin-bottom: 14px; font-size: 15px; line-height: 1.7; color: var(--text); }
@@ -1761,8 +1761,8 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   margin-bottom: 8px; font-weight: 600;
 }
 .md-rendered pre code { background: none; padding: 0; color: var(--text2); }
-.md-rendered ul,.md-rendered ol { padding-left: 22px; margin-bottom: 16px; }
-.md-rendered li { margin-bottom: 6px; font-size: 15px; line-height: 1.65; color: var(--text); }
+.md-rendered ul,.md-rendered ol { padding-left: 24px; margin-bottom: 16px; margin-top: 4px; }
+.md-rendered li { margin-bottom: 4px; font-size: 15px; line-height: 1.65; color: var(--text); }
 .md-rendered blockquote {
   border-left: 2px solid var(--border);
   padding: 8px 16px; margin: 16px 0;
