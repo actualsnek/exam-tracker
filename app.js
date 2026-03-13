@@ -2941,7 +2941,7 @@ function buildFvToc() {
   sidebar.innerHTML = '';
   const label = document.createElement('div');
   label.className = 'fv-toc-label';
-  label.textContent = 'Contents';
+  label.textContent = 'On this page';
   sidebar.appendChild(label);
   sidebar.appendChild(list);
   sidebar.style.display = 'block';
