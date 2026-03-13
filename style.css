@@ -1692,11 +1692,47 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
    Applied to: .fv-content and .md-preview-content
    via the .md-rendered class on both elements.
 ════════════════════════════════════════ */
-.md-rendered h1,.md-rendered h2,.md-rendered h3,.md-rendered h4 { color: var(--text); font-family: var(--font); font-weight: 600; letter-spacing: -.2px; margin: 28px 0 8px; }
-.md-rendered h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; margin-top: 0; margin-bottom: 12px; }
-.md-rendered h2 { font-size: 15px; font-weight: 600; letter-spacing: -.1px; color: var(--text2); margin-top: 40px; text-transform: uppercase; font-size: 11px; letter-spacing: .8px; }
-.md-rendered h3 { font-size: 14px; font-weight: 600; margin-top: 22px; }
-.md-rendered h4 { font-size: 13px; font-weight: 600; color: var(--text2); margin-top: 16px; }
+/* Heading base reset */
+.md-rendered h1,.md-rendered h2,.md-rendered h3,.md-rendered h4 {
+  color: var(--text); font-family: var(--font);
+  font-weight: 600; letter-spacing: -.15px;
+  margin: 28px 0 8px; line-height: 1.3;
+}
+
+/* H1 — document title, only appears once at top */
+.md-rendered h1 {
+  font-size: 22px; font-weight: 700;
+  letter-spacing: -.4px; line-height: 1.2;
+  margin-top: 0; margin-bottom: 12px;
+  color: var(--text);
+}
+
+/* H2 — major section divider, label style with a bottom rule */
+.md-rendered h2 {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .7px; text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 44px; margin-bottom: 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* H3 — subsection heading, clear but not dominant */
+.md-rendered h3 {
+  font-size: 15px; font-weight: 600;
+  letter-spacing: -.1px;
+  color: var(--text);
+  margin-top: 24px; margin-bottom: 6px;
+}
+
+/* H4 — inline label, subtle */
+.md-rendered h4 {
+  font-size: 13px; font-weight: 600;
+  color: var(--text2);
+  margin-top: 16px; margin-bottom: 4px;
+  letter-spacing: 0;
+}
+
 .md-rendered p  { margin-bottom: 14px; font-size: 15px; line-height: 1.7; color: var(--text); }
 .md-rendered strong { color: var(--text); font-weight: 700; }
 .md-rendered em { font-style: italic; color: var(--text); }
@@ -2857,7 +2893,7 @@ tr.exam-row.drag-over {
 #fv-toc-sidebar {
   display: none; /* shown by JS when headings exist */
   position: fixed;
-  /* Fix 5: align top with content — 52px header + 28px content padding-top */
+  /* Fix 5: align top with content — 52px header + 40px content padding-top */
   top: calc(52px + 28px);
   bottom: 0;
   /* Fix 2: push further left, more breathing room from content */
