@@ -1431,7 +1431,7 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 ═══════════════════════════════════════════════════ */
 
 /* The content-column width. Change only this to resize. */
-:root { --ep-col: 640px; --ep-pad: 40px; }
+:root { --ep-col: 760px; --ep-pad: 40px; }
 
 .ep-overlay {
   position: fixed; inset: 0;
@@ -1900,9 +1900,11 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 .md-rendered .md-collapsible[open] .md-collapsible-title { color: var(--text); }
 .md-rendered .md-collapsible-title::-webkit-details-marker { display: none; }
 .md-rendered .md-collapsible-body {
-  padding: 12px 14px; font-size: 14px;
+  padding: 16px 18px 8px; font-size: 14px;
   color: var(--text2); border-top: 1px solid var(--border2); line-height: 1.65;
 }
+.md-rendered .md-collapsible-body table { margin-bottom: 8px; }
+.md-rendered .md-collapsible-body > *:last-child { margin-bottom: 0; }
 
 .md-panel-footer {
   display: flex; align-items: center; justify-content: space-between;
@@ -3008,11 +3010,28 @@ tr.exam-row.drag-over {
 #fv-toc-sidebar::-webkit-scrollbar-track { background: transparent; }
 #fv-toc-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* ════════════════════════════════════════
+   READING PROGRESS BAR
+════════════════════════════════════════ */
+#fv-progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  z-index: 9999;
+  transition: width .1s linear;
+  pointer-events: none;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
 /* Fix 1: subtler label — no uppercase, lighter weight, smaller */
 .fv-toc-label {
-  font-size: 11px; font-weight: 500; letter-spacing: .1px;
-  color: var(--muted); opacity: .7;
-  margin-bottom: 8px; padding-left: 8px;
+  font-size: 10px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase;
+  color: var(--muted); opacity: .6;
+  margin-bottom: 10px; padding-left: 8px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border2);
 }
 .fv-toc-list {
   list-style: none; margin: 0; padding: 0;
