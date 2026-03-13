@@ -2607,11 +2607,19 @@ document.getElementById('confirm-action-btn').addEventListener('click', async ()
 //  THEME TOGGLE
 // ════════════════════════════════════════════════════
 
+function _syncThemeMetaColor() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', isDark ? '#131416' : '#faf9f7');
+}
+_syncThemeMetaColor();
+
 window.toggleTheme = () => {
   const html   = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  _syncThemeMetaColor();
 };
 
 // ── Scroll lock helpers ──────────────────────────────
