@@ -2906,8 +2906,8 @@ function buildFvToc() {
   const sheetList = document.getElementById('fv-toc-sheet-list');
   if (!content || !sidebar) return;
 
-  // Collect headings
-  const headings = Array.from(content.querySelectorAll('h1,h2,h3,h4'));
+  // Collect headings — H1/H2/H3 only, H4 too granular for navigation
+  const headings = Array.from(content.querySelectorAll('h1,h2,h3'));
 
   // Hide everything if fewer than 2 headings
   if (headings.length < 2) {
