@@ -3503,9 +3503,9 @@ function inlineFmt(s) {
   return s;
 }
 
-function parseMd(md) {
+function parseMd(md, skipEscape) {
   if (!md) return '';
-  let html = escHtml(md);
+  let html = skipEscape ? md : escHtml(md);
 
   // Headings — most specific first, with slug IDs for TOC anchors
   const _slugCount = {};
@@ -3537,12 +3537,12 @@ function parseMd(md) {
                : t === 'tip'                      ? '💡'
                : t === 'success'                  ? '✅'
                :                                    'ℹ️';
-    return `<div class="md-callout ${cls}"><span class="callout-icon">${icon}</span><div class="callout-body">${inlineFmt(content.trim())}</div></div>`;
+    return `<div class="md-callout ${cls}"><span class="callout-icon">${icon}</span><div class="callout-body">${parseMd(content.trim(), true)}</div></div>`;
   });
 
   // Collapsible +++ Title \n content \n +++
   html = html.replace(/\+\+\+ (.+)\n([\s\S]*?)\+\+\+/gm, (_, title, content) => {
-    return `<details class="md-collapsible"><summary class="md-collapsible-title">${inlineFmt(title.trim())}</summary><div class="md-collapsible-body">${inlineFmt(content.trim())}</div></details>`;
+    return `<details class="md-collapsible"><summary class="md-collapsible-title">${inlineFmt(title.trim())}</summary><div class="md-collapsible-body">${parseMd(content.trim(), true)}</div></details>`;
   });
 
   // Bold + italic (order: *** before ** before *)
