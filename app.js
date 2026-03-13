@@ -3674,13 +3674,15 @@ function safeUrl(url) {
     bar.style.width = pct + '%';
   }
 
-  // Attach on view open — re-attach whenever ep-view-body appears
+  // Attach on view open, reset on view close
   const _observer = new MutationObserver(() => {
     const el = document.querySelector('.ep-view-body');
     if (el && !el._progressAttached) {
       el._progressAttached = true;
       el.addEventListener('scroll', updateProgress, { passive: true });
       updateProgress();
+    } else if (!el) {
+      bar.style.width = '0%';
     }
   });
   _observer.observe(document.body, { childList: true, subtree: true });
