@@ -1660,17 +1660,6 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 }
 .ep-view-inner {
   padding-top: 28px; padding-bottom: 64px;
-  /* Default: symmetric column centering */
-  transition: padding-left .2s, padding-right .2s;
-}
-
-/* When TOC sidebar is active (class toggled by JS on ep-view-inner),
-   shift content slightly left so it reads as centered between TOC + right edge */
-@media (min-width: 1080px) {
-  .ep-view-inner.toc-visible {
-    padding-left:  max(var(--ep-pad), calc((100% - var(--ep-col)) / 2 - 60px));
-    padding-right: max(var(--ep-pad), calc((100% - var(--ep-col)) / 2 + 60px));
-  }
 }
 
 .fv-empty-state {
@@ -2980,12 +2969,13 @@ tr.exam-row.drag-over {
 #fv-toc-sidebar {
   display: none; /* shown by JS when headings exist */
   position: fixed;
-  /* Fix 5: align top with content — 52px header + 40px content padding-top */
   top: calc(52px + 28px);
   bottom: 0;
-  /* Fix 2: push further left, more breathing room from content */
-  right: calc(50% + var(--ep-col) / 2 + 32px);
-  width: 188px;
+  /* Anchor from left: sits in the left gutter.
+     Left edge = 0 + small margin.
+     Right edge must not exceed: (viewport - col) / 2 - 16px gap */
+  left: 16px;
+  width: 180px;
   padding: 0 0 48px;
   overflow-y: auto;
   z-index: 10;
@@ -3047,14 +3037,13 @@ tr.exam-row.drag-over {
 .fv-toc-item[data-level="3"].fv-toc--active,
 .fv-toc-item[data-level="4"].fv-toc--active { color: var(--accent); opacity: 1; }
 
-/* Only show sidebar on wide screens */
-@media (max-width: 1079px) {
+/* Only show sidebar on wide screens — need enough gutter for 180px TOC */
+@media (max-width: 1119px) {
   #fv-toc-sidebar { display: none !important; }
-  .fv-toc-btn-label { display: none; } /* icon-only on mid */
+  .fv-toc-btn-label { display: none; }
 }
-@media (min-width: 1080px) {
+@media (min-width: 1120px) {
   .fv-toc-btn-label { display: inline; }
-  /* hide mobile TOC button on desktop — sidebar replaces it */
   #fv-toc-btn { display: none !important; }
 }
 
