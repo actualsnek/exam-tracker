@@ -1660,6 +1660,17 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 }
 .ep-view-inner {
   padding-top: 28px; padding-bottom: 64px;
+  /* Default: symmetric column centering */
+  transition: padding-left .2s, padding-right .2s;
+}
+
+/* When TOC sidebar is active (class toggled by JS on ep-view-inner),
+   shift content slightly left so it reads as centered between TOC + right edge */
+@media (min-width: 1080px) {
+  .ep-view-inner.toc-visible {
+    padding-left:  max(var(--ep-pad), calc((100% - var(--ep-col)) / 2 - 60px));
+    padding-right: max(var(--ep-pad), calc((100% - var(--ep-col)) / 2 + 60px));
+  }
 }
 
 .fv-empty-state {
@@ -1801,7 +1812,16 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
 .md-rendered thead tr:first-child th:last-child  { border-top-right-radius: 8px; }
 .md-rendered tbody tr:last-child td:first-child  { border-bottom-left-radius: 8px; }
 .md-rendered tbody tr:last-child td:last-child   { border-bottom-right-radius: 8px; }
-.md-rendered a { color: var(--accent); }
+.md-rendered a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color .15s;
+}
+.md-rendered a:hover {
+  text-decoration-color: var(--accent);
+}
 .md-rendered .task-list { list-style: none; padding-left: 4px; }
 .md-rendered .task-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
 .md-rendered .task-cb { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid var(--border2); border-radius: 3px; flex-shrink: 0; margin-top: 1px; cursor: pointer; background: none; padding: 0; transition: all .15s; }
@@ -1841,13 +1861,37 @@ td.td-year { font-family: var(--mono); font-size: 11px; color: var(--text2); }
   background: color-mix(in srgb, #ef4444 8%, var(--bg));
   border-left-color: #ef4444;
 }
-.md-rendered .md-collapsible { border: 1px solid var(--border2); border-radius: var(--r); margin: 16px 0; overflow: hidden; background: none; }
-.md-rendered .md-collapsible-title { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--text2); cursor: pointer; background: none; list-style: none; user-select: none; transition: color .15s, background .15s; }
+.md-rendered .md-collapsible {
+  border: 1px solid var(--border2); border-radius: 8px;
+  margin: 14px 0; overflow: hidden; background: none;
+}
+.md-rendered .md-collapsible-title {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; font-size: 13px; font-weight: 500;
+  color: var(--text2); cursor: pointer; background: none;
+  list-style: none; user-select: none;
+  transition: color .15s, background .15s;
+}
 .md-rendered .md-collapsible-title:hover { background: var(--surface2); color: var(--text); }
-.md-rendered .md-collapsible-title::before { content: '▶'; font-size: 8px; color: var(--muted); transition: transform .2s; flex-shrink: 0; }
+/* Custom SVG chevron — no browser triangle */
+.md-rendered .md-collapsible-title::before {
+  content: '';
+  display: inline-block; flex-shrink: 0;
+  width: 14px; height: 14px;
+  background-color: var(--muted);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 4l4 4-4 4' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 4l4 4-4 4' stroke='currentColor' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain; mask-size: contain;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  transition: transform .2s;
+}
 .md-rendered .md-collapsible[open] .md-collapsible-title::before { transform: rotate(90deg); }
+.md-rendered .md-collapsible[open] .md-collapsible-title { color: var(--text); }
 .md-rendered .md-collapsible-title::-webkit-details-marker { display: none; }
-.md-rendered .md-collapsible-body { padding: 12px 14px; font-size: 14px; color: var(--text2); border-top: 1px solid var(--border2); line-height: 1.65; }
+.md-rendered .md-collapsible-body {
+  padding: 12px 14px; font-size: 14px;
+  color: var(--text2); border-top: 1px solid var(--border2); line-height: 1.65;
+}
 
 .md-panel-footer {
   display: flex; align-items: center; justify-content: space-between;
