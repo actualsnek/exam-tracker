@@ -105,6 +105,16 @@ function hideSkeleton() {
 }
 
 // ── Auth State Listener ──────────────────────────────
+// ── Pre-auth hint: show skeleton immediately if user was previously logged in ──
+if (localStorage.getItem('et_was_logged_in')) {
+  const authEl = document.getElementById('auth-screen');
+  const appEl  = document.getElementById('app');
+  if (authEl) authEl.style.display = 'none';
+  if (appEl)  { appEl.style.display = 'block'; appEl.classList.add('no-pinned'); }
+  const sk = document.getElementById('skeleton-loader');
+  if (sk) sk.style.display = '';
+}
+
 onAuthStateChanged(auth, user => {
   if (examsUnsubscribe) { examsUnsubscribe(); examsUnsubscribe = null; }
   if (user) {
@@ -121,6 +131,7 @@ onAuthStateChanged(auth, user => {
 });
 
 function showApp() {
+  localStorage.setItem('et_was_logged_in', '1');
   const authEl = document.getElementById('auth-screen');
   const appEl  = document.getElementById('app');
 
@@ -157,6 +168,7 @@ function showApp() {
 }
 
 function showAuthScreen() {
+  localStorage.removeItem('et_was_logged_in');
   const appEl  = document.getElementById('app');
   const authEl = document.getElementById('auth-screen');
 
